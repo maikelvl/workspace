@@ -1,0 +1,9 @@
+/.system
+/.vagrant
+/*.vbox-extpack
+/config
+/docker
+/projects
+/env.json
+/config
+*.tar

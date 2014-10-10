@@ -1,0 +1,15 @@
+---
+authentication:
+  client_key: your-client-key-here
+  api_key: your-api-key-here
+ssh:
+  ssh_user: root
+  ssh_key_path: /workspace/workspace_digitalocean_rsa
+  ssh_port: '22'
+defaults:
+  region: '5'
+  image: '6514809'
+  size: '66'
+  ssh_key: 'your-ssh-key-id-here'
+  private_networking: 'true'
+  backups_enabled: 'false'

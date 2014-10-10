@@ -1,0 +1,195 @@
+#!/bin/bash
+usage()
+{
+cat << EOF
+
+usage: $(basename $0) options INSTANCE
+
+This script starts or resumes a coreos vagrant vm.
+
+OPTIONS:
+	-h (help) 			Show this message
+	-c (command)		-c=command Pass a command to the coreos instance
+	-r (reload)			Reload the instance
+	-R (rebuild) 		Rebuild the instance
+	-p (provision) 		Provision the instance
+	-d (destroy) 		Kill and destroy instance
+	-s (status) 		See the global status
+
+EOF
+}
+
+count=0
+while getopts "hc:rRpds" OPTION
+do
+	case $OPTION in
+		h|help)
+			usage
+			exit 1
+			;;
+		c|command)
+			COMMAND="$OPTARG"
+			;;
+		r|reload)
+			RELOAD=1
+			;;
+		R|rebuild)
+			REBUILD=1
+			;;
+		p|provision)
+			PROVISION=1
+			;;
+		d|destroy)
+			DESTROY=1
+			;;
+		s|status)
+			STATUS=1
+			;;
+		?)
+			usage
+			exit
+		;;
+	esac
+	count=`expr $count + 1`
+	if [ "$OPTARG" ]
+	then
+		count=`expr $count + 1`
+	fi
+done
+shift $count
+
+BLACK="\e[0;30m"
+RED="\e[0;31m"
+GREEN="\e[0;32m"
+ORANGE="\e[0;33m"
+BLUE="\e[0;34m"
+PURPLE="\e[0;35m"
+TURQUASE="\e[0;36m"
+NC="\e[0m"
+
+function info()
+{
+    printf "$BLUE"
+    echo -e "$@"
+    printf "$NC"
+}
+
+function success()
+{
+    printf "$GREEN"
+    echo -e "$@"
+    printf "$NC"
+}
+
+function error()
+{
+    printf "$RED"
+    echo -e "$@"
+    printf "$NC"
+}
+
+INSTANCE="$1"
+
+if [ "$(which vagrant)" == "" ]
+then
+	error "Vagrant could not be found."
+	exit
+fi
+
+if [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
+then
+	if [ ! -f "$PWD/config/*.lic" ]
+	then
+		error "Please copy your Vagrant VMWare Fusion License to ${PWD/$HOME/~}/config/"
+		exit
+	fi
+	vagrant plugin install vagrant-vmware-fusion
+	vagrant plugin license "$(ls $PWD/config/*.lic)"
+fi
+
+if [ -f "$PWD/.extension.vbox-extpack" ]
+then
+	open "$PWD/.extension.vbox-extpack"
+	rm -f "$PWD/.extension.vbox-extpack"
+fi
+
+env="$(cat "$PWD/env.json")"
+function get_env()
+{
+    echo $env | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t\" "
+}
+
+provider="$(get_env 'provider')"
+export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
+
+if [ $STATUS ]
+then
+	vagrant global-status
+	exit
+fi
+
+if [ ! "$INSTANCE" ]
+then
+	INSTANCE=1
+fi
+
+INSTANCE="$(printf "%0*d\n" 2 ${INSTANCE:-1})"
+
+if [ $REBUILD ] || [ $DESTROY ]
+then
+	success "Destroying coreos-$INSTANCE..."
+	vagrant destroy -f "coreos-$INSTANCE" 2>/dev/null
+	if [ $DESTROY ]
+	then
+		vagrant global-status
+		exit
+	fi
+fi
+
+info "Looking for status coreos-$INSTANCE..."
+status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
+if [ "${status/not running/}" != "$status" ]
+then
+	success "Resuming coreos-$INSTANCE..."
+	vagrant up "coreos-$INSTANCE"
+elif [ "${status/not created/}" != "$status" ]
+then
+	success "Creating coreos-$INSTANCE..."
+	vagrant up "coreos-$INSTANCE"
+else
+	if [ "$INSTANCE" == "01" ] && [ "$(vagrant ssh --command "ls -A /workspace" "coreos-$INSTANCE")" == "" ]
+	then
+		RELOAD=1
+	fi
+	if [ $RELOAD ]
+	then
+		info "Reloading coreos-$INSTANCE"
+		if [ $PROVISION ]
+		then
+			vagrant reload "coreos-$INSTANCE"
+		else
+			vagrant reload --provision "coreos-$INSTANCE"
+		fi
+	else
+		info "Already running coreos-$INSTANCE"
+		if [ $PROVISION ]
+		then
+			success "Provisioning coreos-$INSTANCE..."
+			vagrant provision "coreos-$INSTANCE"
+		fi
+	fi
+fi
+
+status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
+if [ "${status/not running/}" == "$status" ]
+then
+	if [ "$COMMAND" != "" ]
+	then
+		info "Running your command on coreos-$INSTANCE..."
+		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
+	else
+		info "Logging in to coreos-$INSTANCE..."
+		vagrant ssh "coreos-$INSTANCE"
+	fi
+fi
+
