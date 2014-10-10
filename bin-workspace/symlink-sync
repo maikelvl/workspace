@@ -1,0 +1,23 @@
+#!/bin/bash
+cat << 'EOF' > /tmp/symlinks.sh
+#!/bin/bash
+if [ -d /project ];then
+	mkdir -p /project/server/conf/$DOCKER_NAME
+	cp -rn /conf/* /project/server/conf/$DOCKER_NAME/
+
+	if [ -d "/var/log" ];then
+		rm -rf /var/log
+	fi
+	mkdir -p /project/server/log
+	ln -sf /project/server/log /var/log
+	
+	touch /project/server/log/.gitignore
+fi
+EOF
+
+for image in /workspace/docker/crobays/*;do
+	if [ -f "$image/scripts/symlinks.sh" ];then
+		cp -f "/tmp/symlinks.sh" "$image/scripts/symlinks.sh"
+		echo "Written symlinks.sh to ${image/\/workspace\/docker\/crobays\//}"
+	fi
+done

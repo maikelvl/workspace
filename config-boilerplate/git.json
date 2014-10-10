@@ -1,0 +1,39 @@
+{
+	"user": {
+		"name": "your-username-here",
+		"email": "your-email-here"
+	},
+	"services": {
+		"github": {
+		    "token": "your-token-here"
+		},
+		"gitlab": {
+		    "https": true,
+		    "domain": "gitlab.com",
+		    "port": 22,
+		    "api-version": "v3",
+		    "token": "your-token-here",
+		    "upstream": true
+		}
+	},
+	"global-ignore": [
+		".DS_Store",
+		".AppleDouble",
+		".LSOverride",
+		"Icon",
+		"._*",
+		".Spotlight-V100",
+		".Trashes",
+		".AppleDB",
+		".AppleDesktop",
+		".apdisk",
+		"Thumbs.db",
+		"ehthumbs.db",
+		"Desktop.ini",
+		"$RECYCLE.BIN/",
+		"*.cab",
+		"*.msi",
+		"*.msm",
+		"*.msp"
+	]
+}

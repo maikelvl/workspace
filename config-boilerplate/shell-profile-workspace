@@ -1,0 +1,5 @@
+#!/bin/bash
+export PATH="$PATH:/workspace/bin-coreos"
+export TUGBOAT_CONFIG_PATH="$CONFIG_DIR/tugboat.yml"
+source ~/.rvm/scripts/rvm
+# rvm --quiet-curl --install --default use 2.1.3

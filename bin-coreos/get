@@ -1,0 +1,175 @@
+#!/bin/bash
+usage()
+{
+cat << EOF
+
+usage: $(basename $0) options IMAGE
+
+Image version defaults to :latest
+
+OPTIONS:
+   -h (help)       Show this message
+   -R (remake)     Rebuild or repull image
+   -p (save-path)  Path where images tars are stored, defaults to $ARCHIVE_PATH
+   -n (no-save)    Do not save the image to the tar archive
+
+EOF
+}
+count=0
+docker_dir="/workspace/docker"
+ARCHIVE_PATH="/workspace/.docker-images"
+while getopts “hRp:n” OPTION
+do
+    case $OPTION in
+        h)
+            usage
+            exit 1
+            ;;
+        R)
+            REMAKE=1
+            ;;
+        p)
+            ARCHIVE_PATH="$OPTARG"
+            ;;
+        n)
+            NO_SAVE=1
+            ;;
+        ?)
+            usage
+            exit
+            ;;
+    esac
+    count=`expr $count + 1`
+    if [ "$OPTARG" ]
+    then
+        count=`expr $count + 1`
+    fi
+done
+shift $count
+
+BLACK="\e[0;30m"
+RED="\e[0;31m"
+GREEN="\e[0;32m"
+ORANGE="\e[0;33m"
+BLUE="\e[0;34m"
+PURPLE="\e[0;35m"
+TURQUASE="\e[0;36m"
+NC="\e[0m"
+
+function info()
+{
+    printf "$BLUE"
+    echo -e "$@"
+    printf "$NC"
+}
+
+function success()
+{
+    printf "$GREEN"
+    echo -e "$@"
+    printf "$NC"
+}
+
+function error()
+{
+    printf "$RED"
+    echo -e "$@"
+    printf "$NC"
+}
+
+IMAGE="$1"
+
+if [ ! "$IMAGE" ]
+then
+	usage
+	exit;
+fi
+
+# If no version is specified, change it to :latest
+image="$IMAGE"
+if [ "$image" == "${image//:/---}" ]
+then
+	image="$image:latest"
+fi
+
+image_base_name="${image%:*}"
+
+file="${image/\//-SLASH-}"
+file="${file/:/-COLON-}"
+
+mkdir -p "$ARCHIVE_PATH"
+tar="$ARCHIVE_PATH/$file.tar"
+
+if [ $REMAKE ]
+then
+    if [ -f "$tar" ]
+    then
+	   rm -f "$tar"
+    fi
+    if [ "$(docker inspect "$image" 2>/dev/null)" != "[]" ]
+    then
+        docker rmi --force "$image"
+    fi
+fi
+
+if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
+then
+    if [ -f "$tar" ]
+    then
+        info "Loading $image from $tar..."
+        docker load --input "$tar";
+        action="load"
+    elif [ "$image_base_name:latest" == "$image" ] && [ -f "$docker_dir/$image_base_name/Dockerfile" ]
+    then
+        info "Building $image..."
+        docker build \
+            --tag "$image_base_name:latest" \
+            "$docker_dir/$image_base_name"
+        action="build"
+    else
+        info "Pulling $image..."
+        docker pull "$image"
+        action="pull"
+    fi
+
+    if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
+    then
+        error "Failed to $action $image"
+        if [ "$action" == "load" ]
+        then
+            info "Deleting $tar (probably broken)"
+            rm -f "$tar"
+            info "Retrying to get $image"
+            get -R -n "$image"
+            exit
+        fi
+    else
+        if [ "$action" == "build" ]
+        then
+            action_past="built"
+        else
+            action_past="${action}ed"
+        fi
+        
+        success "Successfully $action_past $image"
+
+        if [ "$action" != "load" ] && [ ! $NO_SAVE ]
+        then
+            info "Saving $image to $tar..."
+            docker save \
+                --output "$tar" \
+                "$image";
+        fi
+    fi
+elif [ ! -f "$tar" ]
+then
+    if [ ! $NO_SAVE ]
+    then
+        info "Saving $image to $tar..."
+        docker save \
+            --output "$tar" \
+            "$image";
+    fi
+else
+    success "$image already present"
+fi

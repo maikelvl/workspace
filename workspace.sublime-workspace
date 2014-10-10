@@ -1,0 +1,275 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"anal",
+				"analogWrite	Arduino analogWrite"
+			],
+			[
+				"debug",
+				"debugoutln"
+			],
+			[
+				"bac",
+				"background-color"
+			]
+		]
+	},
+	"buffers":
+	[
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 107.0,
+		"selected_items":
+		[
+			[
+				"html",
+				"HTML: Encode Special Characters"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"remove",
+				"Package Control: Remove Package"
+			],
+			[
+				"browser",
+				"Browser Integration: Launch Browser"
+			],
+			[
+				"brows",
+				"Browser Integration: Reload"
+			],
+			[
+				"brwoser",
+				"Browser Integration: Launch Browser"
+			],
+			[
+				"insta",
+				"Package Control: Install Package"
+			],
+			[
+				"install",
+				"Package Control: Install Package"
+			],
+			[
+				"pack",
+				"Preferences: Package Control Settings – User"
+			],
+			[
+				"pac",
+				"Preferences: Browse Packages"
+			]
+		],
+		"width": 530.0
+	},
+	"console":
+	{
+		"height": 139.0,
+		"history":
+		[
+			"new",
+			"mkdir hi"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/Maikel/workspace"
+	],
+	"file_history":
+	[
+		"/Users/crobays/workspace/arduino/sketches/WebServer_Socket/WebServer_Socket.ino",
+		"/Users/crobays/workspace/vagrant/web/Vagrantfile",
+		"/Users/Maikel/workspace/arduino/sketches/WebServer_Socket/WebServer_Socket.ino",
+		"/Users/Maikel/workspace/arduino/sketches/WebClient/WebClient.ino",
+		"/Users/Maikel/workspace/arduino/watterott-libs/RedFly/examples/WebServer_Socket/conn_test.htm",
+		"/Users/Maikel/workspace/arduino/sketches/WebServer_Socket/test.html",
+		"/Users/Maikel/workspace/arduino/watterott-libs/RedFly/examples/WebServer_Socket/WebServer_Socket.ino",
+		"/Users/Maikel/workspace/arduino/sketches/WebServer/WebServer.ino",
+		"/Users/Maikel/workspace/credentials/notes/ips.txt",
+		"/Users/Maikel/workspace/arduino/sketches/WebServer2/WebServer2.ino",
+		"/Users/Maikel/workspace/setup/application-support/sublime-text-3/Packages/User/Package Control.sublime-settings",
+		"/Users/Maikel/workspace/setup/application-support/sublime-text-3/Packages/Default/Preferences.sublime-settings",
+		"/Users/Maikel/workspace/setup/application-support/sublime-text-3/Packages/User/Preferences.sublime-settings"
+	],
+	"find":
+	{
+		"height": 25.0
+	},
+	"find_in_files":
+	{
+		"height": 93.0,
+		"where_history":
+		[
+			"/Users/Maikel/workspace/arduino"
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"hostname",
+			"output",
+			"</label></p>",
+			" type=\"checkbox\"",
+			"222",
+			"d2",
+			"socketRead",
+			"SOCKET",
+			"socket",
+			"80",
+			"Serial.print"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "/Users/Maikel/workspace"
+		}
+	],
+	"groups":
+	[
+		{
+			"sheets":
+			[
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 25.0
+	},
+	"input":
+	{
+		"height": 33.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.WebClient":
+	{
+		"height": 372.0
+	},
+	"output.WebServer":
+	{
+		"height": 515.0
+	},
+	"output.WebServer2":
+	{
+		"height": 112.0
+	},
+	"output.WebServer_Socket":
+	{
+		"height": 358.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.stino_log":
+	{
+		"height": 112.0
+	},
+	"project": "",
+	"replace":
+	{
+		"height": 46.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+		"last_automatic_layout":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		]
+	},
+	"show_minimap": false,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 219.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+		"max_columns": 2
+	}
+}

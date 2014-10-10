@@ -1,0 +1,12 @@
+.docker-images
+.git
+.system
+.vagrant
+.workspace-base
+bin-coreos
+bin-workspace
+config
+config-boilerplate
+config-scripts
+docker
+projects

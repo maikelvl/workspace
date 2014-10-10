@@ -1,0 +1,12 @@
+#!/bin/bash
+
+if [ ! -d "/workspace/projects/$2" ] || [ ! $2 ];then
+	echo "No such project: $2"
+	exit
+fi
+
+if [ "$2" != "" ];then
+	cd "/workspace/projects/$2"
+fi
+
+fig $1
