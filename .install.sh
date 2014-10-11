@@ -101,7 +101,7 @@ add_to_uninstaller ()
 		uninstaller="$(cat "$uninstaller_script")"
 		if [ "${uninstaller//$addition/}" == "$uninstaller" ]
 		then
-			echo -e "$addition\n" >> "$uninstaller_script"
+			echo -e "${addition//$HOME/\$HOME}\n" >> "$uninstaller_script"
 		fi
 	fi
 }
@@ -129,9 +129,9 @@ add_shell_profile_to_bash_profile ()
 		echo -e "$add_bash_line" >> "$bash_profile_file"
 
 		add_to_uninstaller << EOF
-			if [ -f "${bash_profile_file/$HOME/\$HOME}" ]
+			if [ -f "$bash_profile_file" ]
 			then
-				echo -e "\\\n" >> ${bash_profile_file/$HOME/\$HOME}
+				echo -e "\\\n" >> $bash_profile_file
 				new_bash_profile_file=""
 				while read line
 				do
@@ -160,16 +160,16 @@ add_shell_profile_to_bash_profile ()
 						write_line="yes"
 					fi
 
-				done < ${bash_profile_file/$HOME/\$HOME}
+				done < $bash_profile_file
 
 				if [ ! -n "\$new_bash_profile_file" ]
 				then
-					if [ -f "${bash_profile_file/$HOME/\$HOME}" ]
+					if [ -f "$bash_profile_file" ]
 					then
-						rm "${bash_profile_file/$HOME/\$HOME}"
+						rm "$bash_profile_file"
 					fi
 				else
-					echo -e "\$new_bash_profile_file" > ${bash_profile_file/$HOME/\$HOME}
+					echo -e "\$new_bash_profile_file" > $bash_profile_file
 				fi
 			fi
 EOF
@@ -206,6 +206,9 @@ install_virtualbox ()
 		"Oracle_VM_VirtualBox_Extension_Pack-*.vbox-extpack" \
 		"" \
 		"VirtualBox Extension Pack"
+
+	add_to_uninstaller "trash $HOME/Library/Preferences/VirtualBox"
+
 }
 
 install_vmware_fusion ()
@@ -227,7 +230,13 @@ install_vmware_fusion ()
 		"$dest" \
 		"$application_name"
 
-	#add_to_uninstaller ""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/VMWare Fusion\""
+	add_to_uninstaller "trash \"$HOME/Library/Caches/com.vmware.fusion\""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusionStartMenu.plist\""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusion.LSSharedFileList.plist\""
+	add_to_uninstaller "trash \"$HOME/Library/Application Support/VMWare Fusion\""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusion.plist\""
+	add_to_uninstaller "trash \"$HOME/Library/Logs/VMWare Fusion\""
 
 	echo "-- $application_name end --"
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
@@ -476,16 +485,13 @@ install()
 	application_path="Applications"
 	dest_application_path="/$application_path"
 	app_path=""
-	if [ "$application_name" != "" ] && [ -d "$dest_application_path/$application_name" ]
-	then
-		app_path="$dest_application_path/$application_name"
-	fi
-
+	
 	pkg="$(ls $extraction_path | grep .pkg | head -1)"
 	app="$(ls $extraction_path | grep .app | head -1)"
 	if [ "$pkg" != "" ]
 	then
 		sudo installer -verboseR -pkg "$extraction_path/$pkg" -target /
+		app_path="$dest_application_path/$application_name"
 	elif [ "$app" != "" ]
 	then
 		app_path="$extraction_path/$app"
