@@ -98,22 +98,22 @@ fi
 
 if [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
 then
-	if [ ! -f "$PWD/config/*.lic" ]
+	if [ ! -f "$WORKSPACE/config/*.lic" ]
 	then
-		error "Please copy your Vagrant VMWare Fusion License to ${PWD/$HOME/~}/config/"
+		error "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
 		exit
 	fi
 	vagrant plugin install vagrant-vmware-fusion
-	vagrant plugin license "$(ls $PWD/config/*.lic)"
+	vagrant plugin license "$(ls $WORKSPACE/config/*.lic)"
 fi
 
-if [ -f "$PWD/.extension.vbox-extpack" ]
+if [ -f "$WORKSPACE/.extension.vbox-extpack" ]
 then
-	open "$PWD/.extension.vbox-extpack"
-	rm -f "$PWD/.extension.vbox-extpack"
+	open "$WORKSPACE/.extension.vbox-extpack"
+	rm -f "$WORKSPACE/.extension.vbox-extpack"
 fi
 
-env="$(cat "$PWD/env.json")"
+env="$(cat "$WORKSPACE/env.json")"
 function get_env()
 {
     echo $env | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t\" "

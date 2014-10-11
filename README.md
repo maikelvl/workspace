@@ -11,21 +11,21 @@ The usual development machine has all kinds of software installed on the main op
 ### VirtualBox
 To install your workspace just run the following in your terminal:
 
-	curl workspace-install.userx.nl | bash
+	curl -L workspace-install.userx.nl | bash
 
 ### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
-	 curl workspace-install.userx.nl | bash -s **vmware-fusion**
+	 curl -L workspace-install.userx.nl | bash -s **vmware-fusion**
 
 ### Customized location:
 The default workspace location is ~/workspace. You can customize this by providing a second argument:
 
-	curl workspace-install.userx.nl | bash -s virtualbox **/your/directory**
+	curl -L workspace-install.userx.nl | bash -s virtualbox **/your/directory**
 
 or
 
-	curl workspace-install.userx.nl | bash -s **vmware-fusion /your/directory**
+	curl -L workspace-install.userx.nl | bash -s **vmware-fusion /your/directory**
 
 During installation we need administrator privileges for the following:
 - Get your system’s timezone (your workspace will inherit this timezone)
@@ -42,9 +42,7 @@ The first time you run your workspace with VirtualBox you will be asked to insta
 Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it.
 
 ### Run it, get coffee
-Now, lets run your brand new Workspace by typing just:
-	
-	workspace
+Now, lets run your brand new Workspace by executing `workspace`.
 
 You might take a cup of coffee because this very first run will do the following:
 - Download the latest CoreOS Beta release
@@ -58,3 +56,10 @@ Now you will see your workspace which is configured as you wish.
 
 ## Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run `workspace -B` in your Mac terminal.
+
+## Uninstall Workspace
+Just trash your Workspace directory and delete the aliases from ~/.bash_profile
+
+To completely uninstall all installed software run ./.system/uninstall.sh. This will move the Workspace directory, Vagrant, VirtualBox and VMWare to the trash.
+
+##
