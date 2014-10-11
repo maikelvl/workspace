@@ -96,23 +96,6 @@ then
 	exit
 fi
 
-if [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
-then
-	if [ ! -f "$WORKSPACE/config/*.lic" ]
-	then
-		error "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
-		exit
-	fi
-	vagrant plugin install vagrant-vmware-fusion
-	vagrant plugin license "$(ls $WORKSPACE/config/*.lic)"
-fi
-
-if [ -f "$WORKSPACE/.extension.vbox-extpack" ]
-then
-	open "$WORKSPACE/.extension.vbox-extpack"
-	rm -f "$WORKSPACE/.extension.vbox-extpack"
-fi
-
 env="$(cat "$WORKSPACE/env.json")"
 function get_env()
 {
@@ -121,6 +104,22 @@ function get_env()
 
 provider="$(get_env 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
+
+
+if [ "$provider" == "vmware-fusion" ] && [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
+then
+	if [ ! -f "$WORKSPACE/config/"*.lic ]
+	then
+		error "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
+		exit
+	fi
+	vagrant plugin install vagrant-vmware-fusion
+	vagrant plugin license "$(ls $WORKSPACE/config/*.lic | head -1)"
+elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.extension.vbox-extpack" ]
+then
+	open "$WORKSPACE/.extension.vbox-extpack"
+	rm -f "$WORKSPACE/.extension.vbox-extpack"
+fi
 
 if [ $STATUS ]
 then
