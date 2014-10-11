@@ -1,6 +1,5 @@
 /.system
 /.vagrant
-/*.vbox-extpack
 /config
 /docker
 /projects
