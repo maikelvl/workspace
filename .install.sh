@@ -127,7 +127,7 @@ add_shell_profile_to_bash_profile ()
 	bash_profile_file="$HOME/.bash_profile"
 	start_line="# === Workspace aliases start ==="
 	end_line="# === Workspace aliases end ==="
-	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"\$WORKSPACE/coreos\"\nalias workspace=\"\$WORKSPACE/coreos -c workspace\"\n$end_line"
+	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\"\nalias workspace=\"cd \$WORKSPACE && \$WORKSPACE/coreos -c workspace\"\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
 		bash_profile="$(cat "$bash_profile_file")"
