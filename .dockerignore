@@ -2,11 +2,10 @@
 .git
 .system
 .vagrant
-.workspace-base
+base
 bin-coreos
 bin-workspace
 config
 config-boilerplate
-config-scripts
 docker
 projects
