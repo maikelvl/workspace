@@ -28,6 +28,7 @@ start ()
 	then
 		install_vmware_fusion
 	fi
+	add_projects
 }
 
 # --- ask workspace directory ---------------------------------------------------
@@ -80,6 +81,15 @@ set_up_workspace()
 	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 
 	echo "-- Workspace end --"
+}
+
+add_projects ()
+{
+	echo "-- Projects start --"
+
+	mkdir -p "$WORKSPACE/projects" && success "Added projects directory"
+
+	echo "-- Projects end --"
 }
 
 add_to_uninstaller ()
