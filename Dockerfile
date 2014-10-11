@@ -6,4 +6,7 @@ ENV SCRIPTS /workspace/config-scripts
 
 VOLUME  ["/workspace"]
 
-ENTRYPOINT ["/workspace/config-scripts/run.sh"]
+ADD /config-scripts/run.sh /scripts/run.sh
+RUN chmod +x /scripts/run.sh
+
+ENTRYPOINT ["/scripts/run.sh"]
