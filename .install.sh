@@ -461,6 +461,7 @@ install()
 			volume_path="/Volumes/$volume_name"
 			hdiutil attach -mountpoint "$volume_path" "$package"
 			osascript -e 'tell application "Finder"' -e 'close front window' -e 'end tell'
+			echo "Please wait a sec..."
 			sudo cp -rf $volume_path/* $extraction_path/
 			hdiutil detach "$volume_path"
 			;;
