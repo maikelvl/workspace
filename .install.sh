@@ -3,7 +3,7 @@
 #WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
 WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
 VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
-SILENT="no"
+SILENT_LEVEL=1 # 0 = none, 1 = only downloads, 2 = all requests
 DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="${1:-virtualbox}"
 PROVIDER="${PROVIDER//_/-}"
@@ -65,7 +65,12 @@ set_up_workspace()
 	fi
 
 	# --- download base files ---------------------
-	curl --location --silent --url "$WORKSPACE_REPO" --output "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
+	silent_flag=""
+	if [ $SILENT_LEVEL -gt 1 ]
+	then
+		silent_flag="--silent"
+	fi
+	curl --location $silent_flag --url "$WORKSPACE_REPO" --output "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
 	unzip "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip" -d "$WORKSPACE"
 	rm "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
 	remove_sub_dir "$WORKSPACE"
@@ -416,7 +421,7 @@ download()
 
 	info "Downloading latest $application_name $download_link..."
 	silent_flag=""
-	if [ "$SILENT" == "yes" ]
+	if [ $SILENT_LEVEL -gt 0 ]
 	then
 		silent_flag="--silent"
 	fi
@@ -571,7 +576,8 @@ find_download_link()
 	    fi
 	done
 	silent_flag=""
-	if [ 1 ] #"$SILENT" == "yes" ]
+	silent_flag=""
+	if [ $SILENT_LEVEL -gt 1 ]
 	then
 		silent_flag="--silent"
 	fi
