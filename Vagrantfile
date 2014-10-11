@@ -117,8 +117,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             get $image
           done
           
-          rm -rf /workspace/.system
-          mkdir -p /workspace/.system
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
         "
       end

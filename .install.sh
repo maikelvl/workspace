@@ -4,10 +4,11 @@
 WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
 VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
 SILENT="no"
-DOWNLOADS_DIRECTORY="$HOME"
+DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="${1:-virtualbox}"
 PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
+update_uninstaller=1
 
 start ()
 {
@@ -16,7 +17,7 @@ start ()
 		error "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
 		exit
 	fi
-
+	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
 	install_vagrant
@@ -39,36 +40,82 @@ set_up_workspace()
 	timezone="${timezone/Time Zone: /}"
 	hostname="$(hostname)"
 
+	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
+	then
+		info "Found uninstaller... Trashing old workspace files..."
+		sudo bash "$WORKSPACE/.system/uninstall.sh"
+		info "Installing new Workspace..."
+		sleep 5
+	fi
+
 	if [ -d "$WORKSPACE" ]
 	then
 		echo "${WORKSPACE/$HOME/~} already exists. Remove or choose another directory."
 		exit
 	fi
+
+	echo "-- Workspace start --"
+
 	mkdir -p "$WORKSPACE"
-	rand_mac_addr="$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:00:*"
-	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 	
-	# --- download base files ---------------------
-	if [ -f "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip" ]
+	if [ ! -d "$WORKSPACE" ]
 	then
-		rm "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
+		error "No permission to create $WORKSPACE"
+		exit
 	fi
-	
+
+	# --- download base files ---------------------
 	curl --location --silent --url "$WORKSPACE_REPO" --output "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
 	unzip "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip" -d "$WORKSPACE"
 	rm "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
 	remove_sub_dir "$WORKSPACE"
+	add_to_uninstaller "trash \"$WORKSPACE\""
 	cp -r "$WORKSPACE/config-boilerplate" "$WORKSPACE/config"
+	rand_mac_addr="$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:00:*"
+	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+
+	echo "-- Workspace end --"
+}
+
+add_to_uninstaller ()
+{
+	if [ $update_uninstaller ]
+	then
+		if [ "$1" != "" ]
+		then
+			addition="$1"
+		else
+			addition=""
+			while read -r line
+			do
+				addition="$addition$line\n"
+			done
+		fi
+		uninstaller_script="$WORKSPACE/.system/uninstall.sh"
+		mkdir -p "$(dirname "$uninstaller_script")"
+		if [ ! -f "$uninstaller_script" ]
+		then
+			echo -e "#!/bin/bash\ntrash() {\n\tif [ -f \"\$1\" ] || [ -d \"\$1\" ]\n\tthen\n\t\tsudo mv -f \"\$1\" \"\$HOME/.Trash/\$(basename \"\$1\")-\$(date +\"%y-%m-%d_%H;%M;%S\").bak\"\n\t\tsleep 2\n\tfi\n}\n" > "$uninstaller_script"
+		fi
+		
+		uninstaller="$(cat "$uninstaller_script")"
+		if [ "${uninstaller//$addition/}" == "$uninstaller" ]
+		then
+			echo -e "$addition\n" >> "$uninstaller_script"
+		fi
+	fi
 }
 
 add_shell_profile_to_bash_profile ()
 {
 	# Add coreos alias to bash_profile file
 	bash_profile_file="$HOME/.bash_profile"
-	add_bash_line='alias coreos="./coreos"\nalias workspace="./coreos -c workspace"'
+	start_line="# === Workspace aliases start ==="
+	end_line="# === Workspace aliases end ==="
+	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"\$WORKSPACE/coreos\"\nalias workspace=\"\$WORKSPACE/coreos -c workspace\"\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
-		bash_profile="$(cat $bash_profile_file)"
+		bash_profile="$(cat "$bash_profile_file")"
 		if [ "${bash_profile/$add_bash_line/}" == "$bash_profile" ]
 		then
 			add_line=1
@@ -80,15 +127,62 @@ add_shell_profile_to_bash_profile ()
 	if [ add_line ]
 	then
 		echo -e "$add_bash_line" >> "$bash_profile_file"
-		source "$bash_profile_file"
+
+		add_to_uninstaller << EOF
+			if [ -f "${bash_profile_file/$HOME/\$HOME}" ]
+			then
+				echo -e "\\\n" >> ${bash_profile_file/$HOME/\$HOME}
+				new_bash_profile_file=""
+				while read line
+				do
+					if [ ! \$write_line ] && [ "\$line" != "" ]
+					then
+						write_line="yes"
+					fi
+
+					if [ ! \$write_line ]
+					then
+						continue
+					fi
+
+					if [ "\$line" == "$start_line" ]
+					then
+						write_line="no"
+					fi
+					
+					if [ "\$write_line" == "yes" ]
+					then
+						new_bash_profile_file="\$new_bash_profile_file\$line\\\n"
+					fi
+							
+					if [ "\$line" == "$end_line" ]
+					then
+						write_line="yes"
+					fi
+
+				done < ${bash_profile_file/$HOME/\$HOME}
+
+				if [ ! -n "\$new_bash_profile_file" ]
+				then
+					if [ -f "${bash_profile_file/$HOME/\$HOME}" ]
+					then
+						rm "${bash_profile_file/$HOME/\$HOME}"
+					fi
+				else
+					echo -e "\$new_bash_profile_file" > ${bash_profile_file/$HOME/\$HOME}
+				fi
+			fi
+EOF
 	fi
+
+	source "$bash_profile_file"
 }
 
 install_vagrant ()
 {
 	# -- install Vagrant ------------------------------------------------------------
 	download_and_install \
-		vagrant \
+		"vagrant" \
 		"http://www.vagrantup.com/downloads" \
 		"vagrant*.dmg" \
 		"" \
@@ -117,36 +211,26 @@ install_virtualbox ()
 install_vmware_fusion ()
 {
 	# -- install VMWare Fusion ------------------------------------------------------------
-	dest="$DOWNLOADS_DIRECTORY/vmware_fusion.dmg"
-	download \
-		"VMWare" \
-		"$VMWARE_FUSION_DMG_LINK" \
-		"$dest"
+	dest="$DOWNLOADS_DIRECTORY/$(basename $VMWARE_FUSION_DMG_LINK)"
+	application_name="VMware Fusion.app"
+	echo "-- $application_name start --"
+
+	if [ ! -f "$dest" ]
+	then
+		download \
+			"$VMWARE_FUSION_DMG_LINK" \
+			"$dest" \
+			"$application_name"
+	fi
 	install \
+		"" \
 		"$dest" \
-		"VMware Fusion.app"
+		"$application_name"
 
-	# hdiutil attach -mountpoint "/Volumes/vmware-fusion" "$dest"
-	# sudo open $(ls /Volumes/vmware-fusion/*.app)
-	# if [ -d "$HOME/Applications" ]
-	# then
-	# 	mv "/Applications/VMware Fusion.app" "$HOME/Applications/"
-	# fi
+	#add_to_uninstaller ""
 
-	# hdiutil detach /Volumes/vmware-fusion
-
- #    if [ -f "$WORKSPACE/$dest_file_name" ]
- #    then
-	#     rm "$WORKSPACE/$dest_file_name"
-	# fi
-	# echo "VMware Fusion installed"
-	
+	echo "-- $application_name end --"
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
-}
-
-trash ()
-{
-	mv "$1" "$HOME/.Trash/$(basename "$1")-$(date +"%y-%m-%d_%H;%M;%S").bak"
 }
 
 black="\e[0;30m"
@@ -185,7 +269,7 @@ download_and_install ()
 {
 	command="$1"
 	downloads_link="$2"
-	download_link_pattern="$3"
+	download_link_base_pattern="$3"
 	specific_version="$4"
 	application_name="$5"
 
@@ -212,7 +296,8 @@ download_and_install ()
 		echo "Missing second argument: downloads link"
 		exiting="yes"
 	fi
-	if [ "$download_link_pattern" == "" ]
+
+	if [ "$download_link_base_pattern" == "" ]
 	then
 		echo "Missing third argument: download link pattern"
 		exiting="yes"
@@ -223,7 +308,8 @@ download_and_install ()
 		exit
 	fi
 
-	if [ "$application_name" == "" ] && [ "$command" != "" ];then
+	if [ "$application_name" == "" ] && [ "$command" != "" ]
+	then
 		application_name=$(echo $command | head -c 1 | tr [a-z] [A-Z]; echo $1 | tail -c +2)
 	fi
 
@@ -243,7 +329,7 @@ download_and_install ()
 	fi
 
 	echo "Fetching downloads page: $downloads_link..."
-	download_link="$(find_download_link "$downloads_link" "$download_link_pattern")"
+	download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern")"
 	if [ "$download_link" == "" ]
 	then
 		error "No download link found on $downloads_link"
@@ -277,12 +363,18 @@ download_and_install ()
 				download_link="$domain_name$download_link"
 			fi
 			dest="$DOWNLOADS_DIRECTORY/$(basename $download_link)"
-			mkdir -p $(dirname $DOWNLOADS_DIRECTORY)
+			sudo mkdir -p $(dirname $DOWNLOADS_DIRECTORY)
 			if [ ! -f "$dest" ]
 			then
-				download "$application_name" "$download_link" "$dest"
+				download \
+					"$download_link" \
+					"$dest" \
+					"$application_name"
 			fi
-			install "$dest" "$application_name"
+			install \
+				"$command" \
+				"$dest" \
+				"$application_name"
 		elif [ "$current_version" != "" ]
 		then
 			success "$application_name already on latest version: $current_version"
@@ -298,12 +390,13 @@ download_and_install ()
 
 download()
 {
-	application_name="$1"
-	download_link="$2"
-	dest="$3"
+	download_link="$1"
+	dest="$2"
+	application_name="$3"
 
 	minus_one="-1"	
-	if [ "${dest:$minus_one:1}" == "/" ];then
+	if [ "${dest:$minus_one:1}" == "/" ]
+	then
 		dest="$dest$(basename $download_link)"
 	fi
 
@@ -313,6 +406,7 @@ download()
 	fi
 
 	info "Downloading latest $application_name $download_link..."
+	silent_flag=""
 	if [ "$SILENT" == "yes" ]
 	then
 		silent_flag="--silent"
@@ -322,8 +416,9 @@ download()
 
 install()
 {
-	package="$1"
-	application_name="$2"
+	command="$1"
+	package="$2"
+	application_name="$3"
 
 	filename=$(basename "$package")
 	extension="${filename##*.}"
@@ -332,7 +427,8 @@ install()
 	volume_name="${volume_name%.*}"
 	volume_name="${volume_name// /-}"
 	volume_name="$(echo $volume_name | awk '{print tolower($0)}')"
-	extraction_path="$HOME/$volume_name-extraction"
+	extraction_path="$HOME/${filename%.*}-extraction"
+	mkdir -p "$extraction_path"
 	usr="/usr/local"
 	sudo mkdir -p "$usr"
 
@@ -340,24 +436,16 @@ install()
 		dmg)
 			volume_path="/Volumes/$volume_name"
 			hdiutil attach -mountpoint "$volume_path" "$package"
-			pkg="$(ls $volume_path/*.pkg)"
-			if [ "$pkg" != "" ]
-			then
-				sudo installer -verboseR -pkg "$pkg" -target /
-			fi
+			osascript -e 'tell application "Finder"' -e 'close front window' -e 'end tell'
+			sudo cp -rf $volume_path/* $extraction_path/
 			hdiutil detach "$volume_path"
-			if [ "$pkg" == "" ]
-			then
-				error "No package found in $volume_path: $pkg"
-				exit
-			fi
 			;;
 		zip)
 			if [ "$(which apt-get)" != "" ]
 	    	then
 	    		apt-get install unzip
 			fi
-			mkdir "$extraction_path"
+			
 			unzip -o "$package" -d "$extraction_path"
 			;;
 		gz|bz2)
@@ -365,7 +453,6 @@ install()
 			then
 				rm -rf "$extraction_path"
 			fi
-			mkdir "$extraction_path"
 			case "$extension" in
 				gz)
 					method="z"
@@ -379,7 +466,6 @@ install()
 			;;
 		vbox-extpack)
 			cp -f "$package" "$WORKSPACE/.extension.vbox-extpack" 
-			return
 			;;
 		?)
 			error "Unable to install $extension-files"
@@ -387,70 +473,98 @@ install()
 			;;
 	esac
 
+	application_path="Applications"
+	dest_application_path="/$application_path"
+	app_path=""
+	if [ "$application_name" != "" ] && [ -d "$dest_application_path/$application_name" ]
+	then
+		app_path="$dest_application_path/$application_name"
+	fi
+
+	pkg="$(ls $extraction_path | grep .pkg | head -1)"
+	app="$(ls $extraction_path | grep .app | head -1)"
+	if [ "$pkg" != "" ]
+	then
+		sudo installer -verboseR -pkg "$extraction_path/$pkg" -target /
+	elif [ "$app" != "" ]
+	then
+		app_path="$extraction_path/$app"
+	fi
+
+	# -- Move to home Applications directory if there is one ------------------------
+	if [ "$app_path" != "" ] && [ -d "$app_path" ]
+	then
+		dest_application_path=""
+		if [ -d "$HOME/$application_path" ]
+		then
+			dest_application_path="$HOME/$application_path"
+		fi
+		command_location=""
+		if [ "$command" != "" ] && [ "$(which $command)" != "" ]
+		then
+			command_location="$(which $command)"
+		fi
+
+		dest_app_path="$dest_application_path/$(basename "$app_path")"
+		if [ "$app_path" != "$dest_app_path" ]
+		then
+			sudo mv -f "$app_path" "$dest_app_path"
+		fi
+
+		success "$application_name installed in $dest_application_path."
+		add_to_uninstaller "trash \"$dest_app_path\""
+		if [ "$command_location" != "" ] && [ -f "$dest_app_path/bin/$command" ]
+		then
+			sudo ln -sf "$dest_app_path/bin/$command" "$command_location"
+			add_to_uninstaller "trash \"$command_location\""
+		fi
+	fi
+
 	if [ "$command" != "" ]
 	then
 		if [ -d "$extraction_path/bin" ]
 		then
-			mv -f "$extraction_path" "$usr/$command"
+			sudo mv -f "$extraction_path" "$usr/$command"
 			export PATH="$PATH:$usr/$command/bin"
 		else
-			mkdir -p "$usr/bin"
-			mv $extraction_path/* "$usr/bin/"
+			sudo mkdir -p "$usr/bin"
+			sudo mv $extraction_path/* "$usr/bin/"
 		fi
 
 		if [ "$(which $command)" != "" ]
 		then
-			success "$application_name $(version $command) installed"
+			success "$application_name $(version $command)"
 		else
 			error "Something went wrong installing $application_name"
 		fi
 	fi
-
-	# -- Move to home Applications directory if there is one ------------------------
-	if [ "$application_name" != "" ]
-	then
-		if [ -d "$HOME/Applications" ] && [ -d "/Applications/$application_name" ]
-		then
-			command_location=""
-			if [ "$command" != "" ] && [ "$(which $command)" != "" ] && [ "$HOME/Applications/$application_name/bin/$command" ]
-			then
-				command_location="$(which $command)"
-			fi
-			sudo mv "/Applications/$application_name" "$HOME/Applications"
-			success "$application_name moved to $HOME/Applications."
-			if [ "$command_location" != "" ]
-			then
-				sudo ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
-			fi
-		elif [ -d "$HOME/Applications/$application_name" ] || [ -d "/Applications/$application_name" ]
-		then
-			success "$application_name already installed."
-		fi
-	fi
-
+	
 	if [ -d "$extraction_path" ]
 	then
-		rm -rf "$extraction_path"
+		sudo rm -rf "$extraction_path"
 	fi
 }
 
 find_download_link()
 {
 	downloads_link="$1"
-	download_link_pattern="$2"
+	download_link_base_pattern="$2"
+	download_link_base_front=""
+	download_link_base_rear=""
+	latest_version=""
 
-	IFS='*' read -ra str <<< "$download_link_pattern"
+	IFS='*' read -ra str <<< "$download_link_base_pattern"
 	for i in "${str[@]}"
 	do
 	    if [ "$download_link_base_front" == "" ]
 	    then
 	    	download_link_base_front="$i"
-	    elif [ "$download_link_rear" == "" ]
+	    elif [ "$download_link_base_rear" == "" ]
 	    then
-	    	download_link_rear="$i"
+	    	download_link_base_rear="$i"
 	    fi
 	done
-
+	silent_flag=""
 	if [ 1 ] #"$SILENT" == "yes" ]
 	then
 		silent_flag="--silent"
@@ -459,18 +573,18 @@ find_download_link()
 	# Find download link
 	find_download_link_html=$(curl --location $silent_flag --url "$downloads_link")
 	find_download_link_html="${find_download_link_html//href=\"/ }"
-	find_download_link_html="${find_download_link_html//$download_link_rear/$download_link_rear }"
+	find_download_link_html="${find_download_link_html//$download_link_base_rear/$download_link_base_rear }"
 	for s in $find_download_link_html
 	do
-		if [ "${s%$download_link_rear}" != "$s" ]
+		if [ "${s%$download_link_base_rear}" != "$s" ]
 		then
 			file_name="$(basename $s)"
 			latest_version="${file_name/${download_link_base_front}_/}"
 			latest_version="${latest_version/${download_link_base_front}-/}"
 			latest_version="${latest_version/${download_link_base_front}/}"
-			latest_version="${latest_version/_${download_link_rear}/}"
-			latest_version="${latest_version/-${download_link_rear}/}"
-			latest_version="${latest_version/${download_link_rear}/}"
+			latest_version="${latest_version/_${download_link_base_rear}/}"
+			latest_version="${latest_version/-${download_link_base_rear}/}"
+			latest_version="${latest_version/${download_link_base_rear}/}"
 			if [ "$latest_version" == "master" ]
 			then
 				continue
