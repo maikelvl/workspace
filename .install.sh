@@ -490,7 +490,7 @@ install()
 			remove_sub_dir "$extraction_path"
 			;;
 		vbox-extpack)
-			cp -f "$package" "$WORKSPACE/.system/virtualbox-extension.vbox-extpack" 
+			cp -f "$package" "$WORKSPACE/.system/$(basename "$package")" 
 			;;
 		?)
 			error "Unable to install $extension-files"

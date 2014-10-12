@@ -114,10 +114,10 @@ then
 	fi
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license "$(ls $WORKSPACE/config/*.lic | head -1)"
-elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/virtualbox-extension.vbox-extpack" ]
+elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
-	open "$WORKSPACE/.system/virtualbox-extension.vbox-extpack"
-	rm -f "$WORKSPACE/.system/virtualbox-extension.vbox-extpack"
+	open "$WORKSPACE/.system/"*.vbox-extpack
+	rm -f "$WORKSPACE/.system/"*.vbox-extpack
 fi
 
 if [ $STATUS ]
