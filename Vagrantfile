@@ -43,25 +43,34 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   end
 
   env = JSON.parse(File.read('env.json'))
-  env['mac-addr']['*'] = '%02d'
   
   (1..$num_instances).each do |i|
     vm_name = "coreos-%02d" % i
+    mac_addr = false
+    if env['start-mac-addr']
+      mac_addr = env['start-mac-addr'].split(':')[0..4].join(':') << ':' << (env['start-mac-addr'].split(':')[-1].to_i + i - 1).to_s
+    end
+    
     config.vm.define vm_name do |coreos|
 
       coreos.vm.hostname = env['hostname']+'-'+vm_name
 
-      coreos.vm.network :public_network
-      coreos.vm.provider :vmware_fusion do |v|
-        v.vmx["memsize"] = $vb_memory
-        v.vmx["numvcpus"] = $vb_cpus
-        v.vmx["ethernet0.present"] = "TRUE"
-        v.vmx["ethernet0.connectionType"] = "nat"
-        v.vmx["ethernet1.generatedAddress"] = nil
-        v.vmx["ethernet1.present"] = "TRUE"
-        v.vmx["ethernet1.connectionType"] = "bridged"
-        v.vmx["ethernet1.addressType"] = "static"
-        v.vmx["ethernet1.address"] = env['mac-addr'] % i
+      if env['interface']
+        coreos.vm.network :public_network, :bridge => env['interface']
+      else
+        coreos.vm.network :public_network
+      end
+
+      if mac_addr
+        coreos.vm.provider :vmware_fusion do |v|
+          v.vmx["ethernet0.present"] = "TRUE"
+          v.vmx["ethernet0.connectionType"] = "nat"
+          v.vmx["ethernet1.generatedAddress"] = nil
+          v.vmx["ethernet1.present"] = "TRUE"
+          v.vmx["ethernet1.connectionType"] = "bridged"
+          v.vmx["ethernet1.addressType"] = "static"
+          v.vmx["ethernet1.address"] = mac_addr
+        end
       end
 
       if $enable_serial_logging
@@ -86,6 +95,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       coreos.vm.provider :vmware_fusion do |v|
         v.gui = $vb_gui
+        v.vmx["memsize"] = $vb_memory
+        v.vmx["numvcpus"] = $vb_cpus
       end
 
       coreos.vm.provider :virtualbox do |v|
