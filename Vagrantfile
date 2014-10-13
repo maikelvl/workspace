@@ -45,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       coreos.vm.hostname = $env['hostname']+'-'+vm_name
       
       if $env['network'] == 'private'
-        coreos.vm_network :private_network, ip: "172.16.1.1%02d" % i
+        coreos.vm.network :private_network, ip: "172.16.1.1%02d" % i
       elsif $env['network-interface']
         coreos.vm.network :public_network, bridge: $env['network-interface']
       else
