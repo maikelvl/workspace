@@ -12,6 +12,8 @@ update_uninstaller=1
 
 start ()
 {
+	uninstall_previous_workspace
+
 	if [ "$PROVIDER" == "" ]
 	then
 		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
@@ -29,10 +31,12 @@ start ()
 	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
+
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
 	fi
+
 	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
 		install_virtualbox
@@ -41,6 +45,18 @@ start ()
 		install_vmware_fusion
 	fi
 	add_projects
+}
+
+uninstall_previous_workspace ()
+{
+	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
+	then
+		info "Found uninstaller... Trashing old workspace files..."
+		sudo bash "$WORKSPACE/.system/uninstall.sh"
+		info "Old Workspace uninstalled"
+		sleep 5
+		info "Installing new Workspace..."
+	fi
 }
 
 # --- ask workspace directory ---------------------------------------------------
@@ -52,14 +68,6 @@ set_up_workspace()
 	timezone="$(sudo systemsetup -gettimezone)"
 	timezone="${timezone/Time Zone: /}"
 	hostname="$(hostname)"
-
-	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
-	then
-		info "Found uninstaller... Trashing old workspace files..."
-		sudo bash "$WORKSPACE/.system/uninstall.sh"
-		info "Installing new Workspace..."
-		sleep 5
-	fi
 
 	if [ -d "$WORKSPACE" ]
 	then
