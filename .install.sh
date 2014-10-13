@@ -21,10 +21,10 @@ start ()
 	set_up_workspace
 	add_shell_profile_to_bash_profile
 	install_vagrant
-	if [ "$PROVIDER" == "virtualbox" ]
+	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
 		install_virtualbox
-	elif [ "$PROVIDER" == "vmware-fusion" ]
+	elif [ "$PROVIDER" == "vmware-fusion" ] && [ ! -d "/Applications/VMWare Fusion.app" ] && [ ! -d "$HOME/Applications/VMWare Fusion.app" ]
 	then
 		install_vmware_fusion
 	fi
