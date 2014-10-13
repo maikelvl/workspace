@@ -230,7 +230,7 @@ install_vagrant ()
 	then
 		command_location="$(which $command)"
 		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
-		ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
+		sudo ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
 		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
 		add_to_uninstaller "trash \"$command_location\""
 	fi
