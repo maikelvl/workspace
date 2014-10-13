@@ -196,12 +196,23 @@ EOF
 install_vagrant ()
 {
 	# -- install Vagrant ------------------------------------------------------------
+	application_name="Vagrant"
+	command="vagrant"
 	download_and_install \
-		"vagrant" \
+		"$command" \
 		"http://www.vagrantup.com/downloads" \
 		"vagrant*.dmg" \
 		"" \
-		"Vagrant"
+		"$application_name"
+
+	if [ -d "$HOME/Applications" ]
+	then
+		command_location="$(which $command)"
+		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
+		ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
+		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
+		add_to_uninstaller "trash \"$command_location\""
+	fi
 }
 
 install_virtualbox ()
@@ -244,6 +255,12 @@ install_vmware_fusion ()
 		"" \
 		"$dest" \
 		"$application_name"
+
+	if [ -d "$HOME/Applications" ]
+	then
+		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
+		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
+	fi
 
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/VMWare Fusion\""
 	add_to_uninstaller "trash \"$HOME/Library/Caches/com.vmware.fusion\""
@@ -501,7 +518,6 @@ install()
 	application_path="Applications"
 	dest_application_path="/$application_path"
 	app_path=""
-	
 	pkg="$(ls $extraction_path | grep .pkg | head -1)"
 	app="$(ls $extraction_path | grep .app | head -1)"
 	if [ "$pkg" != "" ]
@@ -516,30 +532,14 @@ install()
 	# -- Move to home Applications directory if there is one ------------------------
 	if [ "$app_path" != "" ] && [ -d "$app_path" ]
 	then
-		dest_application_path=""
-		if [ -d "$HOME/$application_path" ]
-		then
-			dest_application_path="$HOME/$application_path"
-		fi
-		command_location=""
-		if [ "$command" != "" ] && [ "$(which $command)" != "" ]
-		then
-			command_location="$(which $command)"
-		fi
-
 		dest_app_path="$dest_application_path/$(basename "$app_path")"
 		if [ "$app_path" != "$dest_app_path" ]
 		then
 			sudo mv -f "$app_path" "$dest_app_path"
 		fi
 
-		success "$application_name installed in $dest_application_path."
+		success "$application_name installed."
 		add_to_uninstaller "trash \"$dest_app_path\""
-		if [ "$command_location" != "" ] && [ -f "$dest_app_path/bin/$command" ]
-		then
-			sudo ln -sf "$dest_app_path/bin/$command" "$command_location"
-			add_to_uninstaller "trash \"$command_location\""
-		fi
 	fi
 
 	if [ "$command" != "" ]
