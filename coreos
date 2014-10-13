@@ -116,8 +116,16 @@ then
 	vagrant plugin license "$(ls $WORKSPACE/config/*.lic | head -1)"
 elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
-	open "$WORKSPACE/.system/"*.vbox-extpack
-	rm -f "$WORKSPACE/.system/"*.vbox-extpack
+	if [ ! -f "$WORKSPACE/.system/extpack-installed" ]
+	then
+		open "$WORKSPACE/.system/"*.vbox-extpack
+		echo "If the Extension Pack has been installed, please run again."
+		touch "$WORKSPACE/.system/extpack-installed"
+		exit
+	else
+		rm -f "$WORKSPACE/.system/"*.vbox-extpack
+		rm -f "$WORKSPACE/.system/extpack-installed"
+	fi
 fi
 
 if [ $STATUS ]
