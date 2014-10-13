@@ -233,8 +233,12 @@ install_virtualbox ()
 		"" \
 		"VirtualBox Extension Pack"
 
-	add_to_uninstaller "trash $HOME/Library/Preferences/VirtualBox"
-
+	add_to_uninstaller "trash \"$HOME/Library/VirtualBox\""
+	add_to_uninstaller "trash \"$HOME/Library/Application Support/VirtualBox\""
+	add_to_uninstaller "trash \"/Library/Python/2.6/site-packages/vboxapi\""
+	add_to_uninstaller "trash \"/Library/Python/2.6/site-packages/vboxapi-1.0-py2.6.egg-info\""
+	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi\""
+	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi-1.0-py2.7.egg-info\""
 }
 
 install_vmware_fusion ()
