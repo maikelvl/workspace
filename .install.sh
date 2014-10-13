@@ -234,6 +234,8 @@ install_vagrant ()
 		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
 		add_to_uninstaller "trash \"$command_location\""
 	fi
+
+	add_to_uninstaller "trash \"$HOME/.vagrant.d\""
 }
 
 install_virtualbox ()
