@@ -113,7 +113,7 @@ then
 		exit
 	fi
 	vagrant plugin install vagrant-vmware-fusion
-	vagrant plugin license "$(ls $WORKSPACE/config/*.lic | head -1)"
+	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
 elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
 	if [ ! -f "$WORKSPACE/.system/extpack-installed" ]
