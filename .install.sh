@@ -123,6 +123,7 @@ add_to_uninstaller ()
 		if [ ! -f "$uninstaller_script" ]
 		then
 			echo -e "#!/bin/bash\ntrash() {\n\tif [ -f \"\$1\" ] || [ -d \"\$1\" ]\n\tthen\n\t\tsudo mv -f \"\$1\" \"\$HOME/.Trash/\$(basename \"\$1\")-\$(date +\"%y-%m-%d_%H;%M;%S\").bak\"\n\t\tsleep 2\n\tfi\n}\n" > "$uninstaller_script"
+			chmod +x "$uninstaller_script"
 		fi
 		
 		uninstaller="$(cat "$uninstaller_script")"
