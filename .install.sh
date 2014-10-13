@@ -29,7 +29,10 @@ start ()
 	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
-	install_vagrant
+	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
+	then
+		install_vagrant
+	fi
 	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
 		install_virtualbox
@@ -67,7 +70,7 @@ set_up_workspace()
 	echo "-- Workspace start --"
 
 	mkdir -p "$WORKSPACE"
-	
+
 	if [ ! -d "$WORKSPACE" ]
 	then
 		error "No permission to create $WORKSPACE"
