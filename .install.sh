@@ -10,7 +10,7 @@ PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
 update_uninstaller=1
 
-start ()
+function start ()
 {
 	echo "Administrator privileges are required for some operations..."
 	sudo echo ""
@@ -49,7 +49,7 @@ start ()
 	add_projects
 }
 
-uninstall_previous_workspace ()
+function uninstall_previous_workspace ()
 {
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
@@ -63,7 +63,7 @@ uninstall_previous_workspace ()
 
 # --- ask workspace directory ---------------------------------------------------
 
-set_up_workspace()
+function set_up_workspace()
 {
 	# Save hostname, username and timezone
 	timezone="$(sudo systemsetup -gettimezone)"
@@ -104,7 +104,7 @@ set_up_workspace()
 	echo "-- Workspace end --"
 }
 
-add_projects ()
+function add_projects ()
 {
 	echo "-- Projects start --"
 
@@ -113,7 +113,7 @@ add_projects ()
 	echo "-- Projects end --"
 }
 
-add_to_uninstaller ()
+function add_to_uninstaller ()
 {
 	if [ $update_uninstaller ]
 	then
@@ -143,7 +143,7 @@ add_to_uninstaller ()
 	fi
 }
 
-add_shell_profile_to_bash_profile ()
+function add_shell_profile_to_bash_profile ()
 {
 	# Add coreos alias to bash_profile file
 	bash_profile_file="$HOME/.bash_profile"
@@ -215,7 +215,7 @@ EOF
 	source "$bash_profile_file"
 }
 
-install_vagrant ()
+function install_vagrant ()
 {
 	# -- install Vagrant ------------------------------------------------------------
 	application_name="Vagrant"
@@ -244,7 +244,7 @@ install_vagrant ()
 	add_to_uninstaller "trash \"$command_location\""
 }
 
-install_virtualbox ()
+function install_virtualbox ()
 {
 	# -- install VirtualBox ------------------------------------------------------------
 	virtual_box_downloads_link="https://www.virtualbox.org/wiki/Downloads"
@@ -278,7 +278,7 @@ install_virtualbox ()
 	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi-1.0-py2.7.egg-info\""
 }
 
-install_vmware_fusion ()
+function install_vmware_fusion ()
 {
 	# -- install VMWare Fusion ------------------------------------------------------------
 	dest="$DOWNLOADS_DIRECTORY/$(basename $VMWARE_FUSION_DMG_LINK)"
@@ -334,28 +334,28 @@ purple="\e[0;35m"
 turquase="\e[0;36m"
 NC="\e[0m"
 
-info ()
+function info ()
 {
 	printf "$turquase"
 	echo "$1"
 	printf "$NC"
 }
 
-success ()
+function success ()
 {
 	printf "$green"
 	echo "$1"
 	printf "$NC"
 }
 
-error ()
+function error ()
 {
 	printf "$red"
 	echo "$1"
 	printf "$NC"
 }
 
-download_and_install ()
+function download_and_install ()
 {
 	command="$1"
 	downloads_link="$2"
@@ -478,7 +478,7 @@ download_and_install ()
 	echo "-- $application_name end --"
 }
 
-download()
+function download()
 {
 	download_link="$1"
 	dest="$2"
@@ -504,7 +504,7 @@ download()
 	curl --location $silent_flag --output "$dest" --url "$download_link"
 }
 
-install()
+function install()
 {
 	command="$1"
 	package="$2"
@@ -622,7 +622,7 @@ install()
 	fi
 }
 
-find_download_link()
+function find_download_link()
 {
 	downloads_link="$1"
 	download_link_base_pattern="$2"
@@ -674,7 +674,7 @@ find_download_link()
 }
 
 # Removes a directory which is in between two directories: /home/subdir/directory becomes /home/directory
-remove_sub_dir ()
+function remove_sub_dir ()
 {
 	if [ ! -d "$1" ]
 	then
