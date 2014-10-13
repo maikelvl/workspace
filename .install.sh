@@ -55,7 +55,7 @@ function uninstall_previous_workspace ()
 	then
 		info "Found uninstaller... Trashing old workspace files..."
 		sudo bash "$WORKSPACE/.system/uninstall.sh"
-		info "Old Workspace uninstalled"
+		success "Old Workspace successfully uninstalled"
 		sleep 5
 		info "Installing new Workspace..."
 	fi
