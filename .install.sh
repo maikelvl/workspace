@@ -254,8 +254,11 @@ install_virtualbox ()
 		"" \
 		"VirtualBox Extension Pack"
 
+	add_to_uninstaller "trash \"$HOME/VirtualBox VMs\""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/org.virtualbox.app\""
 	add_to_uninstaller "trash \"$HOME/Library/VirtualBox\""
-	add_to_uninstaller "trash \"$HOME/Library/Application Support/VirtualBox\""
+	add_to_uninstaller "trash \"$HOME/Library/Saved Application State/org.virtualbox.app.VirtualBox.savedState\""
+	add_to_uninstaller "trash \"/Library/Application Support/VirtualBox\""
 	add_to_uninstaller "trash \"/Library/Python/2.6/site-packages/vboxapi\""
 	add_to_uninstaller "trash \"/Library/Python/2.6/site-packages/vboxapi-1.0-py2.6.egg-info\""
 	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi\""
@@ -287,12 +290,20 @@ install_vmware_fusion ()
 		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
 	fi
 
+	add_to_uninstaller "trash \"/Library/Application Support/VMWare\""
+	add_to_uninstaller "trash \"/Library/Application Support/VMWare Fusion\""
+	add_to_uninstaller "trash \"/Library/Preferences/VMWare Fusion\""
+	add_to_uninstaller "trash \"/Library/Logs/VMWare\""
+	add_to_uninstaller "trash \"/Library/Logs/VMWare Fusion\""
+	add_to_uninstaller "trash \"/Library/Logs/VMWare Fusion Service.log\""
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/VMWare Fusion\""
 	add_to_uninstaller "trash \"$HOME/Library/Caches/com.vmware.fusion\""
+	add_to_uninstaller "trash \"$HOME/Library/Preferences/VMWare Fusion\""
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusionStartMenu.plist\""
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusion.LSSharedFileList.plist\""
-	add_to_uninstaller "trash \"$HOME/Library/Application Support/VMWare Fusion\""
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/com.vmware.fusion.plist\""
+	add_to_uninstaller "trash \"$HOME/Library/Application Support/VMWare Fusion\""
+	add_to_uninstaller "trash \"$HOME/Library/Logs/VMWare\""
 	add_to_uninstaller "trash \"$HOME/Library/Logs/VMWare Fusion\""
 
 	echo "-- $application_name end --"
