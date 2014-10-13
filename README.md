@@ -33,6 +33,8 @@ During installation we need administrator privileges for the following:
 - Installation of VirtualBox or VMWare Fusion
 
 ## Using your Workspace
+The first thing to do after installation is to control the ./env.json file. This file contains machine specific options which you can edit with your own needs and is not version controlled.
+
 Supply your GitHub or/and GitLab credentials in ./config/git.json so the workspace can configure itself.
 
 ### VirtualBox
