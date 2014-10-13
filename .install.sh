@@ -407,7 +407,7 @@ download_and_install ()
 		fi
 	fi
 
-	echo "Fetching downloads page: $downloads_link..."
+	info "Fetching downloads page $downloads_link..."
 	download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern")"
 	if [ "$download_link" == "" ]
 	then
@@ -460,7 +460,7 @@ download_and_install ()
 		else
 			success "$application_name already installed"
 		fi
-		info "Download link: $download_link"
+		info "Downloaded $download_link"
 	
 	fi
 
