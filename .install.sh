@@ -321,7 +321,7 @@ NC="\e[0m"
 
 info ()
 {
-	printf "$blue"
+	printf "$turquase"
 	echo "$1"
 	printf "$NC"
 }

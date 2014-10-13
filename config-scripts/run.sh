@@ -11,7 +11,7 @@ export NC="\e[0m"
 
 function info()
 {
-    printf "$BLUE"
+    printf "$TURQUASE"
     echo -e "$@"
     printf "$NC"
 }

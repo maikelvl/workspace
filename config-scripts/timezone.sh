@@ -1,31 +1,31 @@
 #!/bin/bash
-export BLACK="\e[0;30m"
-export RED="\e[0;31m"
-export GREEN="\e[0;32m"
-export ORANGE="\e[0;33m"
-export BLUE="\e[0;34m"
-export PURPLE="\e[0;35m"
-export TURQUASE="\e[0;36m"
-export NC="\e[0m"
+black="\e[0;30m"
+red="\e[0;31m"
+green="\e[0;32m"
+orange="\e[0;33m"
+blue="\e[0;34m"
+purple="\e[0;35m"
+turquase="\e[0;36m"
+NC="\e[0m"
 
-function info()
+function info ()
 {
-    printf "$BLUE"
-    echo -e "$@"
+    printf "$turquase"
+    echo "$1"
     printf "$NC"
 }
 
-function success()
+function success ()
 {
-    printf "$GREEN"
-    echo -e "$@"
+    printf "$green"
+    echo "$1"
     printf "$NC"
 }
 
-function error()
+function error ()
 {
-    printf "$RED"
-    echo -e "$@"
+    printf "$red"
+    echo "$1"
     printf "$NC"
 }
 
