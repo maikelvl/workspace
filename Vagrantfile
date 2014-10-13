@@ -105,20 +105,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       coreos.vm.provision :shell, inline: 'timedatectl set-timezone "'+$env['timezone']+'"'
 
       if i == 1
-        coreos.vm.synced_folder ".", "/workspace", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-        coreos.vm.provision :shell, inline: "
-          if [ ! -L /opt/bin ];then
-            mkdir -p /opt
-            ln -sf /workspace/bin-coreos /opt/bin
-          fi
+        coreos.vm.synced_folder '.', '/workspace', id: 'core', :mount_options => ['nolock,vers=3,udp'], :nfs => true
+        coreos.vm.provision :shell, inline: '
+          mkdir -p /opt
+          ln -sf /workspace/bin-coreos /opt/bin
           chmod +x /workspace/bin-coreos/*
-
-          for image in ubuntu:trusty;do
-            get $image
-          done
-          
+          get ubuntu:trusty
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
-        "
+        '
       end
     end
   end
