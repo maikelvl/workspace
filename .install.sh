@@ -96,6 +96,7 @@ function set_up_workspace()
 	unzip "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip" -d "$WORKSPACE"
 	rm "$DOWNLOADS_DIRECTORY/vagrant-workspace.zip"
 	remove_sub_dir "$WORKSPACE"
+	echo "$WORKSPACE_REPO" > "$WORKSPACE/.upstream-workspace-repo"
 	add_to_uninstaller "trash \"$WORKSPACE\""
 	cp -r "$WORKSPACE/.config-boilerplate" "$WORKSPACE/config"
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):00:00:00:01"
