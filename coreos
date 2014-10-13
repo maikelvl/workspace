@@ -5,16 +5,16 @@ cat << EOF
 
 usage: $(basename $0) options INSTANCE
 
-This script starts or resumes a coreos vagrant vm.
+This script handles your CoreOS instances with Vagrant (vagrantup.com)
 
 OPTIONS:
-	-h (help) 			Show this message
-	-c (command)		-c=command Pass a command to the coreos instance
-	-r (reload)			Reload the instance
-	-R (rebuild) 		Rebuild the instance
-	-p (provision) 		Provision the instance
-	-d (destroy) 		Kill and destroy instance
-	-s (status) 		See the global status
+	-h (help)           Show this message
+	-c (command)        -c=command Pass a command to the coreos instance
+	-r (reload)         Reload the instance
+	-R (rebuild)        Rebuild the instance
+	-p (provision)      Provision the instance
+	-d (destroy)        Kill and destroy instance
+	-s (status)         See Vagrants global status
 
 EOF
 }
