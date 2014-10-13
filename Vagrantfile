@@ -7,18 +7,11 @@ VAGRANTFILE_API_VERSION = '2'
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 
 # # Defaults for config options defined in CONFIG
-$num_instances = 1
-$update_channel = "beta"
+$env = JSON.parse(File.read('env.json'))
+$num_instances = 3
+$update_channel = 'beta'
 $enable_serial_logging = false
 $vb_gui = false
-$vb_memory = 512
-$vb_cpus = 1
-
-# Attempt to apply the deprecated environment variable NUM_INSTANCES to
-# $num_instances while allowing config.rb to override it
-if ENV["NUM_INSTANCES"] && ENV["NUM_INSTANCES"].to_i > 0
-  $num_instances = ENV["NUM_INSTANCES"].to_i
-end
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -40,22 +33,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   if Vagrant.has_plugin?("vagrant-vbguest") then
     config.vbguest.auto_update = false
   end
-
-  env = JSON.parse(File.read('env.json'))
   
   (1..$num_instances).each do |i|
     vm_name = "coreos-%02d" % i
     mac_addr = false
-    if env['start-mac-addr']
-      mac_addr = env['start-mac-addr'].split(':')[0..4].join(':') << ':' << (env['start-mac-addr'].split(':')[-1].to_i + i - 1).to_s
+    if $env['start-mac-addr']
+      mac_addr = $env['start-mac-addr'].split(':')[0..4].join(':') << ':' << ($env['start-mac-addr'].split(':')[-1].to_i + i - 1).to_s
     end
     
     config.vm.define vm_name do |coreos|
 
-      coreos.vm.hostname = env['hostname']+'-'+vm_name
-
-      if env['interface']
-        coreos.vm.network :public_network, :bridge => env['interface']
+      coreos.vm.hostname = $env['hostname']+'-'+vm_name
+      
+      if $env['network'] == 'private'
+        coreos.vm_network :private_network
+      elsif $env['interface']
+        coreos.vm.network :public_network, bridge: $env['interface']
       else
         coreos.vm.network :public_network
       end
@@ -70,6 +63,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           v.vmx["ethernet1.addressType"] = "static"
           v.vmx["ethernet1.address"] = mac_addr
         end
+      end
+
+      coreos.vm.provider :vmware_fusion do |v|
+        v.gui = $vb_gui
+        v.vmx['memsize'] = $env['memory']
+        v.vmx['numvcpus'] = $env['cpus']
+      end
+
+      coreos.vm.provider :virtualbox do |v|
+        v.gui = $vb_gui
+        v.memory = $env['memory']
+        v.cpus = $env['cpus']
       end
 
       if $enable_serial_logging
@@ -92,27 +97,12 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
-      coreos.vm.provider :vmware_fusion do |v|
-        v.gui = $vb_gui
-        v.vmx["memsize"] = $vb_memory
-        v.vmx["numvcpus"] = $vb_cpus
-      end
-
-      coreos.vm.provider :virtualbox do |v|
-        v.gui = $vb_gui
-        v.memory = $vb_memory
-        v.cpus = $vb_cpus
-      end
-
-      coreos.vm.provision :shell, inline: "timedatectl set-timezone \""+env["timezone"]+"\""
-
-      # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
-      #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-
       if File.exist?(CLOUD_CONFIG_PATH)
         config.vm.provision :file, :source => CLOUD_CONFIG_PATH, :destination => '/tmp/vagrantfile-user-data'
         config.vm.provision :shell, :inline => 'mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/', :privileged => true
       end
+
+      coreos.vm.provision :shell, inline: 'timedatectl set-timezone "'+$env['timezone']+'"'
 
       if i == 1
         coreos.vm.synced_folder ".", "/workspace", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
