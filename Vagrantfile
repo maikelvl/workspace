@@ -2,10 +2,9 @@
 # vi: set ft=ruby :
 require 'json'
 
-# Vagrant.require_version ">= 1.6.0"
-VAGRANTFILE_API_VERSION = "2"
-CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), "user-data")
-CONFIG = File.join(File.dirname(__FILE__), "config.rb")
+Vagrant.require_version '>= 1.6.0'
+VAGRANTFILE_API_VERSION = '2'
+CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 
 # # Defaults for config options defined in CONFIG
 $num_instances = 1
@@ -111,8 +110,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
 
       if File.exist?(CLOUD_CONFIG_PATH)
-        config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"
-        config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
+        config.vm.provision :file, :source => CLOUD_CONFIG_PATH, :destination => '/tmp/vagrantfile-user-data'
+        config.vm.provision :shell, :inline => 'mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/', :privileged => true
       end
 
       if i == 1
