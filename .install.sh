@@ -87,7 +87,7 @@ set_up_workspace()
 	add_to_uninstaller "trash \"$WORKSPACE\""
 	cp -r "$WORKSPACE/config-boilerplate" "$WORKSPACE/config"
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):00:00:00:01"
-	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"memory\": 512,\n\t\"cpus\": 1,\n\t\"network\": \"public\",\n\t\"network-interface\": false,\n\t\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"memory\": 512,\n\t\"cpus\": 1,\n\t\"network\": \"private\",\n\t\"network-interface\": false,\n\t\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 
 	echo "-- Workspace end --"
 }
