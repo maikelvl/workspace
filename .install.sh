@@ -12,6 +12,8 @@ update_uninstaller=1
 
 start ()
 {
+	echo "Administrator privileges are required for some operations..."
+	sudo echo ""
 	uninstall_previous_workspace
 
 	if [ "$PROVIDER" == "" ]
@@ -64,7 +66,6 @@ uninstall_previous_workspace ()
 set_up_workspace()
 {
 	# Save hostname, username and timezone
-	echo "Reading your system's timezone. Administrator privileges will be required..."
 	timezone="$(sudo systemsetup -gettimezone)"
 	timezone="${timezone/Time Zone: /}"
 	hostname="$(hostname)"
@@ -226,16 +227,21 @@ install_vagrant ()
 		"" \
 		"$application_name"
 
+	command_location="$(which $command)"
 	if [ -d "$HOME/Applications" ]
 	then
-		command_location="$(which $command)"
 		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
 		sudo ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
 		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
-		add_to_uninstaller "trash \"$command_location\""
 	fi
 
+	sed -i "" "s/read my_answer/my_answer=\"Yes\"/" "$WORKSPACE/.system/uninstall-vagrant.sh"
+	sed -i "" "s/key_exit 0/#key_exit 0/" "$WORKSPACE/.system/uninstall-vagrant.sh"
+	add_to_uninstaller "$(awk 'FNR>1' $WORKSPACE/.system/uninstall-vagrant.sh)"
+	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
+
 	add_to_uninstaller "trash \"$HOME/.vagrant.d\""
+	add_to_uninstaller "trash \"$command_location\""
 }
 
 install_virtualbox ()
@@ -255,6 +261,11 @@ install_virtualbox ()
 		"Oracle_VM_VirtualBox_Extension_Pack-*.vbox-extpack" \
 		"" \
 		"VirtualBox Extension Pack"
+
+	sed -i "" "s/my_default_prompt=0/my_default_prompt=\"Yes\"/" "$WORKSPACE/.system/uninstall-virtualbox.sh"
+	sed -i "" "s/exit 0/#exit 0/" "$WORKSPACE/.system/uninstall-virtualbox.sh"
+	add_to_uninstaller "$(awk 'FNR>1' $WORKSPACE/.system/uninstall-virtualbox.sh)"
+	rm -rf "$WORKSPACE/.system/uninstall-virtualbox.sh"
 
 	add_to_uninstaller "trash \"$HOME/VirtualBox VMs\""
 	add_to_uninstaller "trash \"$HOME/Library/Preferences/org.virtualbox.app\""
@@ -312,6 +323,8 @@ install_vmware_fusion ()
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
 }
 
+# === Download and install scripts: ================================
+
 black="\e[0;30m"
 red="\e[0;31m"
 green="\e[0;32m"
@@ -341,8 +354,6 @@ error ()
 	echo "$1"
 	printf "$NC"
 }
-
-# === Download and install scripts: ================================
 
 download_and_install ()
 {
@@ -561,6 +572,12 @@ install()
 	if [ "$pkg" != "" ]
 	then
 		sudo installer -verboseR -pkg "$extraction_path/$pkg" -target /
+		uninstall_script="$(ls $extraction_path | grep .tool | head -1)"
+		if [ "$uninstall_script" != "" ]
+		then
+			sudo cp -f "$extraction_path/$uninstall_script" "$WORKSPACE/.system/uninstall-$volume_name.sh"
+			sudo chmod +x "$WORKSPACE/.system/uninstall-$volume_name.sh"
+		fi
 		app_path="$dest_application_path/$application_name"
 	elif [ "$app" != "" ]
 	then
