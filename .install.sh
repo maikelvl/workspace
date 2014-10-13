@@ -5,18 +5,27 @@ WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?
 VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
 SILENT_LEVEL=1 # 0 = none, 1 = only downloads, 2 = all requests
 DOWNLOADS_DIRECTORY="$HOME/Downloads"
-PROVIDER="${1:-virtualbox}"
+PROVIDER="$1"
 PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
 update_uninstaller=1
 
 start ()
 {
-	if [ "$PROVIDER" != "virtualbox" ] && [ "$PROVIDER" != "vmware-fusion" ]
+	if [ "$PROVIDER" == "" ]
+	then
+		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
+		then
+			PROVIDER="vmware-fusion"
+		else
+			PROVIDER="virtualbox"
+		fi
+	elif [ "$PROVIDER" != "virtualbox" ] && [ "$PROVIDER" != "vmware-fusion" ]
 	then
 		error "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
 		exit
 	fi
+
 	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
