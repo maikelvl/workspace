@@ -47,6 +47,8 @@ function start ()
 		install_vmware_fusion
 	fi
 	add_projects
+
+	
 }
 
 function uninstall_previous_workspace ()
@@ -342,23 +344,30 @@ NC="\e[0m"
 
 function info ()
 {
-	printf "$turquase"
-	echo "$1"
-	printf "$NC"
+    printf "$turquase"
+    echo "$1"
+    printf "$NC"
 }
 
 function success ()
 {
-	printf "$green"
-	echo "$1"
-	printf "$NC"
+    printf "$green"
+    echo "$1"
+    printf "$NC"
+}
+
+function warning ()
+{
+    printf "$orange"
+    echo "$1"
+    printf "$NC"
 }
 
 function error ()
 {
-	printf "$red"
-	echo "$1"
-	printf "$NC"
+    printf "$red"
+    echo "$1"
+    printf "$NC"
 }
 
 function download_and_install ()
