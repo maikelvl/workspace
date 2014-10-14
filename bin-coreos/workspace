@@ -90,6 +90,12 @@ image="$(get_env 'username')/workspace"
 workspace_base_dir="/workspace/base"
 base_image="crobays/workspace-base"
 
+if [ "$(cat /workspace/config/git.json)" == "$(cat /workspace/.config-boilerplate/git.json)" ]
+then
+    error "First set your Git credentials in ./config/git.json"
+    exit
+fi
+
 NAME_SUFFIX="$1"
 if [ ! "$NAME_SUFFIX" ]
 then
