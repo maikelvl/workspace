@@ -190,7 +190,7 @@ else
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --env "CONFIG_DIR=/workspace/config" \
-        --env "LOG=false" \
+        --env "LOG_LEVEL=1" \
         --interactive \
         --tty \
         "$image"

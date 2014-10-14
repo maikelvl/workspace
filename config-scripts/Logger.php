@@ -2,12 +2,13 @@
 
 class Logger {
 
-	static public function log($msg)
+	static public function log($msg, $level = 1)
 	{
-		if (array_key_exists('LOG', $_SERVER) && (strtolower($_SERVER['LOG']) == 'false' || ! $_SERVER['LOG']))
+		if($level > LOG_LEVEL)
 		{
 			return;
 		}
+
 		$microtime = strstr(microtime(true), '.');
 		$d = debug_backtrace();
 		$line = isset($d[0]['line']) ? $d[0]['line'].str_repeat(' ', 5-strlen($d[0]['line'])) : FALSE;

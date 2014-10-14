@@ -17,7 +17,7 @@ class GitService {
 		'user-keys' => '',
 	];
 	protected $postJson;
-	protected $existingKeys;
+	protected $existingKeys = NULL;
 
 	public function https($https)
 	{
@@ -33,6 +33,10 @@ class GitService {
 
 	public function user($user)
 	{
+		if (preg_match('/your-.*-here/i', $user))
+		{
+			return $this;
+		}
 		$this->user = $user;
 		return $this;
 	}
@@ -51,6 +55,10 @@ class GitService {
 
 	public function token($token)
 	{
+		if (preg_match('/your-.*-here/i', $token))
+		{
+			return $this;
+		}
 		$this->token = $token;
 		return $this;
 	}
@@ -76,7 +84,19 @@ class GitService {
 		$sendKey = TRUE;
 		$title = SSH_KEY_TITLE;
 
-		foreach($this->listKeys() as $key)
+		if ( ! $this->token)
+		{
+			Logger::log("Please set your ".get_called_class()." token.", 0);
+			return FALSE;
+		}
+
+		$existingKeys = $this->listKeys();
+		if ($existingKeys === FALSE)
+		{
+			return FALSE;
+		}
+
+		foreach($existingKeys as $key)
 		{
 			if ($key['title'] === $title)
 			{
@@ -89,7 +109,7 @@ class GitService {
 				}
 				else
 				{
-					Logger::log("Key ".$key['title']." already exists");
+					Logger::log("Key ".$key['title']." already exists", 1);
 				}
 				
 				break;
@@ -100,6 +120,8 @@ class GitService {
 		{
 			$this->sendSshKey($title, file_get_contents($identityfile.'.pub'));
 		}
+
+		return TRUE;
 	}
 
 	public function deleteDeletedWorkspaceSshKeys()
@@ -111,15 +133,15 @@ class GitService {
 		{
 			$hostnames[] = $c->Config->Hostname;
 		}
-
-		foreach ($this->listKeys() as $key)
+		
+		foreach ($this->listKeys() ?: array() as $key)
 		{
 			if ( ! SSH_KEY_BASE_TITLE || substr($key['title'], 0, strlen(SSH_KEY_BASE_TITLE)) != SSH_KEY_BASE_TITLE)
 			{
 				continue;
 			}
-
-			if( ! in_array($key['title'], $hostnames))
+			
+			if( ! in_array(substr(strstr($key['title'], '@'), 1), $hostnames))
 			{
 				$this->deleteSshKey($key['id'], $key['title']);
 			}
@@ -150,16 +172,22 @@ class GitService {
 
 	protected function listKeys($fresh = FALSE)
 	{
-		if ( ! $this->existingKeys || $fresh)
+		if ($this->existingKeys === NULL || $fresh)
 		{
-			$this->existingKeys = $this->api('user-keys')->get() ?: array();
+			$this->existingKeys = $this->api('user-keys')->get();
+			
+			if ( ! is_array($this->existingKeys) || ($this->existingKeys !== array() && ( ! is_array(current($this->existingKeys)) || ! array_key_exists('id', current($this->existingKeys)))))
+			{
+				Logger::log("Invalid ".get_called_class(). " credentials.", 0);
+				$this->existingKeys = FALSE;
+			}
 		}
 		return $this->existingKeys;
 	}
 
 	protected function sendSshKey($title, $key)
 	{
-		Logger::log("Sending key ".$title);
+		Logger::log("Sending key $title", 1);
 		return $this->api('user-keys')->data([
 			'title' => $title,
 			'key' => $key,
@@ -168,17 +196,12 @@ class GitService {
 
 	protected function deleteSshKey($id, $label = FALSE)
 	{
-		Logger::log("Delete key ".($label ? "$label ($id)" : $id));
+		Logger::log("Delete key ".($label ? "$label ($id)" : $id), 1);
 		return $this->api('user-keys', $id)->delete();
 	}
 
 	protected function api($apiUriType, $addition = FALSE)
 	{
-		if ( ! $this->token)
-		{
-			throw new Exception("Missing token in ".get_called_class()." service", 1);
-		}
-
 		if ( ! array_key_exists($apiUriType, $this->apiUris))
 		{
 			throw new Exception("Unsupported uri: $apiUriType in ".get_called_class()." service", 1);

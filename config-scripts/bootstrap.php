@@ -6,6 +6,12 @@ if ( ! array_key_exists('CONFIG_DIR', $_SERVER))
 	exit('Missing env variable CONFIG_DIR');
 }
 
+if( ! array_key_exists('LOG_LEVEL', $_SERVER))
+{
+	$_SERVER['LOG_LEVEL'] = 1;
+}
+
+define('LOG_LEVEL', strtoupper($_SERVER['LOG_LEVEL']) == 'FALSE' ? 0 : intval($_SERVER['LOG_LEVEL']));
 define('CONFIG_DIR', $_SERVER['CONFIG_DIR']);
 define('SSH_KEY_TITLE', $_SERVER['USER'].'@'.$_SERVER['HOSTNAME']);
 define('SSH_KEY_BASE_TITLE', strrev(strstr(strrev(SSH_KEY_TITLE), strrev('workspace-'))));
@@ -26,4 +32,4 @@ $git->setUser()
 	->addServices()
 	->writeIgnore(getenv('HOME')."/.config/git/ignore");
 
-Logger::log("end");
+Logger::log("end", 1);

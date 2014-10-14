@@ -2,19 +2,30 @@
 
 class Git {
 
+	public $config_file;
 	private $config;
 
 	public $logs = array();
 
 	public function __construct($config_file)
 	{
+		$this->config_file = $config_file;
 		$this->config = json_decode(file_get_contents($config_file), TRUE);
 	}
 
 	public function setUser()
 	{
+		if ( ! array_key_exists('user', $this->config))
+		{
+			throw new Exception("Please set your user credentials in ".$this->config_file, 1);
+		}
 		foreach ($this->config['user'] as $k => $v)
 		{
+			if ( ! $v || preg_match('/your-.*-here/i', $v))
+			{
+				Logger::log("Please set your $k in ".$this->config_file, 0);
+				continue;
+			}
 			$this->writeConfigItem('user.'.$k, $v);
 		}
 		return $this;
@@ -24,13 +35,17 @@ class Git {
 	{
 		if ( ! in_array($behavior, $options = ['matching', 'simple']))
 		{
-			throw new Exception("Unsupported push.default: $behavior. Available options:".implode(", ", $options), 1);
+			throw new Exception("Unsupported push.default: $behavior. Available options: ".implode(", ", $options), 1);
 		}
 		return $this->writeConfigItem('push.default', $behavior);
 	}
 	
 	public function writeIgnore($file)
 	{
+		if ( ! array_key_exists('global-ignore', $this->config))
+		{
+			return $this;
+		}
 		@mkdir(dirname($file), 0755, TRUE);
 		File::write($file, implode("\n", $this->config['global-ignore']));
 		return $this->writeConfigItem('core.excludesfile', $file);
@@ -52,7 +67,7 @@ class Git {
 		{
 			throw new Exception("Failed to write to git config", 1);
 		}
-		Logger::log("Set config $key = $value");
+		Logger::log("Set config $key = $value", 1);
 		return $this;
 	}
 
@@ -103,8 +118,11 @@ class Git {
 			$service->apiVersion($config['api-version']);
 		}
 		
-		$service->addSsh();
-		$service->deleteDeletedWorkspaceSshKeys();
+		if ($service->addSsh())
+		{
+			$service->deleteDeletedWorkspaceSshKeys();
+		}
+		
 		return $this;
 	}
 }
