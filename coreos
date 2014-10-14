@@ -116,8 +116,26 @@ if [ "$provider" == "vmware-fusion" ] && [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.
 then
 	if [ ! -f "$WORKSPACE/config/"*.lic ]
 	then
-		warning "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
-		exit
+		info "Please enter the path to your Vagrant VMWare Fusion License file:"
+		read vagrant_vmware_fusion_license
+		if [ "$vagrant_vmware_fusion_license" == "" ]
+		then
+			exit
+		fi
+		
+		if [ "${vagrant_vmware_fusion_license:$(expr ${#vagrant_vmware_fusion_license} - 4):4}" != '.lic' ]
+		then
+			vagrant_vmware_fusion_license="$vagrant_vmware_fusion_license/"*.lic
+		fi
+		
+		scp "$vagrant_vmware_fusion_license" "$WORKSPACE/config/"
+
+		if [ ! -f "$WORKSPACE/config/"*.lic ]
+		then
+			error "No license file found."
+			exit
+		fi
+		success 'License file found'
 	fi
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
