@@ -12,6 +12,20 @@ update_uninstaller=1
 
 function start ()
 {
+	if [ "$PROVIDER" == "" ]
+	then
+		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
+		then
+			PROVIDER="vmware-fusion"
+		else
+			PROVIDER="virtualbox"
+		fi
+	elif [ "$PROVIDER" != "virtualbox" ] && [ "$PROVIDER" != "vmware-fusion" ]
+	then
+		warning "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
+		exit
+	fi
+
 	echo "Administrator privileges are required for some operations..."
 	sudo echo ""
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
@@ -28,22 +42,7 @@ function start ()
 	else
 		info "Installing new Workspace..."
 	fi
-	
-	if [ "$PROVIDER" == "" ]
-	then
-		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
-		then
-			PROVIDER="vmware-fusion"
-		else
-			PROVIDER="virtualbox"
-		fi
-	elif [ "$PROVIDER" != "virtualbox" ] && [ "$PROVIDER" != "vmware-fusion" ]
-	then
-		error "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
-		exit
-	fi
 
-	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
 	set_up_config
