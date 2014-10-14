@@ -9,12 +9,12 @@ The usual development machine has all kinds of software installed on the main op
 ## Workspace installation
 To run Vagrant we need virtual machine software. A free and good option is to use VirtualBox. For performance reasons, you may want to choose VMWare Fusion, however it requires a license for VMWare Fusion itself and the Vagrant VMWare provider.
 
-### VirtualBox
+#### VirtualBox
 To install your workspace just run the following in your terminal:
 
 	curl -L workspace-install.userx.nl | bash -s virtualbox ~/workspace
 
-### VMWare Fusion
+#### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
 	 curl -L workspace-install.userx.nl | bash -s vmware-fusion ~/workspace
@@ -26,15 +26,16 @@ During installation we need administrator privileges for the following:
 - Installation of VirtualBox or VMWare Fusion
 
 ## Using your Workspace
-The first thing to do after installation is to edit the ./env.json file. This file contains machine specific options which you can edit with your own needs and is not version controlled.
-
-Supply your GitHub or/and GitLab credentials in ./config/git.json so the workspace can configure itself.
+Next steps:
+1. Edit ./env.json to match your needs (contains machine specific options which you can edit with your own needs and is not version controlled)
+2. Setup Git in ./config/git.json (the Workspace configures itself using the git.json file)
+3. VMWare Fusion only) Place your Vagrant VMWare Fusion license file in ./config.
 
 #### VirtualBox
 The first time you run your workspace with VirtualBox you will be asked to install VirtualBox’ Extension Pack, which is already downloaded during installation.
 
 #### VMWare Fusion
-Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
+Make sure you have copied your Vagrant VMWare Fusion license in the ./config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
 
 ### Run it, get coffee
 Now, lets run your brand new Workspace by running:
@@ -51,7 +52,7 @@ You might take a cup of coffee because this very first run will do the following
 
 Now you will see your workspace which is configured as you wish.
 
-## Install extra software
+### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
 
 	workspace -B
