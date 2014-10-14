@@ -162,8 +162,8 @@ then
 	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/.upstream-workspace-repo" ]
 	then
 		git clone "$(cat /workspace/.system/.upstream-workspace-repo)" "/workspace/.workspace-git"
-		mv "/workspace/.workspace-git/.git" "/workspace/.git"
-		rm -rf "/workspace/.workspace-git"
+		mv -f /workspace/.workspace-git/* /workspace
+		rmdir "/workspace/.workspace-git"
 		rm "/workspace/.system/.upstream-workspace-repo"
 	fi
 
