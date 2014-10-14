@@ -33,7 +33,7 @@ class Curl {
 		return $this;
 	}
 
-	public function data($data, $is_json = FALSE)
+	public function data($data, $is_json = TRUE)
 	{
 		if ($is_json)
 		{
