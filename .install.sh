@@ -47,8 +47,15 @@ function start ()
 		install_vmware_fusion
 	fi
 	add_projects
-
 	
+	success "Your Workspace is installed successfully!"
+	info "Next steps:"
+	info "1. Edit ./env.json to match your needs"
+	info "2. Setup Git in ./config/git.json"
+	if [ "$PROVIDER" == "vmware-fusion" ]
+	then
+		info "3. Place your Vagrant VMWare Fusion license file in ./config"
+	fi
 }
 
 function uninstall_previous_workspace ()
@@ -284,6 +291,12 @@ function install_virtualbox ()
 	add_to_uninstaller "trash \"/Library/Python/2.6/site-packages/vboxapi-1.0-py2.6.egg-info\""
 	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi\""
 	add_to_uninstaller "trash \"/Library/Python/2.7/site-packages/vboxapi-1.0-py2.7.egg-info\""
+
+	if [ ! -d "/Applications/VirtualBox.app" ]
+	then
+		error "Something went wrong installing VirtualBox"
+		exit
+	fi
 }
 
 function install_vmware_fusion ()
@@ -328,6 +341,11 @@ function install_vmware_fusion ()
 	add_to_uninstaller "trash \"$HOME/Library/Logs/VMWare Fusion\""
 
 	echo "-- $application_name end --"
+	if [ ! -d "/Applications/VMWare Fusion.app" ] && [ ! -d "$HOME/Applications/VMWare Fusion.app" ]
+	then
+		error "Something went wrong installing VMWare Fusion"
+		exit
+	fi
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
 }
 
