@@ -123,7 +123,7 @@ then
 	then
 		if [ $LOG ]
 		then
-		    info "Cloning $repo ..."
+		    info "Cloning $OH_MY_ZSH_GIT ..."
 		fi
 		su "$USERNAME" --command "git clone $OH_MY_ZSH_GIT $CONFIG_DIR/oh-my-zsh"
 	fi
