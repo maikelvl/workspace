@@ -1,18 +1,18 @@
 {
 	"user": {
-		"name": "your-username-here",
+		"name": "your-name-here",
 		"email": "your-email-here"
 	},
 	"services": {
 		"github": {
-		    "token": "your-token-here"
+		    "token": "your-github-token-here"
 		},
 		"gitlab": {
 		    "https": true,
 		    "domain": "gitlab.com",
 		    "port": 22,
 		    "api-version": "v3",
-		    "token": "your-token-here",
+		    "token": "your-gitlab-token-here",
 		    "upstream": true
 		}
 	},

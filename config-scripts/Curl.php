@@ -123,7 +123,7 @@ class Curl {
 	   	$curl_options[CURLOPT_USERAGENT] = gethostname();
 	    // Send request and wait for response
 	    $handle = curl_init();
-	    Logger::log($curl_options[CURLOPT_CUSTOMREQUEST].' '.$curl_options[CURLOPT_URL]);
+	    Logger::log($curl_options[CURLOPT_CUSTOMREQUEST].' '.$curl_options[CURLOPT_URL], 2);
 	    curl_setopt_array($handle, $curl_options);
 	    $res = curl_exec($handle);
 
@@ -133,10 +133,10 @@ class Curl {
 	    }
 
 	    curl_close($handle);
-
-	    if ($json = json_decode($res, TRUE))
+	   	
+	    if (($json = json_decode($res, TRUE)) !== NULL)
 	    {
-	    	Logger::log("RES ".str_replace("\n", '',$res));
+	    	Logger::log("RES ".str_replace("\n", '',$res), 2);
 	    	$res = $json;
 	    }
 
