@@ -2,6 +2,43 @@
 DOWNLOADS_DIRECTORY="/downloads"
 SILENT="no"
 
+black="\e[0;30m"
+red="\e[0;31m"
+green="\e[0;32m"
+orange="\e[0;33m"
+blue="\e[0;34m"
+purple="\e[0;35m"
+turquase="\e[0;36m"
+NC="\e[0m"
+
+function info ()
+{
+    printf "$turquase"
+    echo "$1"
+    printf "$NC"
+}
+
+function success ()
+{
+    printf "$green"
+    echo "$1"
+    printf "$NC"
+}
+
+function warning ()
+{
+    printf "$orange"
+    echo "$1"
+    printf "$NC"
+}
+
+function error ()
+{
+    printf "$red"
+    echo "$1"
+    printf "$NC"
+}
+
 # === Download and install scripts: ================================
 
 download_and_install ()

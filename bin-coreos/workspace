@@ -73,6 +73,13 @@ function success ()
     printf "$NC"
 }
 
+function warning ()
+{
+    printf "$orange"
+    echo "$1"
+    printf "$NC"
+}
+
 function error ()
 {
     printf "$red"
@@ -92,7 +99,7 @@ base_image="crobays/workspace-base"
 
 if [ "$(cat /workspace/config/git.json)" == "$(cat /workspace/.config-boilerplate/git.json)" ]
 then
-    error "First set your Git credentials in ./config/git.json"
+    warning "First set your Git credentials in ./config/git.json"
     exit
 fi
 
