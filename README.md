@@ -37,7 +37,8 @@ The first time you run your workspace with VirtualBox you will be asked to insta
 Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
 
 ### Run it, get coffee
-Now, lets run your brand new Workspace by executing `workspace`.
+Now, lets run your brand new Workspace by executing
+	workspace
 
 You might take a cup of coffee because this very first run will do the following:
 - Download the latest CoreOS Beta release
