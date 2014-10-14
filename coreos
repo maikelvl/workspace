@@ -112,6 +112,30 @@ function get_env()
 provider="$(get_env 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
 
+if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+then
+	info "Please enter the path to your Gig config file:"
+    read git_config_file
+    if [ "$git_config_file" != "" ]
+	then
+		if [ "${git_config_file:$(expr ${#git_config_file} - 5):5}" != '.json' ]
+		then
+			git_config_file="$git_config_file/git.json"
+		fi
+		
+		scp "$git_config_file" "$WORKSPACE/config/git.json"
+
+		if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+		then
+			error "No Git config file found."
+			exit
+		fi
+		success 'Git config file found!'
+	else
+		info "Skipping Git config"
+	fi
+fi
+
 if [ "$provider" == "vmware-fusion" ] && [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
 then
 	if [ ! -f "$WORKSPACE/config/"*.lic ]
@@ -135,7 +159,7 @@ then
 			error "No license file found."
 			exit
 		fi
-		success 'License file found'
+		success 'License file found!'
 	fi
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
