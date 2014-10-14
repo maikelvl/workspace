@@ -152,12 +152,12 @@ then
 		su "$USERNAME" --command "$SCRIPTS/bootstrap.php"
 	fi
 
-	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.upstream-workspace-repo" ]
+	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/.upstream-workspace-repo" ]
 	then
-		git clone "$(cat /workspace/.upstream-workspace-repo)" "/workspace/.workspace-git"
+		git clone "$(cat /workspace/.system/.upstream-workspace-repo)" "/workspace/.workspace-git"
 		mv "/workspace/.workspace-git/.git" "/workspace/.git"
-		rm "/workspace/.workspace-git"
-		rm "/workspace/.upstream-workspace-repo"
+		rm -rf "/workspace/.workspace-git"
+		rm "/workspace/.system/.upstream-workspace-repo"
 	fi
 
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
