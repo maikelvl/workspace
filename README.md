@@ -37,7 +37,7 @@ The first time you run your workspace with VirtualBox you will be asked to insta
 Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
 
 ### Run it, get coffee
-Now, lets run your brand new Workspace by executing
+Now, lets run your brand new Workspace by running:
 	
 	workspace
 
@@ -52,7 +52,9 @@ You might take a cup of coffee because this very first run will do the following
 Now you will see your workspace which is configured as you wish.
 
 ## Install extra software
-If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run `workspace -B` in your Mac terminal.
+If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
+
+	workspace -B
 
 ## Uninstall Workspace
 Just trash your Workspace directory and delete the aliases from ~/.bash_profile
