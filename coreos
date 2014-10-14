@@ -81,6 +81,13 @@ function success ()
 	printf "$NC"
 }
 
+function warning ()
+{
+    printf "$orange"
+    echo "$1"
+    printf "$NC"
+}
+
 function error ()
 {
 	printf "$red"

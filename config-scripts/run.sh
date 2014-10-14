@@ -23,6 +23,13 @@ function success()
     printf "$NC"
 }
 
+function warning ()
+{
+    printf "$orange"
+    echo "$1"
+    printf "$NC"
+}
+
 function error()
 {
     printf "$RED"
@@ -44,7 +51,7 @@ function get_env()
 # If this script is for accidently running in run.sh in CoreOS or OSX
 if [ ! -d "/workspace" ] || [ -d "/etc/coreos" ]
 then
-	error "This script is meant to be running in the Docker workspace (which happens when running the container). Enter 'workspace' to enter it."
+	warning "This script is meant to be running in the Docker workspace (which happens when running the container). Enter 'workspace' to enter it."
 	exit
 fi
 
