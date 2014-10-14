@@ -241,7 +241,7 @@ function install_vagrant ()
 	sed -i "" "s/key_exit 0/#key_exit 0/" "$WORKSPACE/.system/uninstall-vagrant.sh"
 	add_to_uninstaller "$(awk 'FNR>1' $WORKSPACE/.system/uninstall-vagrant.sh)"
 	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
-
+	add_to_uninstaller "echo \"Continue uninstalling...\""
 	add_to_uninstaller "trash \"$HOME/.vagrant.d\""
 	add_to_uninstaller "trash \"$command_location\""
 }
