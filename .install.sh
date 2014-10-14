@@ -35,7 +35,7 @@ function start ()
 	add_shell_profile_to_bash_profile
 	set_up_config
 	set_up_projects
-	
+
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
@@ -136,45 +136,6 @@ function set_up_config()
 	fi
 }
 
-function add_projects ()
-{
-	echo "-- Projects start --"
-
-	mkdir -p "$WORKSPACE/projects" && success "Added projects directory"
-
-	echo "-- Projects end --"
-}
-
-function add_to_uninstaller ()
-{
-	if [ $update_uninstaller ]
-	then
-		if [ "$1" != "" ]
-		then
-			addition="$1"
-		else
-			addition=""
-			while read -r line
-			do
-				addition="$addition$line\n"
-			done
-		fi
-		uninstaller_script="$WORKSPACE/.system/uninstall.sh"
-		mkdir -p "$(dirname "$uninstaller_script")"
-		if [ ! -f "$uninstaller_script" ]
-		then
-			echo -e "#!/bin/bash\ntrash() {\n\tif [ -f \"\$1\" ] || [ -d \"\$1\" ]\n\tthen\n\t\tsudo mv -f \"\$1\" \"\$HOME/.Trash/\$(basename \"\$1\")-\$(date +\"%y-%m-%d_%H;%M;%S\").bak\"\n\t\tsleep 2\n\tfi\n}\n" > "$uninstaller_script"
-			chmod +x "$uninstaller_script"
-		fi
-		
-		uninstaller="$(cat "$uninstaller_script")"
-		if [ "${uninstaller//$addition/}" == "$uninstaller" ]
-		then
-			echo -e "${addition//$HOME/\$HOME}\n" >> "$uninstaller_script"
-		fi
-	fi
-}
-
 function add_shell_profile_to_bash_profile ()
 {
 	# Add coreos alias to bash_profile file
@@ -245,6 +206,15 @@ EOF
 	fi
 
 	source "$bash_profile_file"
+}
+
+function add_projects ()
+{
+	echo "-- Projects start --"
+
+	mkdir -p "$WORKSPACE/projects" && success "Added projects directory"
+
+	echo "-- Projects end --"
 }
 
 function install_vagrant ()
@@ -364,6 +334,36 @@ function install_vmware_fusion ()
 		exit
 	fi
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
+}
+
+function add_to_uninstaller ()
+{
+	if [ $update_uninstaller ]
+	then
+		if [ "$1" != "" ]
+		then
+			addition="$1"
+		else
+			addition=""
+			while read -r line
+			do
+				addition="$addition$line\n"
+			done
+		fi
+		uninstaller_script="$WORKSPACE/.system/uninstall.sh"
+		mkdir -p "$(dirname "$uninstaller_script")"
+		if [ ! -f "$uninstaller_script" ]
+		then
+			echo -e "#!/bin/bash\ntrash() {\n\tif [ -f \"\$1\" ] || [ -d \"\$1\" ]\n\tthen\n\t\tsudo mv -f \"\$1\" \"\$HOME/.Trash/\$(basename \"\$1\")-\$(date +\"%y-%m-%d_%H;%M;%S\").bak\"\n\t\tsleep 2\n\tfi\n}\n" > "$uninstaller_script"
+			chmod +x "$uninstaller_script"
+		fi
+		
+		uninstaller="$(cat "$uninstaller_script")"
+		if [ "${uninstaller//$addition/}" == "$uninstaller" ]
+		then
+			echo -e "${addition//$HOME/\$HOME}\n" >> "$uninstaller_script"
+		fi
+	fi
 }
 
 # === Download and install scripts: ================================
