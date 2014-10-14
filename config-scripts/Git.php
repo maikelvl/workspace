@@ -11,6 +11,11 @@ class Git {
 	{
 		$this->config_file = $config_file;
 		$this->config = json_decode(file_get_contents($config_file), TRUE);
+		if ($this->config === NULL)
+		{
+			Logger::log("There is an syntax error in your $config_file", 0);
+			exit;
+		}
 	}
 
 	public function setUser()
@@ -105,8 +110,8 @@ class Git {
 		{
 			$service->port($config['port']);
 		}
-
-		$service->shortName(array_key_exists('short-name', $config) ? $config['short-name'] : $host);
+		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $host;
+		$service->shortName($shortName);
 
 		if (array_key_exists('token', $config))
 		{
@@ -121,6 +126,29 @@ class Git {
 		if ($service->addSsh())
 		{
 			$service->deleteDeletedWorkspaceSshKeys();
+		}
+
+		if( ! is_dir(CONFIG_DIR.'/.git') && array_key_exists('config-repo', $config))
+		{
+			$repo_name = $service->getServiceUsername().'/'.$config['config-repo'];
+			
+			if (array_search($repo_name, $service->getRepositories()) === FALSE)
+			{
+				return $this;
+			}
+
+			$config_repo = $shortName.':'.$repo_name.'.git';
+			$tmp_config_git_dir = CONFIG_DIR.'-git';
+			exec('git clone '.$config_repo.' '.$tmp_config_git_dir, $res);
+			if (is_dir($tmp_config_git_dir))
+			{
+				 foreach(directory_map($tmp_config_git_dir, 1, TRUE) as $item)
+				 {
+				 	rename($tmp_config_git_dir.'/'.$item, CONFIG_DIR.'/'.$item);
+				 }
+			}
+			rmdir($tmp_config_git_dir);
+			Logger::log("Cloned config repo $repo_name from $host", 1);
 		}
 		
 		return $this;

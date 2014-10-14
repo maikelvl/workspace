@@ -18,6 +18,8 @@ class GitService {
 	];
 	protected $postJson;
 	protected $existingKeys = NULL;
+	protected $serviceUser = NULL;
+	protected $repositories = NULL;
 
 	public function https($https)
 	{
@@ -146,6 +148,36 @@ class GitService {
 				$this->deleteSshKey($key['id'], $key['title']);
 			}
 		}
+	}
+
+	public function getServiceUser()
+	{
+		if ($this->serviceUser === NULL)
+		{
+			$this->serviceUser = $this->api('user')->get();
+		}
+		return $this->serviceUser;
+	}
+
+	public function getServiceUsername()
+	{
+		$user = $this->getServiceUser();
+
+		if ( ! array_key_exists('username', $user))
+		{
+			throw new Exception("Could not get user from ".get_called_class(), 1);
+		}
+
+		return $user['username'];
+	}
+
+	public function getRepositories()
+	{
+		if ($this->repositories === NULL)
+		{
+			$this->repositories = $this->api('repositories')->get();
+		}
+		return $this->repositories;
 	}
 
 	protected function getProtocol()
