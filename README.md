@@ -38,6 +38,7 @@ Before you run the workspace, you have to place your Vagrant VMWare license in t
 
 ### Run it, get coffee
 Now, lets run your brand new Workspace by executing
+	
 	workspace
 
 You might take a cup of coffee because this very first run will do the following:
