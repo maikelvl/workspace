@@ -135,14 +135,14 @@ then
 	fi
 	
 	open "$vmware_app"
-	success "Execute again after you activated VMWare Fusion"
+	success "Please run 'workspace' again if the VMWare Fusion is activated"
 	exit
 elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
 	if [ ! -f "$WORKSPACE/.system/extpack-installed" ]
 	then
 		open "$WORKSPACE/.system/"*.vbox-extpack
-		echo "If the Extension Pack has been installed, please run again."
+		echo "Please run 'workspace' again if the Extension Pack has been installed"
 		touch "$WORKSPACE/.system/extpack-installed"
 		exit
 	else
