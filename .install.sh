@@ -33,7 +33,9 @@ function start ()
 	success 'Installation Started'
 	set_up_workspace
 	add_shell_profile_to_bash_profile
-
+	set_up_config
+	set_up_projects
+	
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
@@ -46,16 +48,18 @@ function start ()
 	then
 		install_vmware_fusion
 	fi
-	add_projects
 	
 	success "Your Workspace is installed successfully!"
 	info "Next steps:"
-	info "1. Edit ./env.json to match your needs"
-	info "2. Setup Git in ./config/git.json"
+	info "1. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
+	info "2. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
 	if [ "$PROVIDER" == "vmware-fusion" ]
 	then
-		info "3. Place your Vagrant VMWare Fusion license file in ./config"
+		info "3. Place your Vagrant VMWare Fusion license file in  ${WORKSPACE/$HOME/~}/config"
 	fi
+	sleep 2
+	open --background "$WORKSPACE/env.json"
+	open --background "$WORKSPACE/config/git.json"
 }
 
 function uninstall_previous_workspace ()
@@ -112,11 +116,24 @@ function set_up_workspace()
 	repo_part_4="${repo_part_3#*/}"
 	echo "${WORKSPACE_REPO2%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git" > "$WORKSPACE/.system/.upstream-workspace-repo"
 	add_to_uninstaller "trash \"$WORKSPACE\""
-	cp -r "$WORKSPACE/.config-boilerplate" "$WORKSPACE/config"
-	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):00:00:01:01"
-	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"memory\": 512,\n\t\"cpus\": 1,\n\t\"network\": \"private\",\n\t\"network-interface\": false,\n\t\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+
+	generate_environment_file
 
 	echo "-- Workspace end --"
+}
+
+function generate_environment_file()
+{
+	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):00:00:01:01"
+	echo -e "{\n\t\"username\": \"$USER\",\n\t\"hostname\": \"${hostname%.*}\",\n\t\"timezone\": \"$timezone\",\n\t\"provider\": \"$PROVIDER\",\n\t\"memory\": 512,\n\t\"cpus\": 1,\n\t\"network\": \"private\",\n\t\"network-interface\": false,\n\t\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+}
+
+function set_up_config()
+{
+	if [ ! -d "$WORKSPACE/config" ]
+	then
+		cp -r "$WORKSPACE/.config-boilerplate" "$WORKSPACE/config"
+	fi
 }
 
 function add_projects ()
@@ -355,7 +372,7 @@ black="\e[0;30m"
 red="\e[0;31m"
 green="\e[0;32m"
 orange="\e[0;33m"
-blue="\e[0;34m"
+blue="\e[1;34m"
 purple="\e[0;35m"
 turquase="\e[0;36m"
 NC="\e[0m"
@@ -364,6 +381,18 @@ function info ()
 {
     printf "$turquase"
     echo "$1"
+    printf "$NC"
+}
+
+function ask ()
+{
+    printf "$blue"
+    if [ "$1" == "-n" ]
+    then
+    	echo -n "$2"
+	else
+		echo "$1"
+	fi
     printf "$NC"
 }
 
