@@ -14,8 +14,21 @@ function start ()
 {
 	echo "Administrator privileges are required for some operations..."
 	sudo echo ""
-	uninstall_previous_workspace
-
+	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
+	then
+		uninstall_previous_workspace
+		success "Workspace completely uninstalled."
+		sec=10
+		while [ $sec -ge 0 ]; do
+		        echo -ne "Installing new Workspace in $sec seconds...\033[0K\r"
+		        sec=$((sec-1))
+		        sleep 1
+		done
+		echo ""
+	else
+		info "Installing new Workspace..."
+	fi
+	
 	if [ "$PROVIDER" == "" ]
 	then
 		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
@@ -64,14 +77,9 @@ function start ()
 
 function uninstall_previous_workspace ()
 {
-	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
-	then
-		info "Found uninstaller... Trashing old workspace files..."
-		sudo bash "$WORKSPACE/.system/uninstall.sh"
-		success "Old Workspace successfully uninstalled"
-		sleep 5
-		info "Installing new Workspace..."
-	fi
+	info "Found uninstaller... Trashing old workspace files..."
+	sudo bash "$WORKSPACE/.system/uninstall.sh"
+	success "Old Workspace successfully uninstalled"
 }
 
 # --- ask workspace directory ---------------------------------------------------
