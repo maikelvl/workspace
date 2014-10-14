@@ -20,7 +20,7 @@ function start ()
 		success "Workspace completely uninstalled."
 		sec=10
 		while [ $sec -ge 0 ]; do
-		        echo -ne "Installing new Workspace in $sec seconds...\033[0K\r"
+		        echo -ne "Installing new Workspace in $sec...\033[0K\r"
 		        sec=$((sec-1))
 		        sleep 1
 		done
