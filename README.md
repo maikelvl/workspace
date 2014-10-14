@@ -16,16 +16,13 @@ To install your workspace just run the following in your terminal:
 ### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
-	 curl -L workspace-install.userx.nl | bash -s *vmware-fusion*
+	 curl -L workspace-install.userx.nl | bash -s vmware-fusion
 
 #### Customized location:
 The default workspace location is ~/workspace. You can customize this by providing a second argument:
 
-	curl -L workspace-install.userx.nl | bash -s virtualbox **/your/directory**
-
-or
-
-	curl -L workspace-install.userx.nl | bash -s **vmware-fusion /your/directory**
+	curl -L workspace-install.userx.nl | bash -s virtualbox /your/directory
+	curl -L workspace-install.userx.nl | bash -s vmware-fusion /your/directory
 
 During installation we need administrator privileges for the following:
 - Get your system’s timezone (your workspace will inherit this timezone)
