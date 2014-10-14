@@ -116,7 +116,7 @@ if [ "$provider" == "vmware-fusion" ] && [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.
 then
 	if [ ! -f "$WORKSPACE/config/"*.lic ]
 	then
-		error "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
+		warning "Please copy your Vagrant VMWare Fusion License to ${WORKSPACE/$HOME/~}/config/"
 		exit
 	fi
 	vagrant plugin install vagrant-vmware-fusion
