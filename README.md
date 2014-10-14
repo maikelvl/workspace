@@ -16,9 +16,9 @@ To install your workspace just run the following in your terminal:
 ### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
-	 curl -L workspace-install.userx.nl | bash -s **vmware-fusion**
+	 curl -L workspace-install.userx.nl | bash -s *vmware-fusion*
 
-### Customized location:
+#### Customized location:
 The default workspace location is ~/workspace. You can customize this by providing a second argument:
 
 	curl -L workspace-install.userx.nl | bash -s virtualbox **/your/directory**
@@ -33,14 +33,14 @@ During installation we need administrator privileges for the following:
 - Installation of VirtualBox or VMWare Fusion
 
 ## Using your Workspace
-The first thing to do after installation is to control the ./env.json file. This file contains machine specific options which you can edit with your own needs and is not version controlled.
+The first thing to do after installation is to edit the ./env.json file. This file contains machine specific options which you can edit with your own needs and is not version controlled.
 
 Supply your GitHub or/and GitLab credentials in ./config/git.json so the workspace can configure itself.
 
-### VirtualBox
+#### VirtualBox
 The first time you run your workspace with VirtualBox you will be asked to install VirtualBox’ Extension Pack, which is already downloaded during installation.
 
-### VMWare Fusion
+#### VMWare Fusion
 Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it.
 
 ### Run it, get coffee
@@ -63,5 +63,3 @@ If you’ve got your own software you wish to have in your workspace, just add s
 Just trash your Workspace directory and delete the aliases from ~/.bash_profile
 
 To completely uninstall all installed software run ./.system/uninstall.sh. This will move the Workspace directory, Vagrant, VirtualBox and VMWare to the trash.
-
-##
