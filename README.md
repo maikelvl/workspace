@@ -7,6 +7,7 @@ It’s a consistent development environment for all your Macs using Vagrant, Cor
 The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace get you up and running by leveraging Vagrant. Combined with CoreOS and Docker this gives you a workspace which is configurable in code.
 
 ## Workspace installation
+To run Vagrant we need virtual machine software. A free and good option is to use VirtualBox. For performance reasons, you may want to choose VMWare Fusion, however it requires a license for VMWare Fusion itself and the Vagrant VMWare provider.
 
 ### VirtualBox
 To install your workspace just run the following in your terminal:
@@ -18,9 +19,7 @@ To install with VMWare Fusion run the following instead:
 
 	 curl -L workspace-install.userx.nl | bash -s vmware-fusion ~/workspace
 
-—
-
-#### Sudo
+#### Administrator privileges
 During installation we need administrator privileges for the following:
 - Get your system’s timezone (your workspace will inherit this timezone)
 - Installation of the Vagrant package
@@ -35,7 +34,7 @@ Supply your GitHub or/and GitLab credentials in ./config/git.json so the workspa
 The first time you run your workspace with VirtualBox you will be asked to install VirtualBox’ Extension Pack, which is already downloaded during installation.
 
 #### VMWare Fusion
-Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it.
+Before you run the workspace, you have to place your Vagrant VMWare license in the config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
 
 ### Run it, get coffee
 Now, lets run your brand new Workspace by executing `workspace`.
