@@ -142,26 +142,9 @@ class Git {
 			exec('git clone '.$config_repo.' '.$tmp_config_git_dir, $res);
 			if (is_dir($tmp_config_git_dir))
 			{
-				 rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
-				 exec('git reset --hard --git-dir '.CONFIG_DIR.'/.git');
-
-				$objects = scandir($tmp_config_git_dir);
-				foreach ($objects as $object)
-				{
-					if ($object != "." && $object != "..")
-					{
-						if (filetype($tmp_config_git_dir."/".$object) == "dir")
-						{
-							rrmdir($tmp_config_git_dir."/".$object);
-						}
-						else
-						{
-							unlink($tmp_config_git_dir."/".$object);
-						}
-					}
-				}
-				reset($objects);
-				rmdir($tmp_config_git_dir);
+				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
+				exec('git reset --hard --git-dir '.CONFIG_DIR.'/.git');
+				rrmdir($tmp_config_git_dir)
 			}
 			Logger::log("Cloned config repo $repo_name from $host", 1);
 		}
