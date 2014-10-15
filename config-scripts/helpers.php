@@ -119,9 +119,6 @@ function rrmdir($dir)
 {
     if (is_dir($dir))
     {
-         rename($dir.'/.git', CONFIG_DIR.'/.git');
-         exec('git reset --hard --git-dir '.CONFIG_DIR.'/.git');
-
         $objects = scandir($dir);
         foreach ($objects as $object)
         {
