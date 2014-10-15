@@ -63,12 +63,16 @@ function start ()
 	
 	success "Workspace installed successfully!"
 	info "Next steps:"
-	info "1. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
-	info "2. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
+	info "1. Run 'source ~/.bash_profile' to access your new aliases."
+	info "2. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
+	info "3. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
+	last_step="4"
 	if [ "$PROVIDER" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ]
 	then
-		info "3. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config"
+		info "4. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config"
+		last_step="5"
 	fi
+	info "$last_step. Run 'workspace' and get coffee to let the installation proceed. (you may have to enter your password during booting of CoreOS)"
 	sleep 2
 	open --background "$WORKSPACE/env.json"
 	open --background "$WORKSPACE/config/git.json"
