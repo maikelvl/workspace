@@ -169,6 +169,5 @@ then
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
 fi
 
-success "$USERNAME @ $(hostname)"
 cd "/workspace"
 su "$USERNAME"
