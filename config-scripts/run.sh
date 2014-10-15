@@ -93,9 +93,7 @@ then
 		cp --recursive --no-clobber "$HOME/$i" "$userhome/"
 	done
 	chown --recursive "$USERNAME:$USERNAME" "$userhome"
-
-	ln --symbolic --force "/workspace/bin-workspace" "$userhome/bin"
-
+	
 	# Set password same as username
 	echo "$USERNAME:$USERNAME" | chpasswd
 
