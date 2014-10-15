@@ -144,7 +144,7 @@ class Git {
 			{
 				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
 				exec('git reset --hard --git-dir '.CONFIG_DIR.'/.git');
-				rrmdir($tmp_config_git_dir)
+				rrmdir($tmp_config_git_dir);
 			}
 			Logger::log("Cloned config repo $repo_name from $host", 1);
 		}
