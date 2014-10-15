@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = '2'
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 
 # # Defaults for config options defined in CONFIG
-$env = JSON.parse(File.read('env.json'))
+$env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
 $num_instances = 3
 $update_channel = 'beta'
 $enable_serial_logging = false
