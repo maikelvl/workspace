@@ -134,6 +134,7 @@ class Git {
 			
 			if (array_search($repo_name, $service->getRepositories()) === FALSE)
 			{
+				Logger::log("No config repo $repo_name found on $host", 1);
 				return $this;
 			}
 
