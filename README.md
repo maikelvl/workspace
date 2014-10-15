@@ -1,10 +1,10 @@
-# A rapid Workspace for rapid developers
+# A rapid Workspace for rapid Developers
 
 ### What’s this?
 A consistent development environment for all your Macs using Vagrant, CoreOS and Docker.
 
 ### Why this project?
-The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace get you up and running by leveraging Vagrant. Combined with CoreOS and Docker this gives you a workspace which is configurable in code.
+The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace get you up and running by leveraging Vagrant. Combined with CoreOS and Docker this gives you a workspace which is configurable in code, and therefore consistent.
 
 ## Workspace installation
 To run Vagrant we need virtual machine software. A free and good option is to use VirtualBox. For performance reasons, you may want to choose VMWare Fusion, however it requires a license for VMWare Fusion itself and the Vagrant VMWare provider.
@@ -12,12 +12,12 @@ To run Vagrant we need virtual machine software. A free and good option is to us
 #### VirtualBox
 To install your workspace just run the following in your terminal:
 
-	curl -L workspace-install.userx.nl | bash -s virtualbox ~/workspace
+	curl https://raw.githubusercontent.com/crobays/workspace/master/.install.sh | bash -s virtualbox ~/workspace
 
 #### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
-	 curl -L workspace-install.userx.nl | bash -s vmware-fusion ~/workspace
+	 curl https://raw.githubusercontent.com/crobays/workspace/master/.install.sh | bash -s vmware-fusion ~/workspace
 
 #### Administrator privileges
 During installation we need administrator privileges for the following:
