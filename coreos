@@ -114,7 +114,7 @@ export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
 
 if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 then
-	info "Please enter the path to your Gig config file:"
+	info "Please enter the path to your Git config file:"
     read git_config_file
     if [ "$git_config_file" != "" ]
 	then
@@ -177,14 +177,14 @@ then
 	fi
 	
 	open "$vmware_app"
-	success "Please run 'workspace' again if the VMWare Fusion is activated"
+	info "Please run 'workspace' again if the VMWare Fusion is activated"
 	exit
 elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
 	if [ ! -f "$WORKSPACE/.system/extpack-installed" ]
 	then
 		open "$WORKSPACE/.system/"*.vbox-extpack
-		echo "Please run 'workspace' again if the Extension Pack has been installed"
+		info "Please run 'workspace' again if the Extension Pack has been installed"
 		touch "$WORKSPACE/.system/extpack-installed"
 		exit
 	else
@@ -208,7 +208,7 @@ INSTANCE="$(printf "%0*d\n" 2 ${INSTANCE:-1})"
 
 if [ $REBUILD ] || [ $DESTROY ]
 then
-	success "Destroying coreos-$INSTANCE..."
+	info "Destroying coreos-$INSTANCE..."
 	vagrant destroy -f "coreos-$INSTANCE" 2>/dev/null
 	if [ $DESTROY ]
 	then
@@ -221,11 +221,11 @@ info "Looking for status coreos-$INSTANCE..."
 status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" != "$status" ]
 then
-	success "Resuming coreos-$INSTANCE..."
+	info "Resuming coreos-$INSTANCE..."
 	vagrant up "coreos-$INSTANCE"
 elif [ "${status/not created/}" != "$status" ]
 then
-	success "Creating coreos-$INSTANCE..."
+	info "Creating coreos-$INSTANCE..."
 	vagrant up "coreos-$INSTANCE"
 else
 	if [ "$INSTANCE" == "01" ] && [ "$(vagrant ssh --command "ls -A /workspace" "coreos-$INSTANCE")" == "" ]
@@ -245,7 +245,7 @@ else
 		info "Already running coreos-$INSTANCE"
 		if [ $PROVISION ]
 		then
-			success "Provisioning coreos-$INSTANCE..."
+			info "Provisioning coreos-$INSTANCE..."
 			vagrant provision "coreos-$INSTANCE"
 		fi
 	fi

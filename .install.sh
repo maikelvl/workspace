@@ -61,7 +61,7 @@ function start ()
 		install_vmware_fusion
 	fi
 	
-	success "Your Workspace is installed successfully!"
+	success "Workspace installed successfully!"
 	info "Next steps:"
 	info "1. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
 	info "2. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
@@ -102,7 +102,7 @@ function set_up_workspace()
 
 	if [ ! -d "$WORKSPACE" ]
 	then
-		error "No permission to create $WORKSPACE"
+		warning "No permission to create $WORKSPACE"
 		exit
 	fi
 
@@ -536,7 +536,7 @@ function download_and_install ()
 				"$application_name"
 		elif [ "$current_version" != "" ]
 		then
-			success "$application_name already on latest version: $current_version"
+			info "$application_name already on latest version: $current_version"
 		else
 			success "$application_name already installed"
 		fi
