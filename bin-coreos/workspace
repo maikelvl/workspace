@@ -5,7 +5,7 @@ cat << EOF
 
 usage: $(basename $0) options WORKSPACE-NUM
 
-Creates and runs a Docker workspace
+This script handles your Workspace instances with Docker (docker.com)
 
 OPTIONS:
     -h (help)               Show this message
