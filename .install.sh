@@ -215,7 +215,7 @@ EOF
 	source "$bash_profile_file"
 }
 
-function add_projects ()
+function set_up_projects ()
 {
 	echo "-- Projects start --"
 
