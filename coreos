@@ -130,15 +130,15 @@ do
 		
 		scp "$git_config_file" "$WORKSPACE/config/git.json"
 
-		if [ $unchanged ]
+		if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 		then
 			warning "No Git config file found."
 		else
 			success "Git config file found!"
 		fi
-	elif [ $unchanged ]
+	elif [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 	then
-		warning "No changes detected"
+		warning "No changes detected in git.json"
 	fi
 done
 
