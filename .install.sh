@@ -32,7 +32,6 @@ function start ()
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
 		uninstall_previous_workspace
-		success "Workspace completely uninstalled."
 		sec=10
 		while [ $sec -ge 0 ]; do
 		        echo -ne "Installing new Workspace in $sec...\033[0K\r"
