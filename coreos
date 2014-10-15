@@ -111,6 +111,9 @@ function get_env()
 
 provider="$(get_env 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
+if [ "$VAGRANT_HOME" == "" ] && [ ! -d "$HOME/.vagrant.d" ]
+	export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
+fi
 
 while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 do
@@ -270,4 +273,3 @@ then
 		vagrant ssh "coreos-$INSTANCE"
 	fi
 fi
-
