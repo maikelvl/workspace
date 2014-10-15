@@ -165,7 +165,7 @@ then
 		fi
 	done
 	success "License file found!"
-	vagrant plugin install vagrant-vmware-fusion
+	vagrant plugin install vagrant-vmware-fusion || exit
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
 
 	# Check if VMWare has ran a first time before
