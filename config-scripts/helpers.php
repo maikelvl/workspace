@@ -114,3 +114,30 @@ function delete_files($path, $del_dir = FALSE, $htdocs = FALSE, $_level = 0)
         ? @rmdir($path)
         : TRUE;
 }
+
+function rrmdir($dir)
+{
+    if (is_dir($dir))
+    {
+         rename($dir.'/.git', CONFIG_DIR.'/.git');
+         exec('git reset --hard --git-dir '.CONFIG_DIR.'/.git');
+
+        $objects = scandir($dir);
+        foreach ($objects as $object)
+        {
+            if ($object != "." && $object != "..")
+            {
+                if (filetype($dir."/".$object) == "dir")
+                {
+                    rrmdir($dir."/".$object);
+                }
+                else
+                {
+                    unlink($dir."/".$object);
+                }
+            }
+        }
+        reset($objects);
+        rmdir($dir);
+    }
+}
