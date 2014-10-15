@@ -112,10 +112,16 @@ function get_env()
 provider="$(get_env 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
 
-if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
-then
-	info "Please enter the path to your Git config file:"
+while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+do
+	info "Please enter the path to your Git config file or edit ${WORKSPACE/$HOME/~}/config/git.json"
+	info "manually and hit [enter]."
     read git_config_file
+    unchanged=""
+    if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+	then
+		unchanged=1
+	fi
     if [ "$git_config_file" != "" ]
 	then
 		if [ "${git_config_file:$(expr ${#git_config_file} - 5):5}" != '.json' ]
@@ -125,22 +131,23 @@ then
 		
 		scp "$git_config_file" "$WORKSPACE/config/git.json"
 
-		if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+		if [ $unchanged ]
 		then
-			error "No Git config file found."
-			exit
+			warning "No Git config file found."
 		fi
 		success 'Git config file found!'
-	else
-		info "Skipping Git config"
+	elif [ $unchanged ]
+	then
+		warning "No changed detected"
 	fi
-fi
+done
 
 if [ "$provider" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ]
 then
-	if [ ! -f "$WORKSPACE/config/"*.lic ]
-	then
-		info "Please enter the path to your Vagrant VMWare Fusion License file:"
+	while [ ! -f "$WORKSPACE/config/"*.lic ]
+	do
+		info "Please enter the path to your Vagrant VMWare Fusion License file or place"
+		info "it manually in your ${WORKSPACE/$HOME/~}/config directory and hit [enter]."
 		read vagrant_vmware_fusion_license
 		if [ "$vagrant_vmware_fusion_license" == "" ]
 		then
@@ -156,11 +163,11 @@ then
 
 		if [ ! -f "$WORKSPACE/config/"*.lic ]
 		then
-			error "No license file found."
-			exit
+			warning "No license file found."
+		else
+			success 'License file found!'
 		fi
-		success 'License file found!'
-	fi
+	done
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
 
