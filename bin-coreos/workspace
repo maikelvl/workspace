@@ -95,7 +95,8 @@ function get_env()
 
 image="$(get_env 'username')/workspace"
 workspace_base_dir="/workspace/base"
-base_image="crobays/workspace-base"
+workspace_base_image="crobays/workspace-base"
+workspace_base_image_file="/workspace/.docker-images/crobays-SLASH-workspace-base-COLON-latest.tar"
 
 if [ "$(cat /workspace/config/git.json)" == "$(cat /workspace/.config-boilerplate/git.json)" ]
 then
@@ -120,14 +121,14 @@ NAME="$BASE_NAME-$NAME_SUFFIX"
 
 if [ $REBUILD_BASE_IMAGE ]
 then
-    if [ -f "$workspace_base_dir/image.tar" ]
+    if [ -f "$workspace_base_image_file" ]
     then
-        rm -f "$workspace_base_dir/image.tar"
+        rm -f "$workspace_base_image_file"
     fi
 
-    if [ "$(docker inspect $base_image 2>/dev/null)" != "[]" ]
+    if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
     then
-        docker rmi --force $base_image
+        docker rmi --force $workspace_base_image
     fi
     REBUILD_IMAGE=1
 fi
@@ -163,23 +164,23 @@ then
         --interactive \
         "$NAME"
 else
-    if [ "$(docker inspect $base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_dir/image.tar" ]
+    if [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
     then
-        docker load --input "$workspace_base_dir/image.tar"
+        docker load --input "$workspace_base_image_file"
     fi
     
-    if [ "$(docker inspect $base_image 2>/dev/null)" == "[]" ]
+    if [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ]
     then
-        docker build --tag $base_image "$workspace_base_dir"
-        if [ "$(docker inspect $base_image 2>/dev/null)" != "[]" ]
+        docker build --tag $workspace_base_image "$workspace_base_dir"
+        if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
         then
-            if [ -f "$workspace_base_dir/image.tar" ]
+            if [ -f "$workspace_base_image_file" ]
             then
-                rm -f "$workspace_base_dir/image.tar"
+                rm -f "$workspace_base_image_file"
             fi
-            docker save --output "$workspace_base_dir/image.tar" $base_image
+            docker save --output "$workspace_base_image_file" $workspace_base_image
         else
-            error "Sorry to say... but building $base_image failed"
+            error "Sorry to say... but building $workspace_base_image failed"
             exit
         fi
     fi
