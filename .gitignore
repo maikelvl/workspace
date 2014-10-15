@@ -1,5 +1,6 @@
 /.system
 /.vagrant
+/.vagrant.d
 /config
 /docker
 /projects

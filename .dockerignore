@@ -2,6 +2,7 @@
 .git
 .system
 .vagrant
+.vagrant.d
 base
 bin-coreos
 bin-workspace
