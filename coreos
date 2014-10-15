@@ -168,21 +168,25 @@ then
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
 
-	if [ -d "$HOME/Applications/VMWare Fusion.app" ]
+	# Check if VMWare has ran a first time before
+	if [ ! -d "$HOME/Library/Application Support/VMWare Fusion" ]
 	then
-		vmware_app="$HOME/Applications/VMWare Fusion.app"
-	elif [ -d "/Applications/VMWare Fusion.app" ]
-	then
-		vmware_app="/Applications/VMWare Fusion.app"
-	else
-		error "There was no VMWare Fusion.app found on your system"
-		error "Install VirtualBox or VMWare Fusion first"
+		if [ -d "$HOME/Applications/VMWare Fusion.app" ]
+		then
+			vmware_app="$HOME/Applications/VMWare Fusion.app"
+		elif [ -d "/Applications/VMWare Fusion.app" ]
+		then
+			vmware_app="/Applications/VMWare Fusion.app"
+		else
+			error "There was no VMWare Fusion.app found on your system"
+			error "Install VirtualBox or VMWare Fusion first"
+			exit
+		fi
+		
+		open "$vmware_app"
+		info "Please run 'workspace' again if the VMWare Fusion is activated"
 		exit
 	fi
-	
-	open "$vmware_app"
-	info "Please run 'workspace' again if the VMWare Fusion is activated"
-	exit
 elif [ "$provider" == "virtualbox" ] && [ -f "$WORKSPACE/.system/"*.vbox-extpack ]
 then
 	if [ ! -f "$WORKSPACE/.system/extpack-installed" ]
