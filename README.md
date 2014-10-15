@@ -12,12 +12,12 @@ To run Vagrant we need virtual machine software. A free and good option is to us
 #### VirtualBox
 To install your workspace just run the following in your terminal:
 
-	curl https://raw.githubusercontent.com/crobays/workspace/master/.install.sh | bash -s virtualbox ~/workspace
+	curl -L https://github.com/crobays/workspace/raw/master/.install.sh | bash -s virtualbox ~/workspace
 
 #### VMWare Fusion
 To install with VMWare Fusion run the following instead:
 
-	 curl https://raw.githubusercontent.com/crobays/workspace/master/.install.sh | bash -s vmware-fusion ~/workspace
+	 curl -L https://github.com/crobays/workspace/raw/master/.install.sh | bash -s vmware-fusion ~/workspace
 
 #### Administrator privileges
 During installation we need administrator privileges for the following:
