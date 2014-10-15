@@ -61,6 +61,8 @@ If you’ve got your own software you wish to have in your workspace, just add s
 	workspace -B
 
 ## Uninstall Workspace
-Just trash your Workspace directory and delete the aliases from ~/.bash_profile
+To completely uninstall all installed software run ./.system/uninstall.sh. This will move all software installed during this installation to the trash. (including the Workspace directory, Vagrant, VirtualBox and VMWare Fusion)
 
-To completely uninstall all installed software run ./.system/uninstall.sh. This will move the Workspace directory, Vagrant, VirtualBox and VMWare to the trash.
+To preserve Vagrant and VirtualBox or VMWare Fusion, just trash your Workspace directory and delete the aliases from ~/.bash_profile
+
+#### Happy coding! :D
