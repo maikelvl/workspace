@@ -66,9 +66,9 @@ function start ()
 	info "Next steps:"
 	info "1. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
 	info "2. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
-	if [ "$PROVIDER" == "vmware-fusion" ]
+	if [ "$PROVIDER" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ]
 	then
-		info "3. Place your Vagrant VMWare Fusion license file in  ${WORKSPACE/$HOME/~}/config"
+		info "3. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config"
 	fi
 	sleep 2
 	open --background "$WORKSPACE/env.json"
