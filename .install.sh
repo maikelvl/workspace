@@ -13,6 +13,7 @@ update_uninstaller=1
 
 function start ()
 {
+	timeout 10 "Uninstalling old Workspace"
 	if [ "$PROVIDER" == "" ]
 	then
 		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
@@ -32,13 +33,7 @@ function start ()
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
 		uninstall_previous_workspace
-		sec=10
-		while [ $sec -ge 0 ]; do
-		        echo -ne "Installing new Workspace in $sec...\033[0K\r"
-		        sec=$((sec-1))
-		        sleep 1
-		done
-		echo ""
+		timeout 10 "Installing new Workspace"
 	else
 		info "Installing new Workspace..."
 	fi
@@ -346,6 +341,18 @@ function install_vmware_fusion ()
 		exit
 	fi
 	# TODO: fix HGFS issue: echo "answer AUTO_KMODS_ENABLED yes" | sudo tee -a /etc/vmware-tools/locations
+}
+
+function timeout()
+{
+	sec=${1:-60}
+	msg="${2:-Timeout}"
+	while [ $sec -ge 0 ]; do
+	        echo -ne "$msg in $sec...\033[0K\r"
+	        sec=$((sec-1))
+	        sleep 1
+	done
+	echo ""
 }
 
 function add_to_uninstaller ()
