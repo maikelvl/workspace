@@ -8,11 +8,11 @@ usage: $(basename $0) options WORKSPACE-NUM
 This script handles your Workspace instances with Docker (docker.com)
 
 OPTIONS:
-    -h (help)               Show this message
-    -r (rebuild container)  Rebuild container
-    -R (rebuild image)      Rebuild image from Dockerfile and rebuild container
-    -B (rebuild base image) Rebuild base image from ./base/Dockerfile (get yourself a cup of coffee)
-    -d (destroy)            Kill and destroy workspace containers
+    -h (help)           Show this message
+    -r (recreate)       Recreate workspace
+    -R (rebuild)        Rebuild workspace image from Dockerfile and create workspace container
+    -B (rebuild base)   Rebuild base image from ./base/Dockerfile (get yourself a cup of coffee)
+    -d (destroy)        Kill and destroy workspace container
 
 EOF
 }
