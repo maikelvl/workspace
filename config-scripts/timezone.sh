@@ -29,11 +29,6 @@ function error ()
     printf "$NC"
 }
 
-if [ $LOG_LEVEL -gt 0 ]
-then
-	echo "-- Timezone start --"
-fi
-
 timezone_file="/etc/timezone"
 
 timezone="$1"
@@ -56,7 +51,7 @@ then
 		rm ./-
 	fi
 
-	if [ $LOG_LEVEL -gt 0 ]
+	if [ "$LOG_LEVEL" != "0" ]
 	then
 		info    "Time zone:       $timezone"
 		echo -e "Local time:      $(date)"
@@ -78,7 +73,3 @@ else
 	error "Missing argument: timezone"
 fi
 
-if [ $LOG_LEVEL -gt 0 ]
-then
-	echo "-- Timezone end --"
-fi
