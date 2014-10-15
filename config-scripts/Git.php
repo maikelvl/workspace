@@ -152,7 +152,11 @@ class Git {
 					{
 						if (filetype($tmp_config_git_dir."/".$object) == "dir")
 						{
-							rrmdir($tmp_config_git_dir."/".$object); else unlink($tmp_config_git_dir."/".$object);
+							rrmdir($tmp_config_git_dir."/".$object);
+						}
+						else
+						{
+							unlink($tmp_config_git_dir."/".$object);
 						}
 					}
 				}
