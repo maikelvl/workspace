@@ -148,8 +148,8 @@ function add_shell_profile_to_bash_profile ()
 {
 	# Add coreos alias to bash_profile file
 	bash_profile_file="$HOME/.bash_profile"
-	start_line="# === Workspace aliases start ==="
-	end_line="# === Workspace aliases end ==="
+	start_line="# === Workspace ${WORKSPACE/$HOME/~} aliases start ==="
+	end_line="# === Workspace ${WORKSPACE/$HOME/~} aliases end ==="
 	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\"\nalias workspace=\"cd \$WORKSPACE && \$WORKSPACE/coreos -c workspace\"\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
