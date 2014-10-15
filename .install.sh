@@ -231,6 +231,7 @@ function set_up_projects ()
 
 function install_vagrant ()
 {
+	add_to_uninstaller "cd \"$WORKSPACE\" && vagrant destroy -f"
 	# -- install Vagrant ------------------------------------------------------------
 	application_name="Vagrant"
 	command="vagrant"
