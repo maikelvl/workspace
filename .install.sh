@@ -8,6 +8,7 @@ DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="$1"
 PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
+VAGRANT_HOME="${VAGRANT_HOME:-$HOME/.vagrant.d}"
 update_uninstaller=1
 
 function start ()
@@ -249,7 +250,7 @@ function install_vagrant ()
 	add_to_uninstaller "$(awk 'FNR>1' $WORKSPACE/.system/uninstall-vagrant.sh)"
 	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
 	add_to_uninstaller "echo \"Continue uninstalling...\""
-	add_to_uninstaller "trash \"$HOME/.vagrant.d\""
+	add_to_uninstaller "trash \"$VAGRANT_HOME\""
 	add_to_uninstaller "trash \"$command_location\""
 }
 

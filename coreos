@@ -136,7 +136,7 @@ then
 	fi
 fi
 
-if [ "$provider" == "vmware-fusion" ] && [ ! -f "$HOME/${VAGRANT_HOME:-.vagrant.d}/license-vagrant-vmware-fusion.lic" ]
+if [ "$provider" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ]
 then
 	if [ ! -f "$WORKSPACE/config/"*.lic ]
 	then
