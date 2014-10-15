@@ -31,7 +31,6 @@ function start ()
 
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
-		timeout 10 "Uninstalling old Workspace"
 		uninstall_previous_workspace
 		timeout 10 "Installing new Workspace"
 	else
@@ -78,7 +77,9 @@ function start ()
 
 function uninstall_previous_workspace ()
 {
-	info "Found uninstaller... Trashing old workspace files..."
+	info "Found uninstaller..."
+	timeout 10 "Uninstalling old Workspace"
+	info "Trashing old Workspace files..."
 	sudo bash "$WORKSPACE/.system/uninstall.sh"
 	success "Old Workspace successfully uninstalled"
 }
