@@ -5,7 +5,7 @@ cat << EOF
 
 usage: $(basename $0) options INSTANCE
 
-This script handles your CoreOS instances with Vagrant (vagrantup.com)
+This script handles your CoreOS (coreos.com) instances with Vagrant (vagrantup.com)
 
 OPTIONS:
 	-h (help)           Show this message
