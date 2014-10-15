@@ -134,11 +134,12 @@ do
 		if [ $unchanged ]
 		then
 			warning "No Git config file found."
+		else
+			success "Git config file found!"
 		fi
-		success 'Git config file found!'
 	elif [ $unchanged ]
 	then
-		warning "No changed detected"
+		warning "No changes detected"
 	fi
 done
 
@@ -164,10 +165,9 @@ then
 		if [ ! -f "$WORKSPACE/config/"*.lic ]
 		then
 			warning "No license file found."
-		else
-			success 'License file found!'
 		fi
 	done
+	success "License file found!"
 	vagrant plugin install vagrant-vmware-fusion
 	vagrant plugin license vagrant-vmware-fusion "$(ls "$WORKSPACE/config/"*.lic | head -1)"
 
