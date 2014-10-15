@@ -25,11 +25,14 @@ During installation we need administrator privileges for the following:
 - Installation of the Vagrant package
 - Installation of VirtualBox or VMWare Fusion
 
-## Using your Workspace
-Next steps:
-1. Edit ./env.json to match your needs (contains machine specific options which you can edit with your own needs and is not version controlled)
-2. Setup Git in ./config/git.json (the Workspace configures itself using the git.json file)
-3. VMWare Fusion only) Place your Vagrant VMWare Fusion license file in ./config.
+## Next steps:
+1. Run the following to access your new aliases:
+	
+	source ~/.bash_profile
+
+2. Edit ./env.json to match your needs. (contains machine specific options which you can edit with your own needs and is not version controlled)
+3. Setup Git in ./config/git.json (the Workspace configures itself using the git.json file)
+4. VMWare Fusion only) Place your Vagrant VMWare Fusion license file in ./config.
 
 #### VirtualBox
 The first time you run your workspace with VirtualBox you will be asked to install VirtualBox’ Extension Pack, which is already downloaded during installation.
@@ -38,13 +41,13 @@ The first time you run your workspace with VirtualBox you will be asked to insta
 Make sure you have copied your Vagrant VMWare Fusion license in the ./config directory. On the first run it will catch it and applies it. You can find one here: http://www.vagrantup.com/vmware
 
 ### Run it, get coffee
-Now, lets run your brand new Workspace by running:
+Now, let your brand new Workspace configure itself by running:
 	
 	workspace
 
 You might take a cup of coffee because this very first run will do the following:
 - Download the latest CoreOS Beta release
-- Booting CoreOS (you might be prompted to enter your password for shared folders)
+- Booting CoreOS (you may be prompted to enter your password for shared folders)
 - Pull Ubuntu 14.04 LTS (Trusty)
 - Build the Workspace base Docker container (updating, upgrading, installing extra software properties, ZSH, Vim, Git, RVM, Ruby, Node,  Bundler, PHP, Composer, Docker, Fig, Terraform, Packer, Tugboat)
 - Saving that base to ./base/image.tar, so after recreating the virtual machine it loads fast instead of rebuilding the base again.

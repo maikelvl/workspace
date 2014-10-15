@@ -102,7 +102,7 @@ then
 	error "Vagrant could not be found."
 	exit
 fi
-source "$HOME/.bash_profile"
+
 env="$(cat "$WORKSPACE/env.json")"
 function get_env()
 {
