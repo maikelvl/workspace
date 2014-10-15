@@ -118,8 +118,7 @@ fi
 
 while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 do
-	info "Please enter the path to your Git config file or edit ${WORKSPACE/$HOME/~}/config/git.json"
-	info "manually and hit [enter]."
+	info "Please enter the path to your Git config file or edit ${WORKSPACE/$HOME/~}/config/git.json manually and hit [enter]."
     read git_config_file
     if [ "$git_config_file" != "" ]
 	then
@@ -146,8 +145,7 @@ if [ "$provider" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-v
 then
 	while [ ! -f "$WORKSPACE/config/"*.lic ]
 	do
-		info "Please enter the path to your Vagrant VMWare Fusion License file or place"
-		info "it manually in your ${WORKSPACE/$HOME/~}/config directory and hit [enter]."
+		info "Please enter the path to your Vagrant VMWare Fusion License file or place it manually in your ${WORKSPACE/$HOME/~}/config directory and hit [enter]."
 		read vagrant_vmware_fusion_license
 		if [ "$vagrant_vmware_fusion_license" == "" ]
 		then
