@@ -111,17 +111,16 @@ function get_env()
 
 provider="$(get_env 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
+if [ "$VAGRANT_HOME" == "" ] && [ ! -d "$HOME/.vagrant.d" ]
+then
+	export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
+fi
 
 while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
 do
 	info "Please enter the path to your Git config file or edit ${WORKSPACE/$HOME/~}/config/git.json"
 	info "manually and hit [enter]."
     read git_config_file
-    unchanged=""
-    if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
-	then
-		unchanged=1
-	fi
     if [ "$git_config_file" != "" ]
 	then
 		if [ "${git_config_file:$(expr ${#git_config_file} - 5):5}" != '.json' ]
