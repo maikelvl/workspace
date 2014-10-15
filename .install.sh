@@ -128,7 +128,7 @@ function set_up_workspace()
 	repo_part_2="${repo_part_1#*/}"
 	repo_part_3="${repo_part_2#*/}"
 	repo_part_4="${repo_part_3#*/}"
-	echo "${WORKSPACE_REPO%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git" > "$WORKSPACE/.system/.upstream-workspace-repo"
+	echo "${WORKSPACE_REPO%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git" > "$WORKSPACE/.system/upstream-workspace-repo"
 	add_to_uninstaller "trash \"$WORKSPACE\""
 
 	generate_environment_file

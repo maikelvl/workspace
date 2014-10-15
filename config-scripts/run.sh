@@ -157,11 +157,11 @@ then
 		su "$USERNAME" --command "$SCRIPTS/bootstrap.php"
 	fi
 
-	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/.upstream-workspace-repo" ]
+	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/upstream-workspace-repo" ]
 	then
 		git clone "$(cat /workspace/.system/.upstream-workspace-repo)" "/workspace/.workspace-git"
 		mv "/workspace/.workspace-git/.git" "/workspace/.git"
-		git reset --hard --git-dir /workspace/.git
+		git --git-dir /workspace/.git reset --hard
 		rm -rf "/workspace/.workspace-git"
 		rm -f "/workspace/.system/.upstream-workspace-repo"
 	fi
