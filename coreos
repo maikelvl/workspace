@@ -269,4 +269,3 @@ then
 		vagrant ssh "coreos-$INSTANCE"
 	fi
 fi
-
