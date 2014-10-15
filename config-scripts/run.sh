@@ -159,12 +159,11 @@ then
 
 	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/upstream-workspace-repo" ]
 	then
-		git clone "$(cat /workspace/.system/upstream-workspace-repo)" "/workspace/.workspace-git"
+		su "$USERNAME" --command "git clone \"$(cat /workspace/.system/upstream-workspace-repo)\" \"/workspace/.workspace-git\""
 		mv "/workspace/.workspace-git/.git" "/workspace/.git"
 		rm -rf "/workspace/.workspace-git"
 		rm -f "/workspace/.system/upstream-workspace-repo"
-		sleep 2
-		git --git-dir /workspace/.git reset --hard
+		su "$USERNAME" --command "cd /workspace && git reset --hard"
 	fi
 
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
