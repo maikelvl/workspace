@@ -72,7 +72,8 @@ function start ()
 		info "4. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config"
 		last_step="5"
 	fi
-	info "$last_step. Run 'workspace' and get coffee to let the installation proceed. (you may have to enter your password during booting of CoreOS)"
+	info "$last_step. Run 'workspace' to run the workspace for the first time. (this very first run will take some time to "
+	info "   setup, so take some coffee, but you may be prompted for your password during booting of CoreOS)"
 	sleep 2
 	open --background "$WORKSPACE/env.json"
 	open --background "$WORKSPACE/config/git.json"
