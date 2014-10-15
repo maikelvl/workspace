@@ -141,11 +141,12 @@ class Git {
 			$config_repo = $shortName.':'.$repo_name.'.git';
 			$tmp_config_git_dir = CONFIG_DIR.'-git';
 			exec('git clone '.$config_repo.' '.$tmp_config_git_dir, $res);
+
 			if (is_dir($tmp_config_git_dir))
 			{
 				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
 				rrmdir($tmp_config_git_dir);
-				chdir(CONFIG_DIR.'/.git');
+				chdir(CONFIG_DIR);
 				exec('git reset --hard');
 			}
 			Logger::log("Cloned config repo $repo_name from $host", 1);
