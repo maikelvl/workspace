@@ -13,7 +13,8 @@ update_uninstaller=1
 
 function start ()
 {
-	timeout 10 "Uninstalling old Workspace"
+	echo "Administrator privileges are required for some operations..."
+	sudo echo ""
 	if [ "$PROVIDER" == "" ]
 	then
 		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
@@ -28,10 +29,9 @@ function start ()
 		exit
 	fi
 
-	echo "Administrator privileges are required for some operations..."
-	sudo echo ""
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
+		timeout 10 "Uninstalling old Workspace"
 		uninstall_previous_workspace
 		timeout 10 "Installing new Workspace"
 	else
