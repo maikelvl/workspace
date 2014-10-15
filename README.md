@@ -1,7 +1,7 @@
 # A rapid Workspace for rapid developers
 
 ### What’s this?
-It’s a consistent development environment for all your Macs using Vagrant, CoreOS and Docker.
+A consistent development environment for all your Macs using Vagrant, CoreOS and Docker.
 
 ### Why this project?
 The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace get you up and running by leveraging Vagrant. Combined with CoreOS and Docker this gives you a workspace which is configurable in code.
