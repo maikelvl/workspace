@@ -55,6 +55,9 @@ You might take a cup of coffee because this very first run will do the following
 
 Now you will see your workspace which is configured as you wish.
 
+### Available commands
+The only main command on OSX level is `coreos`. This ⌘ lets you ssh in to a CoreOS instance. The `workspace`-command lets yo
+
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
 

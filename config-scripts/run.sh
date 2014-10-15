@@ -161,9 +161,10 @@ then
 	then
 		git clone "$(cat /workspace/.system/upstream-workspace-repo)" "/workspace/.workspace-git"
 		mv "/workspace/.workspace-git/.git" "/workspace/.git"
-		git --git-dir /workspace/.git reset --hard
 		rm -rf "/workspace/.workspace-git"
 		rm -f "/workspace/.system/upstream-workspace-repo"
+		sleep 2
+		git --git-dir /workspace/.git reset --hard
 	fi
 
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
