@@ -93,7 +93,7 @@ then
 		cp --recursive --no-clobber "$HOME/$i" "$userhome/"
 	done
 	chown --recursive "$USERNAME:$USERNAME" "$userhome"
-	
+
 	# Set password same as username
 	echo "$USERNAME:$USERNAME" | chpasswd
 
@@ -160,9 +160,16 @@ then
 	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/.upstream-workspace-repo" ]
 	then
 		git clone "$(cat /workspace/.system/.upstream-workspace-repo)" "/workspace/.workspace-git"
-		mv -f /workspace/.workspace-git/* /workspace
-		rmdir "/workspace/.workspace-git"
-		rm "/workspace/.system/.upstream-workspace-repo"
+		for file in $(ls -A "/workspace/.workspace-git")
+		do
+			if [ -f "/workspace/$file" ] || [ -d "/workspace/$file" ]
+			then
+				rm -rf "/workspace/$file"
+			fi
+			mv -f "/workspace/.workspace-git/$file" "/workspace/$file"
+		done
+		rm -rf "/workspace/.workspace-git"
+		rm -f "/workspace/.system/.upstream-workspace-repo"
 	fi
 
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
