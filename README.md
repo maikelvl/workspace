@@ -31,8 +31,8 @@ During installation we need administrator privileges for the following:
 	source ~/.bash_profile
 
 2. Edit ./env.json to match your needs. (contains machine specific options which you can edit with your own needs and is not version controlled)
-3. Setup Git in ./config/git.json (the Workspace configures itself using the git.json file)
-4. VMWare Fusion only) Place your Vagrant VMWare Fusion license file in ./config.
+3. Setup Git in ./config/git.json (the Workspace configures itself using the git.json file) or during first run be prompted to locally or remotely copy it.
+4. VMWare Fusion only) Place your Vagrant VMWare Fusion license file in ./config or during first run be prompted to locally or remotely copy it .
 
 #### VirtualBox
 The first time you run your workspace with VirtualBox you will be asked to install VirtualBox’ Extension Pack, which is already downloaded during installation.

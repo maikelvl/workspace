@@ -64,12 +64,14 @@ function start ()
 	success "Workspace installed successfully!"
 	info "Next steps:"
 	info "1. Run 'source ~/.bash_profile' to access your new aliases."
-	info "2. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs"
-	info "3. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json"
+	info "2. Edit ${WORKSPACE/$HOME/~}/env.json to match your needs."
+	info "3. Setup Git in ${WORKSPACE/$HOME/~}/config/git.json manually or during"
+	info "   first run be prompted to locally or remotely copy it."
 	last_step="4"
 	if [ "$PROVIDER" == "vmware-fusion" ] && [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ]
 	then
-		info "4. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config"
+		info "4. Place your Vagrant VMWare Fusion license file in ${WORKSPACE/$HOME/~}/config or during"
+		info "   first run be prompted to locally or remotely copy it."
 		last_step="5"
 	fi
 	info "$last_step. Run 'workspace' to run the workspace for the first time. (this very first run will take some time to "
