@@ -211,8 +211,6 @@ function add_shell_profile_to_bash_profile ()
 			fi
 EOF
 	fi
-
-	source "$bash_profile_file"
 }
 
 function set_up_projects ()
