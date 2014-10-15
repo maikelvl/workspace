@@ -9,9 +9,9 @@ This script handles your CoreOS (coreos.com) instances with Vagrant (vagrantup.c
 
 OPTIONS:
 	-h (help)           Show this message
-	-c (command)        -c=command Pass a command to the coreos instance
 	-r (reload)         Reload the instance
 	-R (rebuild)        Rebuild the instance
+	-c (command)        -c=command Pass a command to the coreos instance
 	-p (provision)      Provision the instance
 	-d (destroy)        Kill and destroy instance
 	-s (status)         See Vagrants global status

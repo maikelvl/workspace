@@ -56,7 +56,41 @@ You might take a cup of coffee because this very first run will do the following
 Now you will see your workspace which is configured as you wish.
 
 ### Available commands
-The only main command on OSX level is `coreos`. This ⌘ lets you ssh in to a CoreOS instance. The `workspace`-command lets yo
+The only main command on OSX level is `coreos`. This command (aliased to ~/workspace/coreos) lets you SSH in to a CoreOS instance. From there you can enter your Workspace using the `workspace`-command. To eliminate this second step you can alternatively run `workspace` from the OSX level, which is aliased to `coreos -c workspace`.
+
+#### Commands on OSX-level
+- `coreos -h`					Show usage
+- `coreos`  					SSH into coreos-01 (CoreOS instance 1)
+- `coreos 2`					SSH into coreos-02 (CoreOS instance 2)
+- `coreos 3`					SSH into coreos-03 (CoreOS instance 3)
+- `coreos [n]`				SSH into coreos-[n]
+- …
+- `coreos -r` 				Reload coreos-01 and SSH into it
+- `coreos -r 2` 			Reload coreos-02 and SSH into it
+- `coreos -r [n]` 		Reload coreos-[n] and SSH into it
+- …
+- `coreos -R [n]` 		Rebuild coreos-[n] and SSH into it
+- `coreos -c “ls /“ [n]`		Run ‘ls /‘ on coreos-[n]
+- `coreos -p [n]` 		Provision coreos-[n] and SSH into it
+- `coreos -d [n]` 		Destroy coreos-[n]
+- `coreos -s` 				See all Vagrant instances (same as `vagrant global-status`)
+- `workspace`				SSH into coreos-01 and into workspace-01
+
+#### Commands on CoreOS-level
+- `workspace -h`			Show usage
+- `workspace`					SSH into new workspace
+- `workspace 1`				SSH into workspace-01 (Workspace instance 1)
+- `workspace 2`				SSH into workspace-02 (Workspace instance 2)
+- `workspace [n]`			SSH into workspace-[n]
+- …
+- `workspace -r [n]` 	Recreates workspace-[n] and SSH into it
+- `workspace -R [n]` 	Rebuild workspace image and SSH into workspace-[n]
+- `workspace -B [n]` 	Rebuild workspace base image from ./base/Dockerfile (can take a very long time) and SSH into workspace-[n]
+- `workspace -d [n]`  Destroy workspace-[n]
+
+- `get -h`									Show usage
+- `get centos:latest`				Pull latest CentOS from the registry and archive in ./.docker-images
+- `get username/your-image` Build from Dockerfile if ./docker/username/your-image/Dockerfile exists’, else it will try to pull from the registry.
 
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
