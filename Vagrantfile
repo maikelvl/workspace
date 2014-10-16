@@ -106,8 +106,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       if i == 1
         coreos.vm.synced_folder '.', '/workspace', id: 'core', :mount_options => ['nolock,vers=3,udp'], :nfs => true
         coreos.vm.provision :shell, inline: '
-          mkdir -p /opt
-          ln -sf /workspace/bin-coreos /opt/bin
+          if [ ! -L /opt/bin ];then
+            mkdir /opt && ln --symlink --force /workspace/bin-coreos /opt/bin
+          fi
           chmod +x /workspace/bin-coreos/*
           get ubuntu:trusty
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
