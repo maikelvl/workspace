@@ -143,6 +143,7 @@ then
 			fi
 		fi
 		echo 'export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting' >> "$CONFIG_DIR/zshrc"
+		echo 'export PATH="/usr/local/node/bin:$PATH" # Add Node to PATH for scripting' >> "$CONFIG_DIR/zshrc"
 		if [ -f "$CONFIG_DIR/shell-profile-workspace" ]
 		then
 			echo 'source "$CONFIG_DIR/shell-profile-workspace"' >> "$CONFIG_DIR/zshrc"
