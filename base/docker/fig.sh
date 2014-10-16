@@ -1,9 +1,4 @@
 #!/bin/bash
-#"/scripts/utilities/download-and-install.sh" fig https://github.com/orchardup/fig/releases fig/archive/*.zip "$1"
-#"/scripts/utilities/github-install.sh" orchardup/fig "$1"
-#https://api.github.com/repos/orchardup/fig/releases
-
-#!/bin/bash
 echo "-- Fig start --"
 
 if [ "$1" == "install/fig.sh" ];then

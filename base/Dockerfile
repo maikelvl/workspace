@@ -23,6 +23,7 @@ RUN /scripts/essential/rvm-ruby.sh stable 2.1.3
 RUN /scripts/essential/node.sh
 RUN /scripts/essential/bundler.sh
 RUN /scripts/essential/php.sh
+RUN /scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
@@ -36,6 +37,7 @@ RUN /scripts/terminal/zsh.sh 5.0.5
 ADD /docker /scripts/docker
 RUN /scripts/docker/docker.sh
 RUN /scripts/docker/fig.sh 0.5.2
+RUN /scripts/docker/maestro-ng.sh
 
 # Provider
 ADD /provider /scripts/provider
