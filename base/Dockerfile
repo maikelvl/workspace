@@ -23,6 +23,7 @@ RUN /scripts/essential/rvm-ruby.sh stable 2.1.3
 RUN /scripts/essential/node.sh
 RUN /scripts/essential/bundler.sh
 RUN /scripts/essential/php.sh
+RUN /scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
