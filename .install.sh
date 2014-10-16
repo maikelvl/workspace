@@ -54,7 +54,7 @@ function start ()
 	then
 		install_vmware_fusion
 	fi
-	
+
 	success "Workspace installed successfully!"
 	echo ""
 	info "Next steps:"
@@ -77,6 +77,7 @@ function start ()
 	sleep 2
 	open --background "$WORKSPACE/env.json"
 	open --background "$WORKSPACE/config/git.json"
+	add_to_uninstaller "echo \"Workspace uninstalled succesfully!\""
 }
 
 function uninstall_previous_workspace ()
@@ -85,7 +86,6 @@ function uninstall_previous_workspace ()
 	timeout 10 "Uninstalling old Workspace"
 	info "Trashing old Workspace files..."
 	sudo bash "$WORKSPACE/.system/uninstall.sh"
-	success "Old Workspace successfully uninstalled"
 }
 
 # --- ask workspace directory ---------------------------------------------------
