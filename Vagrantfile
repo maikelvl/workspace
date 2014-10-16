@@ -8,7 +8,7 @@ CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 
 # # Defaults for config options defined in CONFIG
 $env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
-$num_instances = 3
+$num_instances = 5
 $update_channel = 'beta'
 $enable_serial_logging = false
 $vb_gui = false
