@@ -145,7 +145,7 @@ class Git {
 			if (is_dir($tmp_config_git_dir))
 			{
 				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
-				rrmdir($tmp_config_git_dir);
+				File::rrmdir($tmp_config_git_dir);
 				chdir(CONFIG_DIR);
 				exec('git reset --hard');
 			}
