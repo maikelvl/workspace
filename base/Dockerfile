@@ -41,7 +41,7 @@ RUN /scripts/docker/maestro-ng.sh
 
 # Provider
 ADD /provider /scripts/provider
-RUN /scripts/provider/terraform.sh 0.2.2
+RUN /scripts/provider/terraform.sh 0.3.0
 RUN /scripts/provider/dot.sh
 RUN /scripts/provider/packer.sh 0.7.1
 RUN /scripts/provider/tugboat.sh
