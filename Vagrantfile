@@ -107,7 +107,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         coreos.vm.synced_folder '.', '/workspace', id: 'core', :mount_options => ['nolock,vers=3,udp'], :nfs => true
         coreos.vm.provision :shell, inline: '
           if [ ! -L /opt/bin ];then
-            mkdir /opt && ln --symlink --force /workspace/bin-coreos /opt/bin
+            mkdir /opt && ln --symbolic --force /workspace/bin-coreos /opt/bin
           fi
           chmod +x /workspace/bin-coreos/*
           get ubuntu:trusty
