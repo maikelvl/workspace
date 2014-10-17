@@ -116,7 +116,7 @@ function set_up_workspace()
 
 	# --- download base files ---------------------
 	silent_flag=""
-	if [ $SILENT_LEVEL -gt 1 ]
+	if [ $SILENT_LEVEL -lt 1 ]
 	then
 		silent_flag="--silent"
 	fi
@@ -584,7 +584,7 @@ function download()
 
 	info "Downloading latest $application_name $download_link..."
 	silent_flag=""
-	if [ $SILENT_LEVEL -gt 0 ]
+	if [ $SILENT_LEVEL -lt 1 ]
 	then
 		silent_flag="--silent"
 	fi
@@ -730,7 +730,7 @@ function find_download_link()
 	done
 	silent_flag=""
 	silent_flag=""
-	if [ $SILENT_LEVEL -gt 1 ]
+	if [ $SILENT_LEVEL -lt 2 ]
 	then
 		silent_flag="--silent"
 	fi
