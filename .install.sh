@@ -2,7 +2,8 @@
 
 #WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
 WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
-VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
+#VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
+VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.5-2209127.dmg"
 SILENT_LEVEL=1 # 0 = none, 1 = only downloads, 2 = all requests
 DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="$1"
