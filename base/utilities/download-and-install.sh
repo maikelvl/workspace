@@ -152,6 +152,7 @@ function download_and_install ()
 			fi
 			dest="$DOWNLOADS_DIRECTORY/$(basename $download_link)"
 			sudo mkdir -p $(dirname $DOWNLOADS_DIRECTORY)
+
 			if [ ! -f "$dest" ]
 			then
 				download \
@@ -216,10 +217,14 @@ function install()
 	volume_name="${volume_name// /-}"
 	volume_name="$(echo $volume_name | awk '{print tolower($0)}')"
 	extraction_path="$HOME/${filename%.*}-extraction"
+	if [ -d "$extraction_path" ]
+	then
+		rm -rf "$extraction_path"
+	fi
 	mkdir -p "$extraction_path"
 	usr="/usr/local"
 	sudo mkdir -p "$usr"
-
+	
 	case "$extension" in
 		dmg)
 			volume_path="/Volumes/$volume_name"
@@ -238,10 +243,6 @@ function install()
 			unzip -o "$package" -d "$extraction_path"
 			;;
 		gz|bz2)
-			if [ -d "$extraction_path" ]
-			then
-				rm -rf "$extraction_path"
-			fi
 			case "$extension" in
 				gz)
 					method="z"
@@ -250,7 +251,8 @@ function install()
 					method="b"
 					;;
 			esac
-			tar "xfv$method" "$package" --directory "$extraction_path"
+			cd "$extraction_path"
+			tar xfv$method "$package"
 			remove_sub_dir "$extraction_path"
 			;;
 		vbox-extpack)
