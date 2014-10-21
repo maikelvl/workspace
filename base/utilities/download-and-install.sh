@@ -251,8 +251,7 @@ function install()
 					method="b"
 					;;
 			esac
-			cd "$extraction_path"
-			tar xfv$method "$package"
+			tar xfv$method "$package" --directory "$extraction_path"
 			remove_sub_dir "$extraction_path"
 			;;
 		vbox-extpack)
