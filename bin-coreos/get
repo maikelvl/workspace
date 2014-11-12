@@ -113,29 +113,25 @@ then
     then
 	   rm -f "$tar"
     fi
-    if [ "$(docker inspect "$image" 2>/dev/null)" != "[]" ]
-    then
-        docker rmi --force "$image"
-    fi
 fi
 
-if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
+if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ] || [ $REMAKE ]
 then
     if [ -f "$tar" ]
     then
         info "Loading $image from $tar..."
-        docker load --input "$tar";
+        docker load --input "$tar" || exit
         action="load"
     elif [ "$image_base_name:latest" == "$image" ] && [ -f "$docker_dir/$image_base_name/Dockerfile" ]
     then
         info "Building $image..."
         docker build \
             --tag "$image_base_name:latest" \
-            "$docker_dir/$image_base_name"
+            "$docker_dir/$image_base_name" || exit
         action="build"
     else
         info "Pulling $image..."
-        docker pull "$image"
+        docker pull "$image" || exit
         action="pull"
     fi
 
@@ -165,7 +161,7 @@ then
             info "Saving $image to $tar..."
             docker save \
                 --output "$tar" \
-                "$image";
+                "$image" || exit
         fi
     fi
 elif [ ! -f "$tar" ]
@@ -175,7 +171,7 @@ then
         info "Saving $image to $tar..."
         docker save \
             --output "$tar" \
-            "$image";
+            "$image" || exit
     fi
 else
     success "$image already present"

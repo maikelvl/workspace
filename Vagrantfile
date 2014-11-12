@@ -9,14 +9,13 @@ CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 # # Defaults for config options defined in CONFIG
 $env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
 $num_instances = 5
-$update_channel = 'beta'
+$update_channel = 'alpha'
 $enable_serial_logging = false
 $vb_gui = false
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   config.vm.box = 'coreos-%s' % $update_channel
-  config.vm.box_version = '>= 444.4.0'
   config.vm.box_url = 'http://%s.release.core-os.net/amd64-usr/current/coreos_production_vagrant.json' % $update_channel
 
   config.vm.provider :vmware_fusion do |v, override|
@@ -104,13 +103,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       coreos.vm.provision :shell, inline: 'timedatectl set-timezone "'+$env['timezone']+'"'
 
       if i == 1
-        coreos.vm.synced_folder '.', '/workspace', id: 'core', :mount_options => ['nolock,vers=3,udp'], :nfs => true
+        coreos.vm.synced_folder '.', '/workspace', id: 'core', :mount_options => ['actimeo=2,nolock,vers=3,udp'], :nfs => true
         coreos.vm.provision :shell, inline: '
           if [ ! -L /opt/bin ];then
             mkdir /opt && ln --symbolic --force /workspace/bin-coreos /opt/bin
           fi
           chmod +x /workspace/bin-coreos/*
           get ubuntu:trusty
+          get phusion/baseimage
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
         '
       end

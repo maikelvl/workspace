@@ -119,18 +119,28 @@ NAME_SUFFIX="$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})"
 
 NAME="$BASE_NAME-$NAME_SUFFIX"
 
-if [ $REBUILD_BASE_IMAGE ]
+if [ ! $REBUILD_BASE_IMAGE ] && [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
 then
-    if [ -f "$workspace_base_image_file" ]
-    then
-        rm -f "$workspace_base_image_file"
-    fi
+    info "Loading $workspace_base_image from $workspace_base_image_file"
+    docker load --input "$workspace_base_image_file"
+fi
 
+if [ $REBUILD_BASE_IMAGE ] || [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ]
+then
+    docker build --tag $workspace_base_image "$workspace_base_dir"
+    REBUILD_IMAGE=1
     if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
     then
-        docker rmi --force $workspace_base_image
+        if [ -f "$workspace_base_image_file" ]
+        then
+            rm -f "$workspace_base_image_file"
+        fi
+        info "Saving $workspace_base_image to $workspace_base_image_file"
+        docker save --output "$workspace_base_image_file" $workspace_base_image
+    else
+        error "Sorry to say... but building $workspace_base_image failed"
+        exit
     fi
-    REBUILD_IMAGE=1
 fi
 
 if [ $DESTROY ]
@@ -157,6 +167,8 @@ fi
 
 container="$(docker inspect "$NAME" 2>/dev/null)"
 
+
+
 if [ "$container" != "[]" ]
 then
     docker start \
@@ -164,26 +176,6 @@ then
         --interactive \
         "$NAME"
 else
-    if [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
-    then
-        docker load --input "$workspace_base_image_file"
-    fi
-    
-    if [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ]
-    then
-        docker build --tag $workspace_base_image "$workspace_base_dir"
-        if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
-        then
-            if [ -f "$workspace_base_image_file" ]
-            then
-                rm -f "$workspace_base_image_file"
-            fi
-            docker save --output "$workspace_base_image_file" $workspace_base_image
-        else
-            error "Sorry to say... but building $workspace_base_image failed"
-            exit
-        fi
-    fi
 
     if [ $REBUILD_IMAGE ] || [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
     then
@@ -205,6 +197,8 @@ else
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --env "CONFIG_DIR=/workspace/config" \
         --env "LOG_LEVEL=1" \
+        --env "TIMEZONE=$(get_env 'timezone')" \
+        --env "USERNAME=$(get_env 'username')" \
         --interactive \
         --tty \
         "$image"
