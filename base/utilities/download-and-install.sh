@@ -164,6 +164,11 @@ function download_and_install ()
 				"$command" \
 				"$dest" \
 				"$application_name"
+
+			if [ $REMOVE_DOWNLOAD_AFTER_INSTALL ]
+			then
+				rm -rf "$dest"
+			fi
 		elif [ "$current_version" != "" ]
 		then
 			info "$application_name already on latest version: $current_version"
@@ -186,7 +191,10 @@ function download()
 	minus_one="-1"	
 	if [ "${dest:$minus_one:1}" == "/" ]
 	then
+		mkdir -p "$dest"
 		dest="$dest$(basename $download_link)"
+	else
+		mkdir -p "$(dirname $dest)"
 	fi
 
 	if [ -f "$dest" ]

@@ -1,8 +1,10 @@
-FROM ubuntu:trusty
+FROM phusion/baseimage:0.9.15
+ENV HOME /root
+RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
+
 MAINTAINER Crobays <crobays@userex.nl>
-
 ENV DEBIAN_FRONTEND noninteractive
-
+ENV TIMEZONE Etc/UTC
 # Adding scripts in chunks so rebuilding doesn't take so long each time
 
 # Update and server
@@ -27,16 +29,16 @@ RUN /scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
-RUN /scripts/git/git.sh 2.1.1
+RUN /scripts/git/git.sh 2.1.2
 
 # Terminal
 ADD /terminal /scripts/terminal
-RUN /scripts/terminal/zsh.sh 5.0.5
+RUN /scripts/terminal/zsh.sh 5.0.7
 
 # Docker
 ADD /docker /scripts/docker
 RUN /scripts/docker/docker.sh
-RUN /scripts/docker/fig.sh 0.5.2
+RUN /scripts/docker/fig.sh
 RUN /scripts/docker/maestro-ng.sh
 
 # Provider
@@ -53,6 +55,14 @@ RUN /scripts/other/bower.sh
 RUN /scripts/other/composer.sh
 RUN /scripts/other/laravel-installer.sh
 
+# Add set timezone
+RUN echo "#!/bin/bash\necho \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata" > /etc/my_init.d/01-timezone.sh
+
 # Run entrypoint
 ADD /run.sh /scripts/run.sh
+RUN chmod +x /etc/my_init.d/* && chmod +x /scripts/run.sh
+
 ENTRYPOINT ["/scripts/run.sh"]
+
+# Clean up APT when done.
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*

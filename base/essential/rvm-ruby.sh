@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "-- RVM start --"
 
-version="${1:-stable}"
+version="${1:-master}"
 
 # Creating a temporary user account
 tmp_user="tmp-rvm-user"

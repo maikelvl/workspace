@@ -37,15 +37,6 @@ function error()
     printf "$NC"
 }
 
-function get_env()
-{
-	if [ ! $env ]
-	then
-		env="$(cat '/workspace/env.json')"
-	fi
-    echo $env | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t\" "
-}
-
 # ===================================================================================================================
 
 # If this script is for accidently running in run.sh in CoreOS or OSX
@@ -57,10 +48,13 @@ fi
 
 # ===================================================================================================================
 
+for file in $(ls /etc/my_init.d)
+do
+	/etc/my_init.d/"$file"
+done
+
 OH_MY_ZSH_GIT="https://github.com/crobays/oh-my-zsh.git"
 OH_MY_ZSH_THEME="crobays"
-USERNAME=$(get_env 'username')
-TIMEZONE=$(get_env 'timezone')
 
 if [ "$(echo $LOG | awk '{print tolower($0)}')" == "false" ] || [ "$LOG" == "0" ]
 then
@@ -69,14 +63,14 @@ else
 	LOG=1
 fi
 
-if [ -f "$SCRIPTS/config/timezone.sh" ] && [ "$(cat /etc/timezone 2>/dev/null)" != "$TIMEZONE" ]
+if [ $TIMEZONE ] && [ -f "$SCRIPTS/config/timezone.sh" ]
 then
-	"$SCRIPTS/config/timezone.sh" "$TIMEZONE"
+	"$SCRIPTS/config/php-timezone.sh"
 fi
 
-if [ ! $(getent passwd "$USERNAME") ]
+if [ $USERNAME ] && [ ! $(getent passwd "$USERNAME") ]
 then
-	# Changing the root's password to 'root'
+	# Set root's password to 'root'
 	echo "root:root" | chpasswd
 
 	# Creating the new user account to work with
@@ -88,12 +82,12 @@ then
 
 	# Copy all roots home content to the new users home
 	userhome="$(su "$USERNAME" --command "echo \$HOME")"
-	for i in $(ls $HOME -A)
+	for i in $(ls -A $HOME)
 	do
 		cp --recursive --no-clobber "$HOME/$i" "$userhome/"
 	done
 	chown --recursive "$USERNAME:$USERNAME" "$userhome"
-
+	chown --recursive "$USERNAME:$USERNAME" /usr/local/bin
 	# Set password same as username
 	echo "$USERNAME:$USERNAME" | chpasswd
 
@@ -144,6 +138,7 @@ then
 		fi
 		echo 'export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting' >> "$CONFIG_DIR/zshrc"
 		echo 'export PATH="/usr/local/node/bin:$PATH" # Add Node to PATH for scripting' >> "$CONFIG_DIR/zshrc"
+		echo 'export PATH="$PATH:$HOME/.local/bin" # Add Python binaries to PATH for scripting' >> "$CONFIG_DIR/zshrc"
 		if [ -f "$CONFIG_DIR/shell-profile-workspace" ]
 		then
 			echo 'source "$CONFIG_DIR/shell-profile-workspace"' >> "$CONFIG_DIR/zshrc"

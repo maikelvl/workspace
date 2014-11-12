@@ -1,3 +1,4 @@
+.config-boilerplate
 .docker-images
 .git
 .system
@@ -6,7 +7,12 @@
 base
 bin-coreos
 bin-workspace
+cluster
 config
-config-boilerplate
+data
 docker
+drone
+gitlab
+gitlab-ce
+maestro-ng
 projects

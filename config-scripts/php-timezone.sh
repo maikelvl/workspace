@@ -29,31 +29,11 @@ function error ()
     printf "$NC"
 }
 
-timezone_file="/etc/timezone"
-
-timezone="$1"
-if [ "$timezone" != "" ]
+if [ "$TIMEZONE" != "" ]
 then
-	if [ -f "$timezone_file.bak" ]
-	then
-		cp -f "$timezone_file.bak" "$timezone_file"
-	elif [ -f "$timezone_file" ]
-	then
-		cp -f "$timezone_file" "$timezone_file.bak"
-	else
-		echo "$timezone" > "$timezone_file"
-	fi
-	
-	if [ "$(cat $timezone_file)" != "$timezone" ]
-	then
-		echo "$timezone" > "$timezone_file"
-		dpkg-reconfigure --frontend noninteractive tzdata &>-
-		rm ./-
-	fi
-
 	if [ "$LOG_LEVEL" != "0" ]
 	then
-		info    "Time zone:       $timezone"
+		info    "Time zone:       $TIMEZONE"
 		echo -e "Local time:      $(date)"
 		echo -e "Universal time:  $(date -u)"
 	fi
@@ -61,15 +41,15 @@ then
 	if [ -f /etc/php5/fpm/php.ini ]
 	then
 		sed -i "s/;date.timezone =/date.timezone =/" /etc/php5/fpm/php.ini
-		sed -i "s/date.timezone =.*/date.timezone = ${timezone//\//\\\/}/" /etc/php5/fpm/php.ini
+		sed -i "s/date.timezone =.*/date.timezone = ${TIMEZONE//\//\\\/}/" /etc/php5/fpm/php.ini
 	fi
 
 	if [ -f /etc/php5/cli/php.ini ]
 	then
 		sed -i "s/;date.timezone =/date.timezone =/" /etc/php5/cli/php.ini
-		sed -i "s/date.timezone =.*/date.timezone = ${timezone//\//\\\/}/" /etc/php5/cli/php.ini
+		sed -i "s/date.timezone =.*/date.timezone = ${TIMEZONE//\//\\\/}/" /etc/php5/cli/php.ini
 	fi
 else
-	error "Missing argument: timezone"
+	error "Missing argument: TIMEZONE"
 fi
 

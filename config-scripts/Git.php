@@ -67,8 +67,8 @@ class Git {
 
 	private function writeConfigItem($key, $value)
 	{
-		exec("git config --global $key $value");
-		if ($value != exec("git config --global $key"))
+		exec("git config --global \"$key\" \"$value\"");
+		if ($value != exec("git config --global \"$key\""))
 		{
 			throw new Exception("Failed to write to git config", 1);
 		}
