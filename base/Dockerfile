@@ -21,7 +21,7 @@ ADD /utilities /scripts/utilities
 ADD /essential /scripts/essential
 RUN /scripts/essential/curl.sh
 RUN /scripts/essential/vim.sh
-RUN /scripts/essential/rvm-ruby.sh stable 2.1.3
+RUN /scripts/essential/rvm-ruby.sh stable 2.1
 RUN /scripts/essential/node.sh
 RUN /scripts/essential/bundler.sh
 RUN /scripts/essential/php.sh
@@ -29,7 +29,7 @@ RUN /scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
-RUN /scripts/git/git.sh 2.1.2
+RUN /scripts/git/git.sh 2.1
 
 # Terminal
 ADD /terminal /scripts/terminal
