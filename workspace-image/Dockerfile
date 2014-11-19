@@ -50,12 +50,10 @@ RUN /scripts/provider/tugboat.sh
 
 # other
 ADD /other /scripts/other
-RUN /scripts/other/tree.sh
-RUN /scripts/other/bower.sh
-RUN /scripts/other/composer.sh
-RUN /scripts/other/laravel-installer.sh
-
-RUN rm -rf /downloads
+RUN /scripts/other/tree.sh && \
+	/scripts/other/bower.sh && \
+	/scripts/other/composer.sh && \
+	/scripts/other/laravel-installer.sh
 
 ENV CONFIG_DIR /workspace/config
 
@@ -72,14 +70,11 @@ ADD /config-boilerplate /root/config-boilerplate
 RUN echo "#!/bin/bash\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh && \
 	echo "#!/bin/bash\nif [ -f /workspace/workspace-image/run.sh ]\nthen\n\t/workspace/workspace-image/run.sh\nelse\n\t/root/run.sh\nfi" > /root/start && \
 	chmod +x /etc/my_init.d/* && \
-	chmod +x /root/start
+	chmod +x /root/start && \
+	apt-get clean && \
+	rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT ["/root/start"]
-
-# Clean up APT when done.
-RUN apt-get clean && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 
 # docker build -t workspace-base-test /workspace/base && \
 # docker run -it --rm -v /workspace:/workspace workspace-base-test bash
