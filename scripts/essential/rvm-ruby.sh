@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "-- RVM start --"
 
-version="${1:-master}"
+version="${1:-stable}"
 
 # Creating a temporary user account
 tmp_user="tmp-rvm-user"
@@ -17,7 +17,7 @@ if [ "$2" != "" ];then
 	install_ruby="&& rvm --default use --install $2"
 fi
 
-su $tmp_user --command "curl --location --silent --url https://get.rvm.io | bash -s $version --ruby --autolibs=enable --auto-dotfiles --quiet-curl && echo 'success' && source /home/$tmp_user/.rvm/scripts/rvm $install_ruby"
+su $tmp_user --command "curl -sSL https://rvm.io/mpapis.asc | gpg --import - && curl --location --silent --url https://get.rvm.io | bash -s $version --ruby --autolibs=enable --auto-dotfiles --quiet-curl && echo 'success' && source /home/$tmp_user/.rvm/scripts/rvm $install_ruby"
 
 # Revert the sudo group settings
 sed -i "s/%sudo\tALL=(ALL) NOPASSWD: ALL/%sudo\tALL=(ALL:ALL) ALL/" /etc/sudoers
