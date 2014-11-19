@@ -1,5 +1,26 @@
 #!/bin/bash
+author="$(cat "$CONFIG_DIR/author.json")"
+function get_author()
+{
+    echo $author | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
+}
+export AUTHOR_NAME="$(get_author author_name)"
+export AUTHOR_EMAIL="$(get_author author_email)"
+unset author
+
+alias art="php artisan"
+
+export ENVIRONMENT="dev"
+export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH="$PATH:$HOME/.rvm/bin"
+export PATH="/usr/local/node/bin:$PATH"
+export PATH="$PATH:$HOME/.local/bin"
+export PATH="/workspace/bin-workspace:$PATH"
 export PATH="$PATH:/workspace/bin-coreos"
+export PATH="./vendor/bin:$PATH"
 export TUGBOAT_CONFIG_PATH="$CONFIG_DIR/tugboat.yml"
 source ~/.rvm/scripts/rvm
 # rvm --quiet-curl --install --default use 2.1.3
+
+sudo chmod +x /workspace/bin-workspace/*
+sudo chmod +x /workspace/bin-coreos/*
