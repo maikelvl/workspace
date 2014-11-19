@@ -120,13 +120,18 @@ workspace_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$IM
 workspace_rebuild_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
 NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${1:-1})"
 
-if [ ! $REBUILD_IMAGE_TAG ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ] && [ -f "$workspace_image_file" ]
+if [ ! $REBUILD_IMAGE_TAG ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
 then
-    info "Loading $workspace_base_image:$IMAGE_TAG from $workspace_image_file"
-    docker load --input "$workspace_image_file"
-    if [ "$IMAGE_TAG" != "latest" ]
+    if [ -f "$workspace_image_file" ]
     then
-        docker tag "$workspace_base_image:$IMAGE_TAG" "$workspace_base_image:latest"
+        info "Loading $workspace_base_image:$IMAGE_TAG from $workspace_image_file"
+        docker load --input "$workspace_image_file"
+        if [ "$IMAGE_TAG" != "latest" ]
+        then
+            docker tag "$workspace_base_image:$IMAGE_TAG" "$workspace_base_image:latest"
+        fi
+    else
+        pull_image=1
     fi
 fi
 
