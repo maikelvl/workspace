@@ -1,5 +1,4 @@
 #!/bin/bash
-
 export BLACK="\e[0;30m"
 export RED="\e[0;31m"
 export GREEN="\e[0;32m"
@@ -49,9 +48,14 @@ fi
 # ===================================================================================================================
 
 SCRIPTS="/scripts"
-if [ -d /workspace/scripts ]
+if [ -d /workspace/workspace-image ]
 then
-	SCRIPTS="/workspace/scripts"
+	SCRIPTS="/workspace/workspace-image"
+fi
+
+if [ ! -d "$CONFIG_DIR" ]
+then
+	cp --recursive /root/config-boilerplate "$CONFIG_DIR"
 fi
 
 for file in $(ls /etc/my_init.d)
@@ -69,12 +73,12 @@ else
 	LOG=1
 fi
 
-if [ $TIMEZONE ] && [ -f "$SCRIPTS/config/php-timezone.sh" ]
+if [ $TIMEZONE ] && [ -f "$SCRIPTS/config-scripts/php-timezone.sh" ]
 then
-	$SCRIPTS/config/php-timezone.sh
+	$SCRIPTS/config-scripts/php-timezone.sh
 fi
 
-USERNAME="${USERNAME:-default}"
+USERNAME="${USERNAME:-me}"
 
 if [ ! $(getent passwd "$USERNAME") ]
 then
@@ -153,9 +157,9 @@ then
 	ln --symbolic --force "$CONFIG_DIR/zshrc" "$userhome/.zshrc"
 
 	# Config
-	if [ -f "$SCRIPTS/config/bootstrap.php" ]
+	if [ -f "$SCRIPTS/config-scripts/bootstrap.php" ]
 	then
-		su "$USERNAME" --command "$SCRIPTS/config/bootstrap.php"
+		su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 	fi
 
 	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/upstream-workspace-repo" ]

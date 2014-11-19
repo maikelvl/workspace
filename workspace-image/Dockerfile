@@ -8,17 +8,17 @@ ENV TIMEZONE Etc/UTC
 # Adding scripts in chunks so rebuilding doesn't take so long each time
 
 # Update and server
-ADD /scripts/core /scripts/core
+ADD /core /scripts/core
 RUN /scripts/core/update.sh
 RUN /scripts/core/dist-upgrade.sh
 RUN /scripts/core/build-essential.sh
 RUN /scripts/core/linux-image-extra.sh
 
 # Utilities
-ADD /scripts/utilities /scripts/utilities
+ADD /utilities /scripts/utilities
 
 # Essential
-ADD /scripts/essential /scripts/essential
+ADD /essential /scripts/essential
 RUN /scripts/essential/curl.sh
 RUN /scripts/essential/vim.sh
 RUN /scripts/essential/rvm-ruby.sh stable
@@ -28,28 +28,28 @@ RUN /scripts/essential/php.sh
 RUN /scripts/essential/pip.sh
 
 # Git
-ADD /scripts/git /scripts/git
+ADD /git /scripts/git
 RUN /scripts/git/git.sh 2.1
 
 # Terminal
-ADD /scripts/terminal /scripts/terminal
+ADD /terminal /scripts/terminal
 RUN /scripts/terminal/zsh.sh
 
 # Docker
-ADD /scripts/docker /scripts/docker
+ADD /docker /scripts/docker
 RUN /scripts/docker/docker.sh
 RUN /scripts/docker/fig.sh
 RUN /scripts/docker/maestro-ng.sh
 
 # Provider
-ADD /scripts/provider /scripts/provider
+ADD /provider /scripts/provider
 RUN /scripts/provider/terraform.sh
 RUN /scripts/provider/dot.sh
 RUN /scripts/provider/packer.sh
 RUN /scripts/provider/tugboat.sh
 
 # other
-ADD /scripts/other /scripts/other
+ADD /other /scripts/other
 RUN /scripts/other/tree.sh
 RUN /scripts/other/bower.sh
 RUN /scripts/other/composer.sh
@@ -57,21 +57,24 @@ RUN /scripts/other/laravel-installer.sh
 
 RUN rm -rf /downloads
 
-# Add set timezone
-RUN echo "#!/bin/bash\necho \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata" > /etc/my_init.d/01-timezone.sh
-
 ENV CONFIG_DIR /workspace/config
 
 VOLUME  ["/workspace"]
 
 # Run entrypoint
-ADD /scripts/config /scripts/config
-RUN chmod +x /etc/my_init.d/*
+ADD /config-scripts /scripts/config-scripts
+ADD /run.sh /root/run.sh
 
-RUN echo "#!/bin/bash\nif [ -f /workspace/scripts/config/run.sh ]\nthen\n\t/workspace/scripts/config/run.sh\nelse\n\t/scripts/config/run.sh\nfi" > /root/run.sh && \
-	chmod +x /root/run.sh
+# Add config boilerplate
+ADD /config-boilerplate /root/config-boilerplate
 
-ENTRYPOINT ["/root/run.sh"]
+# Add set timezone
+RUN echo "#!/bin/bash\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh && \
+	echo "#!/bin/bash\nif [ -f /workspace/workspace-image/run.sh ]\nthen\n\t/workspace/workspace-image/run.sh\nelse\n\t/root/run.sh\nfi" > /root/start && \
+	chmod +x /etc/my_init.d/* && \
+	chmod +x /root/start
+
+ENTRYPOINT ["/root/start"]
 
 # Clean up APT when done.
 RUN apt-get clean && \

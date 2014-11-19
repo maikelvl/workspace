@@ -147,7 +147,7 @@ function set_up_config()
 {
 	if [ ! -d "$WORKSPACE/config" ]
 	then
-		cp -r "$WORKSPACE/.config-boilerplate" "$WORKSPACE/config"
+		cp --recursive "$WORKSPACE/workspace-image/config-boilerplate" "$WORKSPACE/config"
 	fi
 }
 

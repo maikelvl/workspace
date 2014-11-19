@@ -31,12 +31,12 @@ function error ()
 
 if [ "$TIMEZONE" != "" ]
 then
-	if [ "$LOG_LEVEL" != "0" ]
-	then
-		info    "Time zone:       $TIMEZONE"
-		echo -e "Local time:      $(date)"
-		echo -e "Universal time:  $(date -u)"
-	fi
+	# if [ "$LOG_LEVEL" != "0" ]
+	# then
+	# 	info    "Time zone:       $TIMEZONE"
+	# 	echo -e "Local time:      $(date)"
+	# 	echo -e "Universal time:  $(date -u)"
+	# fi
 
 	if [ -f /etc/php5/fpm/php.ini ]
 	then
