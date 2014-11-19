@@ -116,7 +116,7 @@ then
 	export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
 fi
 
-while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/workspace-image/config-boilerplate/git.json")" ]
 do
 	info "Please enter the path to your Git config file or edit ${WORKSPACE/$HOME/~}/config/git.json manually and hit [enter]."
     read git_config_file
@@ -129,13 +129,13 @@ do
 		
 		scp "$git_config_file" "$WORKSPACE/config/git.json"
 
-		if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+		if [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/workspace-image/config-boilerplate/git.json")" ]
 		then
 			warning "No Git config file found."
 		else
 			success "Git config file found!"
 		fi
-	elif [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/.config-boilerplate/git.json")" ]
+	elif [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/workspace-image/config-boilerplate/git.json")" ]
 	then
 		warning "No changes detected in git.json"
 	fi
