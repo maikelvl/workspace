@@ -9,21 +9,25 @@ This script handles your Workspace instances with Docker (docker.com)
 
 OPTIONS:
     -h (help)           Show this message
+    -t (tag)            The base version of the base
     -r (recreate)       Recreate workspace
     -R (rebuild)        Rebuild workspace image from Dockerfile and create workspace container
-    -B (rebuild base)   Rebuild base image from ./base/Dockerfile (get yourself a cup of coffee)
+    -c (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
 
 EOF
 }
 BASE_NAME="workspace"
 count=0
-while getopts “hrRBd” OPTION
+while getopts “ht:rRBcd” OPTION
 do
          case $OPTION in
                  h)
                          usage
                          exit 1
+                         ;;
+                 t)
+                         IMAGE_TAG="$OPTARG"
                          ;;
                  r)
                          RERUN_CONTAINER=1
@@ -31,8 +35,8 @@ do
                  R)
                          REBUILD_IMAGE=1
                          ;;
-                 B)
-                         REBUILD_BASE_IMAGE=1
+                 c)
+                         USE_CACHE=1
                          ;;
                  d)
                          DESTROY=1
@@ -93,10 +97,14 @@ function get_env()
     echo $env | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t\" "
 }
 
-image="$(get_env 'username')/workspace"
-workspace_base_dir="/workspace/base"
-workspace_base_image="crobays/workspace-base"
-workspace_base_image_file="/workspace/.docker-images/crobays-SLASH-workspace-base-COLON-latest.tar"
+if [ "$IMAGE_TAG" == "" ]
+then
+    IMAGE_TAG="latest"
+fi
+username="$(get_env 'username')"
+workspace_base_dir="/workspace"
+workspace_base_image="$username/workspace:$IMAGE_TAG"
+workspace_base_image_file="/workspace/.docker-images/$username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
 
 if [ "$(cat /workspace/config/git.json)" == "$(cat /workspace/.config-boilerplate/git.json)" ]
 then
@@ -119,16 +127,23 @@ NAME_SUFFIX="$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})"
 
 NAME="$BASE_NAME-$NAME_SUFFIX"
 
-if [ ! $REBUILD_BASE_IMAGE ] && [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
+if [ ! $REBUILD_IMAGE ] && [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
 then
     info "Loading $workspace_base_image from $workspace_base_image_file"
     docker load --input "$workspace_base_image_file"
 fi
 
-if [ $REBUILD_BASE_IMAGE ] || [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ]
+if [ $REBUILD_IMAGE ] || [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ]
 then
-    docker build --tag $workspace_base_image "$workspace_base_dir"
-    REBUILD_IMAGE=1
+    # remove exited images from the old instance
+    docker rm $(docker ps -aq)
+
+    cache="--no-cache"
+    if [ $USE_CACHE ]
+    then
+        cache="$cache=false"
+    fi
+    docker build --tag $workspace_base_image $cache "$workspace_base_dir"
     if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
     then
         if [ -f "$workspace_base_image_file" ]
@@ -141,6 +156,12 @@ then
         error "Sorry to say... but building $workspace_base_image failed"
         exit
     fi
+
+    if [ "$IMAGE_TAG" != "latest" ]
+    then
+        docker tag $workspace_base_image ${workspace_base_image/$IMAGE_TAG/latest}
+    fi
+    RERUN_CONTAINER=1
 fi
 
 if [ $DESTROY ]
@@ -149,25 +170,12 @@ then
     exit
 fi
 
-if [ $RERUN_CONTAINER ] || [ $REBUILD_IMAGE ]
+if [ $RERUN_CONTAINER ]
 then
     docker rm -f "$NAME" 2>/dev/null
-    if [ $REBUILD_IMAGE ]
-    then
-        if [ -f "$tar" ]
-        then
-            rm -f "$tar"
-        fi
-        if [ "$(docker inspect "$image" 2>/dev/null)" != "[]" ]
-        then
-            docker rmi --force "$image"
-        fi
-    fi
 fi
 
 container="$(docker inspect "$NAME" 2>/dev/null)"
-
-
 
 if [ "$container" != "[]" ]
 then
@@ -176,20 +184,6 @@ then
         --interactive \
         "$NAME"
 else
-
-    if [ $REBUILD_IMAGE ] || [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
-    then
-        docker build \
-            --tag "$image:latest" \
-            "/workspace"
-    fi
-    
-    if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
-    then
-        error "Sorry to say... but building $image failed"
-        exit
-    fi
-
     docker run \
         --name "$NAME" \
         --hostname "$HOSTNAME-$NAME" \
@@ -198,10 +192,9 @@ else
         --env "CONFIG_DIR=/workspace/config" \
         --env "LOG_LEVEL=1" \
         --env "TIMEZONE=$(get_env 'timezone')" \
-        --env "USERNAME=$(get_env 'username')" \
+        --env "USERNAME=$username" \
         --interactive \
         --tty \
-        "$image"
-#        --env "SCRIPTS=/workspace/docker/crobays/workspace/scripts" \
+        "$workspace_base_image"
 fi
 
