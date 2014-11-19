@@ -48,10 +48,10 @@ Now, let your brand new Workspace configure itself by running:
 You might take a cup of coffee because this very first run will do the following:
 - Download the latest CoreOS Beta release
 - Booting CoreOS (you may be prompted to enter your password for shared folders)
-- Pull Ubuntu 14.04 LTS (Trusty)
-- Build the Workspace base Docker container (updating, upgrading, installing extra software properties, ZSH, Vim, Git, RVM, Ruby, Node,  Bundler, PHP, Composer, Docker, Fig, Terraform, Packer, Tugboat)
-- Saving that base to ./base/image.tar, so after recreating the virtual machine it loads fast instead of rebuilding the base again.
-- Build the actual Workspace container you will be using. It runs ./config-scripts/run.sh after first boot and configure itself by using config-files in the ./config directory.
+- Pull Phusion Baseimage 0.9.15
+- Build the Workspace Docker container (updating, upgrading, installing extra software properties, ZSH, Vim, Git, RVM, Ruby, Node,  Bundler, PHP, Composer, Docker, Fig, Terraform, Packer, Tugboat)
+- Saving that base to ./.docker-images/username-SLASH-workspace-COLON-latest.tar, so after recreating the virtual machine it loads fast instead of rebuilding the base again.
+- Build the actual Workspace container you will be using. It runs ./workspace-image/run.sh after first boot and configure itself by using config-files in the ./config directory.
 
 Now you will see your workspace which is configured as you wish.
 
@@ -96,7 +96,7 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 - `get username/your-image` 		Build from Dockerfile if ./docker/username/your-image/Dockerfile exists’, else it will try to pull from the registry.
 
 ### Install extra software
-If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
+If you’ve got your own software you wish to have in your workspace, just add scripts to ./workspace-image and reference them in ./workspace-image/Dockerfile. Now run the following in your Mac terminal:
 
 	workspace -R 1.2.4
 
