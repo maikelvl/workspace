@@ -9,7 +9,7 @@ This script handles your Workspace instances with Docker (docker.com)
 
 OPTIONS:
     -h (help)           Show this message
-    -t (tag)            The base version of the base
+    -t (tag)            The base version of the base (default to \'latest\')
     -r (recreate)       Recreate workspace
     -R (rebuild)        Rebuild workspace image from Dockerfile and create workspace container
     -c (cache)          Use cache when building base image
@@ -116,16 +116,9 @@ NAME_SUFFIX="$1"
 if [ ! "$NAME_SUFFIX" ]
 then
     NAME_SUFFIX=1
-    con="$(docker inspect "$BASE_NAME-$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})" 2>/dev/null)"
-    while [ "${con/\"Running\": true,/}" != "$con" ];do
-        NAME_SUFFIX=`expr $NAME_SUFFIX + 1`
-        con="$(docker inspect "$BASE_NAME-$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})" 2>/dev/null)"
-    done
 fi
 
-NAME_SUFFIX="$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})"
-
-NAME="$BASE_NAME-$NAME_SUFFIX"
+NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${NAME_SUFFIX:-1})"
 
 if [ ! $REBUILD_IMAGE ] && [ "$(docker inspect $workspace_base_image 2>/dev/null)" == "[]" ] && [ -f "$workspace_base_image_file" ]
 then
@@ -146,6 +139,10 @@ then
     docker build --tag $workspace_base_image $cache "$workspace_base_dir"
     if [ "$(docker inspect $workspace_base_image 2>/dev/null)" != "[]" ]
     then
+        if [ "$IMAGE_TAG" != "latest" ]
+        then
+            docker tag $workspace_base_image ${workspace_base_image/$IMAGE_TAG/latest}
+        fi
         if [ -f "$workspace_base_image_file" ]
         then
             rm -f "$workspace_base_image_file"
@@ -157,10 +154,6 @@ then
         exit
     fi
 
-    if [ "$IMAGE_TAG" != "latest" ]
-    then
-        docker tag $workspace_base_image ${workspace_base_image/$IMAGE_TAG/latest}
-    fi
     RERUN_CONTAINER=1
 fi
 
@@ -175,15 +168,11 @@ then
     docker rm -f "$NAME" 2>/dev/null
 fi
 
-container="$(docker inspect "$NAME" 2>/dev/null)"
+container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
 
-if [ "$container" != "[]" ]
+if [ "$container_state_running" == "" ]
 then
-    docker start \
-        --attach \
-        --interactive \
-        "$NAME"
-else
+    echo 'docker run'
     docker run \
         --name "$NAME" \
         --hostname "$HOSTNAME-$NAME" \
@@ -194,7 +183,19 @@ else
         --env "TIMEZONE=$(get_env 'timezone')" \
         --env "USERNAME=$username" \
         --interactive \
-        --tty \
+        --detach \
         "$workspace_base_image"
+elif [ "$container_state_running" == "false" ]
+then
+    echo 'docker start'
+    docker start \
+        --interactive \
+        "$NAME"
 fi
+
+docker exec \
+        --interactive \
+        --tty \
+        "$NAME" \
+        "$(docker inspect --format='{{(index .Config.Entrypoint 0)}}' "$NAME")"
 

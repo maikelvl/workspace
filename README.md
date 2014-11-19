@@ -70,10 +70,11 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 - `coreos -r [n]` 		Reload coreos-[n] and SSH into it
 - …
 - `coreos -R [n]` 		Rebuild coreos-[n] and SSH into it
-- `coreos -c “ls /“ [n]`		Run ‘ls /‘ on coreos-[n]
+- `coreos -c "ls /" [n]`		Run `ls /` on coreos-[n]
 - `coreos -p [n]` 		Provision coreos-[n] and SSH into it
 - `coreos -d [n]` 		Destroy coreos-[n]
 - `coreos -s` 				See all Vagrant instances (same as `vagrant global-status`)
+
 - `workspace`				SSH into coreos-01 and into workspace-01
 
 #### Commands on CoreOS-level
@@ -97,11 +98,11 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
 
-	workspace -B [-b latest]
+	workspace -R
 
 ## Uninstall Workspace
-To completely uninstall all installed software run ./.system/uninstall.sh. This will move all software installed during this installation to the trash. (including the Workspace directory, Vagrant, VirtualBox and VMWare Fusion)
+To completely uninstall all installed software run `./.system/uninstall.sh`. This will move all software installed during this installation to the trash. (including the Workspace directory, Vagrant, VirtualBox and VMWare Fusion)
 
-To preserve Vagrant and VirtualBox or VMWare Fusion, just trash your Workspace directory and delete the aliases from ~/.bash_profile
+To preserve Vagrant and VirtualBox or VMWare Fusion, just trash your Workspace directory and delete the aliases from `~/.bash_profile`
 
 #### Happy coding! :D
