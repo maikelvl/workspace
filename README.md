@@ -79,16 +79,16 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 
 #### Commands on CoreOS-level
 - `workspace -h`					Show usage
-- `workspace`						SSH into new workspace
-- `workspace 1`						SSH into workspace-01 (Workspace instance 1)
+- `workspace`						SSH into workspace-01 (Workspace instance 1)
 - `workspace 2`						SSH into workspace-02 (Workspace instance 2)
 - `workspace [n]`					SSH into workspace-[n]
 - …
 - `workspace -t 1.2.3` 				SSH into new workspace image with tag 1.2.3 (defaults to 'latest')
 - `workspace -r [n]` 				Rerun workspace-[n] and SSH into it
 - `workspace -R [n]` 				Rebuild workspace image from scratch and SSH into workspace-[n] (can take a very long time)
-- `workspace -R -t 1.2.3` 			Rebuild with tag 1.2.3 and SSH into
-- `workspace -R -t 1.2.3 -c`		Use cached build using the -c flag
+- `workspace -R 1.2.3` 				Rebuild with tag 1.2.3 and SSH into
+- `workspace -R 1.2.3 -c`			Use cached build using the -c flag
+- `workspace -d`  					Destroy workspace-01
 - `workspace -d [n]`  				Destroy workspace-[n]
 
 - `get -h`							Show usage
@@ -98,7 +98,7 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
 
-	workspace -R
+	workspace -R 1.2.4
 
 ## Uninstall Workspace
 To completely uninstall all installed software run `./.system/uninstall.sh`. This will move all software installed during this installation to the trash. (including the Workspace directory, Vagrant, VirtualBox and VMWare Fusion)
