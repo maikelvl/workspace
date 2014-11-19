@@ -13,7 +13,6 @@
 		    "port": 22,
 		    "api-version": "v3",
 		    "token": "your-gitlab-token-here",
-		    "upstream": true,
 		    "config-repo": "workspace-config"
 		}
 	},
