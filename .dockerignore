@@ -4,15 +4,8 @@
 .system
 .vagrant
 .vagrant.d
-base
 bin-coreos
 bin-workspace
-cluster
 config
-data
 docker
-drone
-gitlab
-gitlab-ce
-maestro-ng
 projects

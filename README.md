@@ -77,25 +77,27 @@ The only main command on OSX level is `coreos`. This command (aliased to ~/works
 - `workspace`				SSH into coreos-01 and into workspace-01
 
 #### Commands on CoreOS-level
-- `workspace -h`			Show usage
-- `workspace`					SSH into new workspace
-- `workspace 1`				SSH into workspace-01 (Workspace instance 1)
-- `workspace 2`				SSH into workspace-02 (Workspace instance 2)
-- `workspace [n]`			SSH into workspace-[n]
+- `workspace -h`					Show usage
+- `workspace`						SSH into new workspace
+- `workspace 1`						SSH into workspace-01 (Workspace instance 1)
+- `workspace 2`						SSH into workspace-02 (Workspace instance 2)
+- `workspace [n]`					SSH into workspace-[n]
 - …
-- `workspace -r [n]` 	Recreates workspace-[n] and SSH into it
-- `workspace -R [n]` 	Rebuild workspace image and SSH into workspace-[n]
-- `workspace -B [n]` 	Rebuild workspace base image from ./base/Dockerfile (can take a very long time) and SSH into workspace-[n]
-- `workspace -d [n]`  Destroy workspace-[n]
+- `workspace -t 1.2.3` 				SSH into new workspace image with tag 1.2.3 (defaults to 'latest')
+- `workspace -r [n]` 				Rerun workspace-[n] and SSH into it
+- `workspace -R [n]` 				Rebuild workspace image from scratch and SSH into workspace-[n] (can take a very long time)
+- `workspace -R -t 1.2.3` 			Rebuild with tag 1.2.3 and SSH into
+- `workspace -R -t 1.2.3 -c`		Use cached build using the -c flag
+- `workspace -d [n]`  				Destroy workspace-[n]
 
-- `get -h`									Show usage
+- `get -h`							Show usage
 - `get centos:latest`				Pull latest CentOS from the registry and archive in ./.docker-images
-- `get username/your-image` Build from Dockerfile if ./docker/username/your-image/Dockerfile exists’, else it will try to pull from the registry.
+- `get username/your-image` 		Build from Dockerfile if ./docker/username/your-image/Dockerfile exists’, else it will try to pull from the registry.
 
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just add scripts to ./base and reference them in ./base/Dockerfile. Now run the following in your Mac terminal:
 
-	workspace -B
+	workspace -B [-b latest]
 
 ## Uninstall Workspace
 To completely uninstall all installed software run ./.system/uninstall.sh. This will move all software installed during this installation to the trash. (including the Workspace directory, Vagrant, VirtualBox and VMWare Fusion)

@@ -1,3 +1,4 @@
+/.docker-images
 /.system
 /.vagrant
 /.vagrant.d
@@ -6,4 +7,3 @@
 /projects
 /env.json
 /config
-*.tar
