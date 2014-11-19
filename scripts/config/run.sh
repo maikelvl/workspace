@@ -69,9 +69,9 @@ else
 	LOG=1
 fi
 
-if [ $TIMEZONE ] && [ -f "$SCRIPTS/config/timezone.sh" ]
+if [ $TIMEZONE ] && [ -f "$SCRIPTS/config/php-timezone.sh" ]
 then
-	$SCRIPTS/config/config/php-timezone.sh
+	$SCRIPTS/config/php-timezone.sh
 fi
 
 USERNAME="${USERNAME:-default}"

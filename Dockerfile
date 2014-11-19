@@ -68,7 +68,10 @@ VOLUME  ["/workspace"]
 ADD /scripts/config /scripts/config
 RUN chmod +x /etc/my_init.d/*
 
-ENTRYPOINT ["/scripts/config/run.sh"]
+RUN echo "#!/bin/bash\nif [ -f /workspace/scripts/config/run.sh ]\nthen\n\t/workspace/scripts/config/run.sh\nelse\n\t/scripts/config/run.sh\nfi" > /root/run.sh && \
+	chmod +x /root/run.sh
+
+ENTRYPOINT ["/root/run.sh"]
 
 # Clean up APT when done.
 RUN apt-get clean && \
