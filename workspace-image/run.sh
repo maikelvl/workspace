@@ -53,6 +53,12 @@ then
 	SCRIPTS="/workspace/workspace-image"
 fi
 
+if [ ! -f "/usr/local/opt/curl-ca-bundle/share/ca-bundle.crt" ];then
+	apt-get install -y ca-certificates
+	mkdir -p /usr/local/opt/curl-ca-bundle/share
+	cp /etc/ssl/certs/ca-certificates.crt /usr/local/opt/curl-ca-bundle/share/ca-bundle.crt
+fi
+
 if [ ! -d "$CONFIG_DIR" ]
 then
 	cp -R /root/config-boilerplate "$CONFIG_DIR"

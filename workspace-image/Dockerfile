@@ -9,23 +9,23 @@ ENV TIMEZONE Etc/UTC
 
 # Update and server
 ADD /core /scripts/core
-RUN /scripts/core/update.sh
-RUN /scripts/core/dist-upgrade.sh
-RUN /scripts/core/build-essential.sh
-RUN /scripts/core/linux-image-extra.sh
+RUN /scripts/core/update.sh && \
+	/scripts/core/dist-upgrade.sh && \
+	/scripts/core/build-essential.sh && \
+	/scripts/core/linux-image-extra.sh
 
 # Utilities
 ADD /utilities /scripts/utilities
 
 # Essential
 ADD /essential /scripts/essential
-RUN /scripts/essential/curl.sh
-RUN /scripts/essential/vim.sh
-RUN /scripts/essential/rvm-ruby.sh stable
-RUN /scripts/essential/node.sh
-RUN /scripts/essential/bundler.sh
-RUN /scripts/essential/php.sh
-RUN /scripts/essential/pip.sh
+RUN /scripts/essential/curl.sh && \
+	/scripts/essential/vim.sh && \
+	/scripts/essential/rvm-ruby.sh stable && \
+	/scripts/essential/node.sh && \
+	/scripts/essential/bundler.sh && \
+	/scripts/essential/php.sh && \
+	/scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
@@ -37,25 +37,23 @@ RUN /scripts/terminal/zsh.sh
 
 # Docker
 ADD /docker /scripts/docker
-RUN /scripts/docker/docker.sh
-RUN /scripts/docker/fig.sh
-RUN /scripts/docker/maestro-ng.sh
+RUN /scripts/docker/docker.sh && \
+	/scripts/docker/fig.sh && \
+	/scripts/docker/maestro-ng.sh
 
 # Provider
 ADD /provider /scripts/provider
-RUN /scripts/provider/terraform.sh
-RUN /scripts/provider/dot.sh
-RUN /scripts/provider/packer.sh
-RUN /scripts/provider/tugboat.sh
+RUN /scripts/provider/terraform.sh && \
+	/scripts/provider/dot.sh && \
+	/scripts/provider/packer.sh && \
+	/scripts/provider/tugboat.sh
 
 # other
 ADD /other /scripts/other
-RUN /scripts/other/tree.sh
-RUN /scripts/other/bower.sh
-RUN /scripts/other/composer.sh
-RUN /scripts/other/laravel-installer.sh
-
-RUN rm -rf /downloads
+RUN /scripts/other/tree.sh && \
+	/scripts/other/bower.sh && \
+	/scripts/other/composer.sh && \
+	/scripts/other/laravel-installer.sh
 
 ENV CONFIG_DIR /workspace/config
 
@@ -72,14 +70,11 @@ ADD /config-boilerplate /root/config-boilerplate
 RUN echo "#!/bin/bash\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh && \
 	echo "#!/bin/bash\nif [ -f /workspace/workspace-image/run.sh ]\nthen\n\t/workspace/workspace-image/run.sh\nelse\n\t/root/run.sh\nfi" > /root/start && \
 	chmod +x /etc/my_init.d/* && \
-	chmod +x /root/start
+	chmod +x /root/start && \
+	apt-get clean && \
+	rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENTRYPOINT ["/root/start"]
-
-# Clean up APT when done.
-RUN apt-get clean && \
-	rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
 
 # docker build -t workspace-base-test /workspace/base && \
 # docker run -it --rm -v /workspace:/workspace workspace-base-test bash
