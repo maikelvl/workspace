@@ -136,8 +136,13 @@ abstract class GitService {
 	public function addSsh()
 	{
 		$ssh = new Ssh();
+<<<<<<< HEAD
 		$ssh->setHost($this->shortName);
 		$ssh->setHostname($this->domain);
+=======
+		$ssh->host($this->shortName);
+		$ssh->hostname($this->domain);
+>>>>>>> 20637e24c38e6688f95ff06d2648f097c005fd97
 		$ssh->setUser($this->user);
 		$ssh->setPort($this->port);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
