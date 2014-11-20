@@ -20,53 +20,42 @@ abstract class GitService {
 	protected $existingKeys = NULL;
 	protected $serviceUser = NULL;
 	protected $repositories = NULL;
-	protected $config = array();
 
 	public function __construct(Git $git)
 	{
-		$this->config = $config = $git->serviceConfig($this->config_service_name);
+		$config = $git->serviceConfig($this->config_service_name);
 
 		if (array_key_exists('https', $config))
 		{
-			$this->setHttps($config['https']);
+			$this->https($config['https']);
 		}
 		
 		if (array_key_exists('domain', $config))
 		{
-			$this->setDomain($config['domain']);
+			$this->domain($config['domain']);
 		}
 
 		if (array_key_exists('user', $config))
 		{
-			$this->setUser($config['user']);
+			$this->user($config['user']);
 		}
 
 		if (array_key_exists('port', $config))
 		{
-			$this->setPort($config['port']);
+			$this->port($config['port']);
 		}
 		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->config_service_name;
-		$this->setShortName($shortName);
+		$this->shortName($shortName);
 
 		if (array_key_exists('token', $config))
 		{
-			$this->setToken($config['token']);
+			$this->token($config['token']);
 		}
 
 		if (array_key_exists('api-version', $config))
 		{
-			$this->setApiVersion($config['api-version']);
+			$this->apiVersion($config['api-version']);
 		}
-	}
-
-	public function config()
-	{
-		return $this->config;
-	}
-
-	public function baseUrl()
-	{
-		return 'http'.($this->https ? 's' : '').'://'.$this->domain;
 	}
 
 	public function register()
@@ -78,19 +67,19 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function setHttps($https)
+	public function https($https)
 	{
 		$this->https = $https;
 		return $this;
 	}
 
-	public function setDomain($domain)
+	public function domain($domain)
 	{
 		$this->domain = $domain;
 		return $this;
 	}
 
-	public function setUser($user)
+	public function user($user)
 	{
 		if (preg_match('/your-.*-here/i', $user))
 		{
@@ -100,24 +89,19 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function setPort($port)
+	public function port($port)
 	{
 		$this->port = $port;
 		return $this;
 	}
 
-	public function setShortName($shortName)
+	public function shortName($shortName)
 	{
 		$this->shortName = $shortName;
 		return $this;
 	}
 
-	public function shortName()
-	{
-		return $this->shortName;
-	}
-
-	public function setToken($token)
+	public function token($token)
 	{
 		if (preg_match('/your-.*-here/i', $token))
 		{
@@ -127,7 +111,7 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function setApiVersion($apiVersion)
+	public function apiVersion($apiVersion)
 	{
 		$this->apiVersion = $apiVersion;
 		return $this;
@@ -138,8 +122,8 @@ abstract class GitService {
 		$ssh = new Ssh();
 		$ssh->host($this->shortName);
 		$ssh->hostname($this->domain);
-		$ssh->setUser($this->user);
-		$ssh->setPort($this->port);
+		$ssh->user($this->user);
+		$ssh->port($this->port);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
 		$ssh->identityfile($identityfile);
 		$ssh->stricthostkeychecking(FALSE);
@@ -212,7 +196,7 @@ abstract class GitService {
 		}
 	}
 
-	public function getServicesetUser()
+	public function getServiceUser()
 	{
 		if ($this->serviceUser === NULL)
 		{
@@ -223,7 +207,7 @@ abstract class GitService {
 
 	public function getServiceUsername()
 	{
-		$user = $this->getServicesetUser();
+		$user = $this->getServiceUser();
 
 		if ( ! array_key_exists('username', $user))
 		{
