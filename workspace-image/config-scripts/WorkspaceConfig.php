@@ -53,7 +53,7 @@ class WorkspaceConfig {
 	{
 		if (is_dir('/workspace/.git'))
 		{
-			//return $this;
+			return $this;
 		}
 
 		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
