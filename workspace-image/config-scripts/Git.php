@@ -7,7 +7,7 @@ class Git {
 
 	public $logs = array();
 
-	public function __construct($config_file)
+	public function setConfigFile($config_file)
 	{
 		$this->config_file = $config_file;
 		$this->config = json_decode(file_get_contents($config_file), TRUE);
@@ -16,6 +16,7 @@ class Git {
 			Logger::log("There is an syntax error in your $config_file", 0);
 			exit;
 		}
+		return $this;
 	}
 
 	public function setUser()
@@ -56,13 +57,14 @@ class Git {
 		return $this->writeConfigItem('core.excludesfile', $file);
 	}
 
-	public function addServices()
+	public function serviceConfig($service_name)
 	{
-		foreach (array_key_exists('services', $this->config) ? $this->config['services'] : array() as $service => $config)
+		if ( ! array_key_exists($service_name, $this->config['services']))
 		{
-			$this->addService($service, $config);
+			throw new Exception("Missing service $service_name in ".$this->config_file, 1);
 		}
-		return $this;
+		
+		return $this->config['services'][$service_name];
 	}
 
 	private function writeConfigItem($key, $value)
@@ -73,85 +75,6 @@ class Git {
 			throw new Exception("Failed to write to git config", 1);
 		}
 		Logger::log("Set config $key = $value", 1);
-		return $this;
-	}
-
-	private function addService($host, $config)
-	{
-		if ($host == "github")
-		{
-			$service = new GitHub();
-		}
-		else if ($host == "gitlab")
-		{
-			$service = new GitLab();
-		}
-		else
-		{
-			throw new Exception("Unsupported service: $host", 1);
-		}
-
-		if (array_key_exists('https', $config))
-		{
-			$service->https($config['https']);
-		}
-		
-		if (array_key_exists('domain', $config))
-		{
-			$service->domain($config['domain']);
-		}
-
-		if (array_key_exists('user', $config))
-		{
-			$service->user($config['user']);
-		}
-
-		if (array_key_exists('port', $config))
-		{
-			$service->port($config['port']);
-		}
-		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $host;
-		$service->shortName($shortName);
-
-		if (array_key_exists('token', $config))
-		{
-			$service->token($config['token']);
-		}
-
-		if (array_key_exists('api-version', $config))
-		{
-			$service->apiVersion($config['api-version']);
-		}
-		
-		if ($service->addSsh())
-		{
-			$service->deleteDeletedWorkspaceSshKeys();
-		}
-
-		if( ! is_dir(CONFIG_DIR.'/.git') && array_key_exists('config-repo', $config))
-		{
-			$repo_name = $service->getServiceUsername().'/'.$config['config-repo'];
-			
-			if (array_search($repo_name, $service->getRepositories()) === FALSE)
-			{
-				Logger::log("No config repo $repo_name found on $host", 1);
-				return $this;
-			}
-
-			$config_repo = $shortName.':'.$repo_name.'.git';
-			$tmp_config_git_dir = CONFIG_DIR.'-git';
-			exec('git clone '.$config_repo.' '.$tmp_config_git_dir, $res);
-
-			if (is_dir($tmp_config_git_dir))
-			{
-				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
-				File::rrmdir($tmp_config_git_dir);
-				chdir(CONFIG_DIR);
-				exec('git reset --hard');
-			}
-			Logger::log("Cloned config repo $repo_name from $host", 1);
-		}
-		
 		return $this;
 	}
 }

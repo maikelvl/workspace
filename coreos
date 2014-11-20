@@ -104,16 +104,21 @@ then
 fi
 
 env="$(cat "$WORKSPACE/env.json")"
-function get_env()
+function get_json()
 {
     echo $1 | sed -e 's/^[{}]*//g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
 }
 
-provider="$(get_env 'provider')"
+provider="$(get_json "$env" 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
-if [ "$VAGRANT_HOME" == "" ] && [ ! -d "$HOME/.vagrant.d" ]
+if [ "$VAGRANT_HOME" == "" ]
 then
-	export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
+	if [ -d "$WORKSPACE/.vagrant.d" ]
+	then
+		export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
+	else
+		export VAGRANT_HOME="$HOME/.vagrant.d"
+	fi
 fi
 
 while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/workspace-image/config-boilerplate/git.json")" ]
