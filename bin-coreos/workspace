@@ -116,6 +116,7 @@ else
 fi
 workspace_base_image="$username/workspace"
 workspace_archive_dir="/workspace/.docker-images"
+workspace_image_latest_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-latest.tar"
 workspace_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
 workspace_rebuild_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
 NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${1:-1})"
@@ -151,7 +152,7 @@ then
         then
             no_cache="$no_cache=false"
         else
-            start_date=$(date)
+            start_date="$(date)"
         fi
         docker build \
             --tag "$workspace_base_image:$REBUILD_IMAGE_TAG" \
@@ -178,6 +179,14 @@ then
         fi
         info "Saving $workspace_base_image:$REBUILD_IMAGE_TAG to $workspace_rebuild_image_file"
         docker save --output "$workspace_rebuild_image_file" "$workspace_base_image:$REBUILD_IMAGE_TAG"
+        if [ "$REBUILD_IMAGE_TAG" != "latest" ]
+        then
+            if [ -f "$workspace_image_latest_file" ]
+            then
+                rm -f "$workspace_image_latest_file"
+            fi
+            docker save --output "$workspace_image_latest_file" "$workspace_base_image:latest"
+        fi
     else
         error "Sorry to say... but building $workspace_base_image:$REBUILD_IMAGE_TAG failed"
         exit

@@ -82,7 +82,6 @@ then
 fi
 
 USERNAME="${USERNAME:-me}"
-su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 
 if [ ! $(getent passwd "$USERNAME") ]
 then

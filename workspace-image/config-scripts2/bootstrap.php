@@ -34,11 +34,11 @@ $git->setConfigFile(CONFIG_DIR.'/git.json')
 	->writeIgnore(getenv('HOME')."/.config/git/ignore");
 
 $github = new GitHub($git);
-//$github->register();
+$github->register();
 
 $gitlab = new GitLab($git);
-//$gitlab->register();
+$gitlab->register();
 
-$config = new WorkspaceConfig($github, $gitlab);
-$config->setWorkspaceRepo($git);//->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->setZshrc();
+$config = new WorkspaceConfig();
+$config->setConfigRepo([$github, $gitlab])->setWorkspaceRepo()->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->setZshrc();
 Logger::log("end", 1);
