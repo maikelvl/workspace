@@ -34,7 +34,7 @@ class WorkspaceConfig {
 				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
 				File::rrmdir($tmp_config_git_dir);
 				chdir(CONFIG_DIR);
-				exec('git reset --hard');
+				#exec('git reset --hard');
 			}
 			Logger::log("Cloned config repo $repo_name from $host", 1);
 			return $this;
