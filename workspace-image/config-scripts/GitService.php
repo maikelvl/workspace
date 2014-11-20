@@ -1,6 +1,6 @@
 <?php
 
-class GitService {
+abstract class GitService {
 
 	protected $https = FALSE;
 	protected $domain;
