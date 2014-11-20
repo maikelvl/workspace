@@ -55,7 +55,7 @@ class WorkspaceConfig {
 <<<<<<< HEAD
 =======
 		{
-			//return $this;
+			return $this;
 		}
 
 		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
