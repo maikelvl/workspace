@@ -13,7 +13,7 @@ class GitLab extends GitService {
 	];
 	protected $postJson = TRUE;
 
-	public function apiVersion($apiVersion)
+	public function setApiVersion($apiVersion)
 	{
 		$this->apiVersion = $apiVersion;
 		$this->apiUri = "api/".$apiVersion;
