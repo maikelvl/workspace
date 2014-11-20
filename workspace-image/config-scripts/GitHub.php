@@ -2,6 +2,7 @@
 
 class GitHub extends GitService {
 
+	protected $config_service_name = 'github';
 	protected $https = TRUE;
 	protected $domain = 'github.com';
 	protected $user = 'git';

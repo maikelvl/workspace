@@ -69,9 +69,6 @@ do
 	/etc/my_init.d/"$file"
 done
 
-OH_MY_ZSH_GIT="https://github.com/crobays/oh-my-zsh.git"
-OH_MY_ZSH_THEME="crobays"
-
 if [ "$(echo $LOG | awk '{print tolower($0)}')" == "false" ] || [ "$LOG" == "0" ]
 then
 	LOG=""
@@ -85,6 +82,7 @@ then
 fi
 
 USERNAME="${USERNAME:-me}"
+su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 
 if [ ! $(getent passwd "$USERNAME") ]
 then
@@ -128,53 +126,10 @@ then
 	# Remove the need for entering a password at sudo
 	sed -i "s/%sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL) NOPASSWD: ALL/" /etc/sudoers
 
-	# Install oh-my-zsh
-	if [ ! -d "$CONFIG_DIR/oh-my-zsh" ]
-	then
-		if [ $LOG ]
-		then
-		    info "Cloning $OH_MY_ZSH_GIT ..."
-		fi
-		su "$USERNAME" --command "git clone $OH_MY_ZSH_GIT $CONFIG_DIR/oh-my-zsh"
-	fi
-
-	# Config oh-my-zsh
-	if [ ! -f "$CONFIG_DIR/zshrc" ]
-	then
-		cp -f "$CONFIG_DIR/oh-my-zsh/templates/zshrc.zsh-template" "$CONFIG_DIR/zshrc"
-		sed -i "s/export ZSH=\$HOME\/\.oh-my-zsh/export ZSH=${CONFIG_DIR//\//\\\/}\/oh-my-zsh/" "$CONFIG_DIR/zshrc"
-		sed -i "s/plugins=(git)/plugins=(git docker composer rvm)/" "$CONFIG_DIR/zshrc"
-		if [ "$OH_MY_ZSH_THEME" != "" ]
-		then
-			info "Set theme to $OH_MY_ZSH_THEME ..."
-			if [ -f "$CONFIG_DIR/oh-my-zsh/themes/$OH_MY_ZSH_THEME.zsh-theme" ]
-			then
-				sed -i "s/ZSH_THEME=\".*\"/ZSH_THEME=\"$OH_MY_ZSH_THEME\"/" "$CONFIG_DIR/zshrc"
-			else
-				echo "Unkown theme: $OH_MY_ZSH_THEME in $CONFIG_DIR/oh-my-zsh/themes"
-			fi
-		fi
-		if [ -f "$CONFIG_DIR/shell-profile-workspace" ]
-		then
-			echo 'source "$CONFIG_DIR/shell-profile-workspace"' >> "$CONFIG_DIR/zshrc"
-		fi
-	fi
-
-	ln --symbolic --force "$CONFIG_DIR/zshrc" "$userhome/.zshrc"
-
 	# Config
 	if [ -f "$SCRIPTS/config-scripts/bootstrap.php" ]
 	then
 		su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
-	fi
-
-	if [ ! -d "/workspace/.git" ] && [ -f "/workspace/.system/upstream-workspace-repo" ]
-	then
-		su "$USERNAME" --command "git clone \"$(cat /workspace/.system/upstream-workspace-repo)\" \"/workspace/.workspace-git\""
-		mv "/workspace/.workspace-git/.git" "/workspace/.git"
-		rm -rf "/workspace/.workspace-git"
-		rm -f "/workspace/.system/upstream-workspace-repo"
-		su "$USERNAME" --command "cd /workspace && git reset --hard"
 	fi
 
 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"

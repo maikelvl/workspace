@@ -25,11 +25,20 @@ require(__DIR__.'/GitLab.php');
 require(__DIR__.'/Ssh.php');
 require(__DIR__.'/Curl.php');
 require(__DIR__.'/File.php');
+require(__DIR__.'/WorkspaceConfig.php');
 
-$git = new Git(CONFIG_DIR.'/git.json');
-$git->setUser()
+$git = new Git();
+$git->setConfigFile(CONFIG_DIR.'/git.json')
+	->setUser()
 	->setPushBehavior()
-	->addServices()
 	->writeIgnore(getenv('HOME')."/.config/git/ignore");
 
+$github = new GitHub($git);
+$github->register();
+
+$gitlab = new GitLab($git);
+$gitlab->register();
+
+$config = new WorkspaceConfig();
+$config->setConfigRepo([$github, $gitlab])->setWorkspaceRepo()->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json')->setZshrc();
 Logger::log("end", 1);
