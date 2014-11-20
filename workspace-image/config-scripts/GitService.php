@@ -21,6 +21,52 @@ class GitService {
 	protected $serviceUser = NULL;
 	protected $repositories = NULL;
 
+	public function __construct(Git $git)
+	{
+		$config = $git->serviceConfig($this->config_service_name);
+
+		if (array_key_exists('https', $config))
+		{
+			$this->https($config['https']);
+		}
+		
+		if (array_key_exists('domain', $config))
+		{
+			$this->domain($config['domain']);
+		}
+
+		if (array_key_exists('user', $config))
+		{
+			$this->user($config['user']);
+		}
+
+		if (array_key_exists('port', $config))
+		{
+			$this->port($config['port']);
+		}
+		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->config_service_name;
+		$this->shortName($shortName);
+
+		if (array_key_exists('token', $config))
+		{
+			$this->token($config['token']);
+		}
+
+		if (array_key_exists('api-version', $config))
+		{
+			$this->apiVersion($config['api-version']);
+		}
+	}
+
+	public function register()
+	{
+		if ($this->addSsh())
+		{
+			$this->deleteDeletedWorkspaceSshKeys();
+		}
+		return $this;
+	}
+
 	public function https($https)
 	{
 		$this->https = $https;
