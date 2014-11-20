@@ -9,23 +9,23 @@ ENV TIMEZONE Etc/UTC
 
 # Update and server
 ADD /core /scripts/core
-RUN /scripts/core/update.sh
-RUN /scripts/core/dist-upgrade.sh
-RUN /scripts/core/build-essential.sh
-RUN /scripts/core/linux-image-extra.sh
+RUN /scripts/core/update.sh && \
+	/scripts/core/dist-upgrade.sh && \
+	/scripts/core/build-essential.sh && \
+	/scripts/core/linux-image-extra.sh
 
 # Utilities
 ADD /utilities /scripts/utilities
 
 # Essential
 ADD /essential /scripts/essential
-RUN /scripts/essential/curl.sh
-RUN /scripts/essential/vim.sh
-RUN /scripts/essential/rvm-ruby.sh stable
-RUN /scripts/essential/node.sh
-RUN /scripts/essential/bundler.sh
-RUN /scripts/essential/php.sh
-RUN /scripts/essential/pip.sh
+RUN /scripts/essential/curl.sh && \
+	/scripts/essential/vim.sh && \
+	/scripts/essential/rvm-ruby.sh stable && \
+	/scripts/essential/node.sh && \
+	/scripts/essential/bundler.sh && \
+	/scripts/essential/php.sh && \
+	/scripts/essential/pip.sh
 
 # Git
 ADD /git /scripts/git
@@ -37,16 +37,16 @@ RUN /scripts/terminal/zsh.sh
 
 # Docker
 ADD /docker /scripts/docker
-RUN /scripts/docker/docker.sh
-RUN /scripts/docker/fig.sh
-RUN /scripts/docker/maestro-ng.sh
+RUN /scripts/docker/docker.sh && \
+	/scripts/docker/fig.sh && \
+	/scripts/docker/maestro-ng.sh
 
 # Provider
 ADD /provider /scripts/provider
-RUN /scripts/provider/terraform.sh
-RUN /scripts/provider/dot.sh
-RUN /scripts/provider/packer.sh
-RUN /scripts/provider/tugboat.sh
+RUN /scripts/provider/terraform.sh && \
+	/scripts/provider/dot.sh && \
+	/scripts/provider/packer.sh && \
+	/scripts/provider/tugboat.sh
 
 # other
 ADD /other /scripts/other
