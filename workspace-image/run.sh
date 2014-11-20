@@ -53,21 +53,21 @@ then
 	SCRIPTS="/workspace/workspace-image"
 fi
 
-if [ ! -f "/usr/local/opt/curl-ca-bundle/share/ca-bundle.crt" ];then
-	apt-get install -y ca-certificates
-	mkdir -p /usr/local/opt/curl-ca-bundle/share
-	cp /etc/ssl/certs/ca-certificates.crt /usr/local/opt/curl-ca-bundle/share/ca-bundle.crt
-fi
+# if [ ! -f "/usr/local/opt/curl-ca-bundle/share/ca-bundle.crt" ];then
+# 	apt-get install -y ca-certificates
+# 	mkdir -p /usr/local/opt/curl-ca-bundle/share
+# 	cp /etc/ssl/certs/ca-certificates.crt /usr/local/opt/curl-ca-bundle/share/ca-bundle.crt
+# fi
 
-if [ ! -d "$CONFIG_DIR" ]
-then
-	cp -R /root/config-boilerplate "$CONFIG_DIR"
-fi
+# if [ ! -d "$CONFIG_DIR" ]
+# then
+# 	cp -R /root/config-boilerplate "$CONFIG_DIR"
+# fi
 
-for file in $(ls /etc/my_init.d)
-do
-	/etc/my_init.d/"$file"
-done
+# for file in $(ls /etc/my_init.d)
+# do
+# 	/etc/my_init.d/"$file"
+# done
 
 if [ "$(echo $LOG | awk '{print tolower($0)}')" == "false" ] || [ "$LOG" == "0" ]
 then
@@ -76,14 +76,13 @@ else
 	LOG=1
 fi
 
-if [ $TIMEZONE ] && [ -f "$SCRIPTS/config-scripts/php-timezone.sh" ]
-then
-	$SCRIPTS/config-scripts/php-timezone.sh
-fi
+# if [ $TIMEZONE ] && [ -f "$SCRIPTS/config-scripts/php-timezone.sh" ]
+# then
+# 	$SCRIPTS/config-scripts/php-timezone.sh
+# fi
 
 USERNAME="${USERNAME:-me}"
-
-if [ ! $(getent passwd "$USERNAME") ]
+if [ ! "$(getent passwd $USERNAME)" ]
 then
 	# Set root's password to 'root'
 	echo "root:root" | chpasswd
@@ -99,7 +98,7 @@ then
 	userhome="$(su "$USERNAME" --command "echo \$HOME")"
 	for i in $(ls -A $HOME)
 	do
-		cp --recursive --no-clobber "$HOME/$i" "$userhome/"
+		cp -R --no-clobber "$HOME/$i" "$userhome/"
 	done
 	chown --recursive "$USERNAME:$USERNAME" "$userhome"
 	chown --recursive "$USERNAME:$USERNAME" /usr/local/bin
@@ -125,13 +124,13 @@ then
 	# Remove the need for entering a password at sudo
 	sed -i "s/%sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL) NOPASSWD: ALL/" /etc/sudoers
 
-	# Config
+ 	# Config
 	if [ -f "$SCRIPTS/config-scripts/bootstrap.php" ]
 	then
 		su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 	fi
 
-	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
+ 	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
 fi
 
 cd "/workspace"

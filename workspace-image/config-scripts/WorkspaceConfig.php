@@ -98,29 +98,29 @@ class WorkspaceConfig {
 
 	public function setZshrc()
 	{
-		if (is_file($config_zshrc = CONFIG_DIR.'/zshrc'))
+		$user_zshrc = $_SERVER['HOME'].'/.zshrc';
+		$config_zshrc = CONFIG_DIR.'/zshrc';
+
+		if ( ! is_file($config_zshrc))
 		{
-			return $this;
+			$theme = 'crobays';
+			$plugins = array(
+				'git',
+				'docker',
+				'composer',
+				'rvm',
+			);
+			
+			$template = File::read(CONFIG_DIR.'/oh-my-zsh/templates/zshrc.zsh-template');	
+			
+			$template = preg_replace('/export\sZSH=.*/', 'export ZSH="$CONFIG_DIR/oh-my-zsh"', $template);
+			$template = preg_replace('/plugins=\(.*\)/', 'plugins=('.implode(' ', $plugins).')', $template);
+			is_file(CONFIG_DIR."/oh-my-zsh/themes/$theme.zsh-theme") && ($template = preg_replace('/ZSH_THEME=".*"/', "ZSH_THEME=\"$theme\"", $template));
+			is_file(CONFIG_DIR.'/shell-profile-workspace') && ($template .= 'source "$CONFIG_DIR/shell-profile-workspace"'."\n");
+
+			File::write($config_zshrc, $template);
 		}
-
-		$theme = 'crobays';
-		$plugins = array(
-			'git',
-			'docker',
-			'composer',
-			'rvm',
-		);
-		
-		$template = File::read(CONFIG_DIR.'/oh-my-zsh/templates/zshrc.zsh-template');	
-		
-		$template = preg_replace('/export\sZSH=.*/', 'export ZSH="$CONFIG_DIR/oh-my-zsh"', $template);
-		$template = preg_replace('/plugins=\(.*\)/', 'plugins=('.implode(' ', $plugins).')', $template);
-		is_file(CONFIG_DIR."/oh-my-zsh/themes/$theme.zsh-theme") && ($template = preg_replace('/ZSH_THEME=".*"/', "ZSH_THEME=\"$theme\"", $template));
-		is_file(CONFIG_DIR.'/shell-profile-workspace') && ($template .= 'source "$CONFIG_DIR/shell-profile-workspace"'."\n");
-
-		File::write($config_zshrc, $template);
-		
-		is_file($user_zshrc = $_SERVER['HOME'].'/.zshrc') && unlink($user_zshrc);
+		is_file($user_zshrc) && unlink($user_zshrc);
 		symlink($config_zshrc, $user_zshrc);
 		return $this;
 	}
