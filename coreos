@@ -113,12 +113,16 @@ provider="$(get_json "$env" 'provider')"
 export VAGRANT_DEFAULT_PROVIDER="${provider//-/_}"
 if [ "$VAGRANT_HOME" == "" ]
 then
-	if [ -d "$WORKSPACE/.vagrant.d" ]
+	vagrant_home="$WORKSPACE/.vagrant.d"
+	if [ ! -d "$HOME/.vagrant.d" ] && [ ! -d "$vagrant_home" ]
 	then
-		export VAGRANT_HOME="$WORKSPACE/.vagrant.d"
-	else
-		export VAGRANT_HOME="$HOME/.vagrant.d"
+		mkdir "$vagrant_home"
 	fi
+	if [ ! -d "$vagrant_home" ]
+	then
+		vagrant_home="$HOME/.vagrant.d"
+	fi
+	export VAGRANT_HOME="$vagrant_home"
 fi
 
 while [ "$(cat "$WORKSPACE/config/git.json")" == "$(cat "$WORKSPACE/workspace-image/config-boilerplate/git.json")" ]
