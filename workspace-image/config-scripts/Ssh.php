@@ -15,31 +15,31 @@ class Ssh {
 		$this->ssh_config = getenv('HOME').'/.ssh/config';
 	}
 
-	public function host($host)
+	public function setHost($host)
 	{
 		$this->host = $host;
 		return $this;
 	}
 
-	public function hostname($hostname)
+	public function setHostname($hostname)
 	{
 		$this->hostname = $hostname;
 		return $this;
 	}
 
-	public function user($user)
+	public function setUser($user)
 	{
 		$this->user = $user;
 		return $this;
 	}
 
-	public function port($port)
+	public function setPort($port)
 	{
 		$this->port = $port;
 		return $this;
 	}
 
-	public function identityfile($identityfile)
+	public function setIdentityfile($identityfile)
 	{
 		$this->identityfile = $identityfile;
 		if ( ! is_file($identityfile))
@@ -50,7 +50,7 @@ class Ssh {
 		return $this;
 	}
 
-	public function stricthostkeychecking($stricthostkeychecking)
+	public function setStricthostkeychecking($stricthostkeychecking)
 	{
 		$this->stricthostkeychecking = $stricthostkeychecking ? $stricthostkeychecking : 'no';
 		return $this;

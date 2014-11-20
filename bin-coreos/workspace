@@ -92,16 +92,16 @@ function error ()
 }
 
 env="$(cat '/workspace/env.json')"
-function get_env()
+function get_json()
 {
-    echo $env | sed -e 's/[{}]/''/g' | awk -F=':' -v RS=',' "\$1~/\"$1\"/ {print}" | sed -e "s/\"$1\"://" | tr -d "\n\t\" "
+    echo $1 | sed -e 's/^[{}]*//g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
 }
 
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="latest"
 fi
-username="$(get_env 'username')"
+username="$(get_json "$env" 'username')"
 if [ ! -d /workspace/workspace-image ]
 then
     username="crobays"
@@ -208,6 +208,7 @@ fi
 
 container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
 
+username="$(get_json "$env" 'username')"
 if [ "$container_state_running" == "" ]
 then
     docker run \
@@ -218,22 +219,21 @@ then
         --env "CONFIG_DIR=/workspace/config" \
         --env "LOG_LEVEL=1" \
         --env "DOCKER_NAME=$NAME" \
-        --env "TIMEZONE=$(get_env 'timezone')" \
-        --env "USERNAME=$(get_env 'username')" \
+        --env "TIMEZONE=$(get_json "$env" 'timezone')" \
+        --env "USERNAME=$username" \
         --interactive \
         --tty \
-        --detach \
         "$workspace_base_image:$IMAGE_TAG"
 elif [ "$container_state_running" == "false" ]
 then
     docker start \
         --interactive \
         "$NAME"
-fi
-
-docker exec \
+elif [ "$container_state_running" == "true" ]
+then
+    docker exec \
         --interactive \
         --tty \
         "$NAME" \
         "$(docker inspect --format='{{(index .Config.Entrypoint 0)}}' "$NAME")"
-
+fi
