@@ -52,26 +52,15 @@ class WorkspaceConfig {
 	public function setWorkspaceRepo()
 	{
 		if (is_dir('/workspace/.git'))
-<<<<<<< HEAD
-=======
-		{
-			//return $this;
-		}
-
-		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
->>>>>>> 20637e24c38e6688f95ff06d2648f097c005fd97
 		{
 			return $this;
 		}
-
-<<<<<<< HEAD
+		
 		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
 		{
 			return $this;
 		}
-
-=======
->>>>>>> 20637e24c38e6688f95ff06d2648f097c005fd97
+		
 		# Replace the front repo url with the short name for using SSH
 		$repo_url = File::read($upstream_repo);
 		foreach($this->services as $service)
