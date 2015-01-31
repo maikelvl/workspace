@@ -29,7 +29,7 @@ RUN /scripts/essential/curl.sh && \
 
 # Git
 ADD /git /scripts/git
-RUN /scripts/git/git.sh 2.1
+RUN /scripts/git/git.sh 2
 
 # Terminal
 ADD /terminal /scripts/terminal
@@ -52,6 +52,7 @@ RUN /scripts/provider/terraform.sh && \
 ADD /other /scripts/other
 RUN /scripts/other/tree.sh && \
 	/scripts/other/bower.sh && \
+	/scripts/other/ember-cli.sh && \
 	/scripts/other/composer.sh && \
 	/scripts/other/laravel-installer.sh
 

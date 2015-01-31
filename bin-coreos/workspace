@@ -162,7 +162,7 @@ then
 
     if [ "$(docker inspect $workspace_base_image:$REBUILD_IMAGE_TAG 2>/dev/null)" != "[]" ]
     then
-        if [ $start_date ]
+        if [ "$start_date" != "" ]
         then
             echo "Started: $start_date"
             echo "Ended:   $(date)"
@@ -170,7 +170,7 @@ then
 
         if [ "$REBUILD_IMAGE_TAG" != "latest" ]
         then
-            docker tag "$workspace_base_image:$REBUILD_IMAGE_TAG" "$workspace_base_image:latest"
+            docker tag -f "$workspace_base_image:$REBUILD_IMAGE_TAG" "$workspace_base_image:latest"
         fi
 
         if [ -f "$workspace_image_file" ]
