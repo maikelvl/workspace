@@ -6,4 +6,6 @@
 /docker
 /projects
 /env.json
+/workspace-image/docker/docker-version
 /workspace.sublime-workspace
+*.log

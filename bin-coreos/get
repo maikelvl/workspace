@@ -8,24 +8,29 @@ usage: $(basename $0) options IMAGE
 Image version defaults to :latest
 
 OPTIONS:
-   -h (help)       Show this message
-   -R (remake)     Rebuild or repull image
-   -p (save-path)  Path where images tars are stored, defaults to $ARCHIVE_PATH
-   -n (no-save)    Do not save the image to the tar archive
-
+   -h (help)                    Show this message
+   -r (remake)                  Rebuild or repull image
+   -R (remake without cache)    Do not use cache when building
+   -p (save-path)               Path where images tars are stored, defaults to $ARCHIVE_PATH
+   -n (no-save)                 Do not save the image to the tar archive
 EOF
 }
 count=0
 docker_dir="/workspace/docker"
 ARCHIVE_PATH="/workspace/.docker-images"
-while getopts “hRp:n” OPTION
+NO_CACHE=false
+while getopts “hrRp:n” OPTION
 do
     case $OPTION in
         h)
             usage
             exit 1
             ;;
+        r)
+            REMAKE=1
+            ;;
         R)
+            NO_CACHE=true
             REMAKE=1
             ;;
         p)
@@ -122,11 +127,12 @@ then
         info "Loading $image from $tar..."
         docker load --input "$tar" || exit
         action="load"
-    elif [ "$image_base_name:latest" == "$image" ] && [ -f "$docker_dir/$image_base_name/Dockerfile" ]
+    elif [ -f "$docker_dir/$image_base_name/Dockerfile" ]
     then
         info "Building $image..."
         docker build \
-            --tag "$image_base_name:latest" \
+            --no-cache=$NO_CACHE \
+            --tag "$image" \
             "$docker_dir/$image_base_name" || exit
         action="build"
     else
