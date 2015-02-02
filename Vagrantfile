@@ -106,7 +106,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       coreos.vm.provision :shell, inline: 'timedatectl set-timezone "'+$env['timezone']+'"'
 
       if i == 1
-        coreos.vm.synced_folder '.', '/workspace', id: 'core', type: => 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
+        coreos.vm.synced_folder '.', '/workspace', id: 'core', type: 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
         coreos.vm.provision :shell, inline: '
           if [ ! -L /opt/bin ];then
             mkdir /opt && ln --symbolic --force /workspace/bin-coreos /opt/bin
