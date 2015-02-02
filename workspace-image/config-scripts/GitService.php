@@ -112,11 +112,6 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function shortName()
-	{
-		return $this->shortName;
-	}
-
 	public function setToken($token)
 	{
 		if (preg_match('/your-.*-here/i', $token))
@@ -210,6 +205,16 @@ abstract class GitService {
 				$this->deleteSshKey($key['id'], $key['title']);
 			}
 		}
+	}
+
+	public function getShortName()
+	{
+		return $this->shortName;
+	}
+
+	public function getDomain()
+	{
+		return $this->domain;
 	}
 
 	public function getServicesetUser()
