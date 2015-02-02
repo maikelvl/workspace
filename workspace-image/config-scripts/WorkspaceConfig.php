@@ -87,7 +87,9 @@ class WorkspaceConfig {
 		chdir('/workspace');
 		exec('git reset --hard');
 		if ($short_name)
-		exec("git remote rename origin \"$short_name\"");
+		{
+			exec("git remote rename origin \"$short_name\"");
+		}
 	}
 
 	public function installOhMyZsh($config_file)
