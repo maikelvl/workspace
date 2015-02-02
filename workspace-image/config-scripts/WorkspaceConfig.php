@@ -24,7 +24,7 @@ class WorkspaceConfig {
 			}
 
 			$repo_name = $service->getServiceUsername().'/'.$config['config-repo'];
-			
+			$host = $service->getDomain();
 			if (array_search($repo_name, $service->getRepositories()) === FALSE)
 			{
 				Logger::log("No config repo $repo_name found on $host", 1);
@@ -55,7 +55,7 @@ class WorkspaceConfig {
 		{
 			return $this;
 		}
-		
+
 		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
 		{
 			return $this;
@@ -63,21 +63,31 @@ class WorkspaceConfig {
 		
 		# Replace the front repo url with the short name for using SSH
 		$repo_url = File::read($upstream_repo);
+		$short_name = FALSE;
 		foreach($this->services as $service)
 		{
-			$new_repo_url = str_replace($service->baseUrl().'/', $service->shortName().':', $repo_url);
+			$new_repo_url = str_replace($service->baseUrl().'/', $service->getShortName().':', $repo_url);
 			if($new_repo_url != $repo_url)
 			{
 				$repo_url = $new_repo_url;
+				$short_name = $service->getShortName();
 				break;
 			}
 		}
-		
-		exec("git clone \"$repo\" \"/workspace/.workspace-git\"");
+
+		Logger::log("Cloning $repo_url");
+		exec("git clone $repo_url /workspace/.workspace-git");
+		if( ! is_dir("/workspace/.workspace-git/.git"))
+		{
+			Logger::log("Fail to clone $repo_url");
+			return $this;
+		}
 		rename("/workspace/.workspace-git/.git", "/workspace/.git");
 		File::rrmdir("/workspace/.workspace-git");
 		chdir('/workspace');
 		exec('git reset --hard');
+		if ($short_name)
+		exec("git remote rename origin \"$short_name\"");
 	}
 
 	public function installOhMyZsh($config_file)
