@@ -1,4 +1,8 @@
 #!/bin/bash
+
+# TODO:
+# - Fix bug where at failing importing tar image, after rebuilding image is saved without version (:latest, :nr)
+
 usage()
 {
 cat << EOF
@@ -15,12 +19,13 @@ OPTIONS:
 	-p (provision)      Provision the instance
 	-d (destroy)        Kill and destroy instance
 	-s (status)         See Vagrants global status
+	-v (debug)			Vagrant debug mode
 
 EOF
 }
 
 count=0
-while getopts "hc:rRpds" OPTION
+while getopts "hc:rRpdsv" OPTION
 do
 	case $OPTION in
 		h|help)
@@ -44,6 +49,9 @@ do
 			;;
 		s|status)
 			STATUS=1
+			;;
+		v|verbose|debug)
+			DEBUG="--debug"
 			;;
 		?)
 			usage
@@ -239,11 +247,11 @@ status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" != "$status" ]
 then
 	info "Resuming coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE"
+	vagrant up "coreos-$INSTANCE" $DEBUG
 elif [ "${status/not created/}" != "$status" ]
 then
 	info "Creating coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE"
+	vagrant up "coreos-$INSTANCE" $DEBUG
 else
 	if [ "$INSTANCE" == "01" ] && [ "$(vagrant ssh --command "ls -A /workspace" "coreos-$INSTANCE")" == "" ]
 	then
