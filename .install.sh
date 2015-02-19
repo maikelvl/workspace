@@ -47,7 +47,7 @@ function start ()
 	then
 		install_vagrant
 	fi
-
+	
 	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
 		install_virtualbox
@@ -236,20 +236,18 @@ function install_vagrant ()
 	# -- install Vagrant ------------------------------------------------------------
 	application_name="Vagrant"
 	command="vagrant"
+	
 	download_and_install \
 		"$command" \
 		"http://www.vagrantup.com/downloads" \
 		"vagrant*.dmg" \
 		"" \
 		"$application_name"
+	
+	add_to_uninstaller "trash \"/opt/$command\""
 
-	command_location="$(which $command)"
-	if [ -d "$HOME/Applications" ]
-	then
-		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
-		sudo ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
-		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
-	fi
+	# trash the /opt folder if it's empty
+	add_to_uninstaller "if [ \"\$(ls -A /opt)\" == \"\" ];then sudo rmdir \"/opt\";fi"
 
 	sed -i "" "s/read my_answer/my_answer=\"Yes\"/" "$WORKSPACE/.system/uninstall-vagrant.sh"
 	sed -i "" "s/key_exit 0/#key_exit 0/" "$WORKSPACE/.system/uninstall-vagrant.sh"
@@ -257,6 +255,8 @@ function install_vagrant ()
 	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
 	add_to_uninstaller "echo \"Continue uninstalling...\""
 	add_to_uninstaller "trash \"$command_location\""
+
+	info "Vagant installed"
 }
 
 function install_virtualbox ()
