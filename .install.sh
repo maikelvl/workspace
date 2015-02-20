@@ -140,7 +140,7 @@ function set_up_workspace()
 function generate_environment_file()
 {
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:01:01"
-	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": 512,\n\"cpus\": 1,\n\"network\": \"public\",\n\"network-interface\": false,\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": 512,\n\"cpus\": 1,\n\"network\": \"public\",\n\"network-interface\": \"en0: Wi-Fi (Airport)\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 }
 
 function set_up_config()
