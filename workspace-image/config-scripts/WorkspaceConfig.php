@@ -78,7 +78,7 @@ class WorkspaceConfig {
 		}
 		
 		# Replace the front repo url with the short name for using SSH
-		$repo_url = File::read($upstream_repo);
+		$repo_url = trim(File::read($upstream_repo));
 		$short_name = FALSE;
 		foreach($this->services as $service)
 		{
@@ -97,15 +97,15 @@ class WorkspaceConfig {
 		}
 
 		Logger::log("Cloning $repo_url");
-		exec("cd /workspace && git clone $repo_url");
+		exec("git clone $repo_url /workspace/.workspace-git");
 		sleep(5);
-		if( ! is_dir("/workspace/workspace/.git"))
+		if( ! is_dir("/workspace/.workspace-git/.git"))
 		{
 			Logger::log("Fail to clone $repo_url");
 			return $this;
 		}
-		rename("/workspace/workspace/.git", "/workspace/.git");
-		File::rrmdir("/workspace/workspace");
+		rename("/workspace/.workspace-git/.git", "/workspace/.git");
+		File::rrmdir("/workspace/.workspace-git");
 		chdir('/workspace');
 		exec('git reset --hard');
 		if ($short_name)
