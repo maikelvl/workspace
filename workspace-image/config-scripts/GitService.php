@@ -64,11 +64,6 @@ abstract class GitService {
 		return $this->config;
 	}
 
-	public function baseUrl()
-	{
-		return 'http'.($this->https ? 's' : '').'://'.$this->domain;
-	}
-
 	public function register()
 	{
 		if ($this->addSsh())
@@ -217,7 +212,7 @@ abstract class GitService {
 		return $this->domain;
 	}
 
-	public function getServicesetUser()
+	public function getServiceUser()
 	{
 		if ($this->serviceUser === NULL)
 		{
@@ -228,14 +223,14 @@ abstract class GitService {
 
 	public function getServiceUsername()
 	{
-		$user = $this->getServicesetUser();
+		$user = $this->getServiceUser();
 
-		if ( ! array_key_exists('username', $user))
+		if (array_key_exists('username', $user))
 		{
-			throw new Exception("Could not get user from ".get_called_class(), 1);
+			return $user['username'];
 		}
-
-		return $user['username'];
+		
+		return '';//throw new Exception("Could not get Git user from ".get_called_class(), 1);
 	}
 
 	public function getRepositories()
@@ -249,12 +244,27 @@ abstract class GitService {
 
 	protected function getProtocol()
 	{
-		return $this->https ? 'https' : 'http';
+		return 'http'.($this->https ? 's' : '');
+	}
+
+	public function getBaseUrl()
+	{
+		return $this->getProtocol().'://'.$this->domain;
+	}
+
+	public function getShortRepoUrl($repo_url)
+	{
+		$new_repo_url = str_replace($this->getBaseUrl().'/', $this->getShortName().':', $repo_url);
+		if ($new_repo_url == $repo_url)
+		{
+			return FALSE;
+		}
+		return $new_repo_url;
 	}
 
 	protected function getApiUrl()
 	{
-		$domain = $this->domain;
+		$domain = $this->getDomain();
 		if ($this->apiSubDomain)
 		{
 			$domain = $this->apiSubDomain.'.'.$domain;

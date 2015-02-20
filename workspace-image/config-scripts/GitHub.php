@@ -20,12 +20,12 @@ class GitHub extends GitService {
 	{
 		$user = $this->getServiceUser();
 		
-		if ( ! array_key_exists('login', $user))
+		if (array_key_exists('login', $user))
 		{
-			throw new Exception("Could not get user from ".get_called_class(), 1);
+			return $user['login'];
 		}
 
-		return $user['login'];
+		return '';//throw new Exception("Could not get Github user from ".get_called_class(), 1);
 	}
 
 	public function getRepositories()
