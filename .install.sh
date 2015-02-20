@@ -29,7 +29,7 @@ function start ()
 		warning "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
 		exit
 	fi
-	
+
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
 		uninstall_previous_workspace
@@ -42,7 +42,7 @@ function start ()
 	add_shell_profile_to_bash_profile
 	set_up_config
 	set_up_projects
-	
+
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
@@ -140,7 +140,7 @@ function set_up_workspace()
 function generate_environment_file()
 {
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:01:01"
-	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": 512,\n\"cpus\": 1,\n\"network\": \"public\",\n\"network-interface\": \"en0: Wi-Fi (Airport)\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": 1024,\n\"cpus\": 2,\n\"network\": \"public\",\n\"network-interface\": \"en0: Wi-Fi (Airport)\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 }
 
 function set_up_config()
