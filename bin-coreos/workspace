@@ -101,7 +101,7 @@ if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="latest"
 fi
-username="$(get_json "$env" 'username')"
+username="crobays" #"$(get_json "$env" 'username')"
 if [ ! -d /workspace/workspace-image ]
 then
     username="crobays"
