@@ -98,7 +98,6 @@ class WorkspaceConfig {
 
 		Logger::log("Cloning $repo_url");
 		exec("git clone $repo_url /workspace/.workspace-git");
-		sleep(5);
 		if( ! is_dir("/workspace/.workspace-git/.git"))
 		{
 			Logger::log("Fail to clone $repo_url");
@@ -143,7 +142,6 @@ class WorkspaceConfig {
 
 		Logger::log("Cloning $repo_url ...");
 		exec("git clone $repo_url ".CONFIG_DIR."/oh-my-zsh");
-		sleep(5);
 		if ($short_name)
 		{
 			exec("git remote set-url origin \"$repo_url\"");
