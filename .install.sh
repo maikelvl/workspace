@@ -29,7 +29,7 @@ function start ()
 		warning "Invalid provider: $PROVIDER: use virtualbox or vmware-fusion"
 		exit
 	fi
-
+	
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
 		uninstall_previous_workspace
@@ -42,7 +42,7 @@ function start ()
 	add_shell_profile_to_bash_profile
 	set_up_config
 	set_up_projects
-
+	
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
@@ -614,8 +614,10 @@ function install()
 			volume_path="/Volumes/$volume_name"
 			hdiutil attach -mountpoint "$volume_path" "$package"
 			osascript -e 'tell application "Finder"' -e 'close front window' -e 'end tell'
-			echo "Please wait a sec..."
-			sudo cp -rf $volume_path/* $extraction_path/
+			echo "Copying DMG content to $extraction_path. Please wait a sec..."
+			sudo cp -rf $volume_path/*.pkg $extraction_path/
+			sudo cp -rf $volume_path/*.tool $extraction_path/
+			echo "Detaching $volume_path"
 			hdiutil detach "$volume_path"
 			;;
 		zip)
@@ -658,6 +660,7 @@ function install()
 	app="$(ls $extraction_path | grep .app | head -1)"
 	if [ "$pkg" != "" ]
 	then
+		echo "Installing package $extraction_path/$pkg..."
 		sudo installer -verboseR -pkg "$extraction_path/$pkg" -target /
 		uninstall_script="$(ls $extraction_path | grep .tool | head -1)"
 		if [ "$uninstall_script" != "" ]
@@ -677,6 +680,7 @@ function install()
 		dest_app_path="$dest_application_path/$(basename "$app_path")"
 		if [ "$app_path" != "$dest_app_path" ]
 		then
+			echo "Moving $app_path to $dest_app_path..."
 			sudo mv -f "$app_path" "$dest_app_path"
 		fi
 
