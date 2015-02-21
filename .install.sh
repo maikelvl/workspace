@@ -167,7 +167,12 @@ function add_shell_profile_to_bash_profile ()
 	bash_profile_file="$HOME/.bash_profile"
 	start_line="# === Workspace ${WORKSPACE/$HOME/~} aliases start ==="
 	end_line="# === Workspace ${WORKSPACE/$HOME/~} aliases end ==="
-	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\"\nalias workspace=\"cd \$WORKSPACE && \$WORKSPACE/coreos -c workspace\"\n$end_line"
+	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\"\nalias workspace=\"cd \$WORKSPACE && \$WORKSPACE/coreos -c workspace\""
+	if [ "$VAGRANT_HOME" == "$WORKSPACE/.vagrant.d" ]
+	then
+		add_bash_line="$add_bash_line\nexport VAGRANT_HOME=\"\$WORKSPACE/.vagrant.d\""
+	fi
+	add_bash_line="$add_bash_line\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
 		bash_profile="$(cat "$bash_profile_file")"
