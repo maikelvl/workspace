@@ -130,9 +130,10 @@ abstract class GitService {
 		$ssh->setUser($this->user);
 		$ssh->setPort($this->port);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
+		$workspace_identityfile = CONFIG_DIR.'/.ssh/'.basename($identityfile);
 		if ( ! $this->token)
 		{
-			$identityfile = CONFIG_DIR.'/.ssh/'.basename($identityfile);
+			$identityfile = $workspace_identityfile;
 		}
 		$ssh->setIdentityfile($identityfile);
 		$ssh->setStricthostkeychecking(FALSE);
@@ -143,11 +144,14 @@ abstract class GitService {
 
 		if ( ! $this->token)
 		{
-			Logger::log(
-				"\n"."The following public key is stored in ".dirname($identityfile).". Add this key to your ".get_called_class().": ".$this->getBaseUrl().$this->ssh_keys_uri.
-				"\n\n".file_get_contents($identityfile.'.pub')
-			, 0);
+			Logger::log("The following public key is stored in ".dirname($identityfile).". Add this key to your ".get_called_class().": ".$this->getBaseUrl().$this->ssh_keys_uri, 0);
+			Logger::log(file_get_contents($identityfile.'.pub'), 0);
 			return FALSE;
+		}
+
+		if (is_file($workspace_identityfile))
+		{
+			Logger::log("A new SSH key pair is generated inside the container at ~/.ssh/. You can safely delete $workspace_identityfile", 0);
 		}
 
 		$existingKeys = $this->listKeys();

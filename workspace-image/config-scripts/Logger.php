@@ -4,9 +4,9 @@ class Logger {
 
 	static public function log($msg, $level = 1)
 	{
-		if ($level == 0)
+		if ($level == 0 && $level >= LOG_LEVEL)
 		{
-			echo $msg."\n";
+			echo "\n".$msg."\n\n";
 			return;
 		}
 
