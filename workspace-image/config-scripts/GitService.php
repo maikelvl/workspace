@@ -6,7 +6,8 @@ abstract class GitService {
 	protected $domain;
 	protected $user = 'git';
 	protected $port = 22;
-	protected $shortName;
+	protected $shortName = FALSE;
+	protected $remoteName = FALSE;
 	protected $tokenParam;
 	protected $token;
 	protected $apiSubDomain;
@@ -46,6 +47,11 @@ abstract class GitService {
 		}
 		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
 		$this->setShortName($shortName);
+
+		if (array_key_exists('remote-name', $config))
+		{
+			$this->setRemoteName($config['remote-name']);
+		}
 
 		if (array_key_exists('token', $config))
 		{
@@ -103,6 +109,12 @@ abstract class GitService {
 	public function setShortName($shortName)
 	{
 		$this->shortName = $shortName;
+		return $this;
+	}
+
+	public function setRemoteName($remoteName)
+	{
+		$this->remoteName = $remoteName;
 		return $this;
 	}
 
@@ -215,6 +227,11 @@ abstract class GitService {
 	public function getShortName()
 	{
 		return $this->shortName;
+	}
+
+	public function getRemoteName()
+	{
+		return $this->remoteName;
 	}
 
 	public function getDomain()
