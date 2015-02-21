@@ -14,37 +14,42 @@ OPTIONS:
     -R [tag] (rebuild)  Rebuild workspace image from Dockerfile with new tag
     -c (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
+    -l (log level)      Log level 1: Actions 2: with execs and curls
 
 EOF
 }
 BASE_NAME="workspace"
+LOG_LEVEL="0"
 count=0
-while getopts “ht:rR:cd” OPTION
+while getopts “ht:rR:cdl:” OPTION
 do
          case $OPTION in
-                 h)
-                         usage
-                         exit 1
-                         ;;
-                 t)
-                         IMAGE_TAG="$OPTARG"
-                         ;;
-                 r)
-                         RERUN_CONTAINER=1
-                         ;;
-                 R)
-                         REBUILD_IMAGE_TAG="$OPTARG"
-                         ;;
-                 c)
-                         USE_CACHE=1
-                         ;;
-                 d)
-                         DESTROY=1
-                         ;;
-                 ?)
-                         usage
-                         exit
-                         ;;
+            h)
+                usage
+                exit 1
+                ;;
+            t)
+                IMAGE_TAG="$OPTARG"
+                ;;
+            r)
+                RERUN_CONTAINER=1
+                ;;
+            R)
+                REBUILD_IMAGE_TAG="$OPTARG"
+                ;;
+            c)
+                USE_CACHE=1
+                ;;
+            d)
+                DESTROY=1
+                ;;
+            l)
+                LOG_LEVEL="$OPTARG"
+                ;;
+            ?)
+                usage
+                exit
+                ;;
          esac
         count=`expr $count + 1`
         if [ "$OPTARG" ]
@@ -97,11 +102,19 @@ function get_json()
     echo $1 | sed -e 's/^[{}]*//g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
 }
 
+function log()
+{
+    if [ "$LOG_LEVEL" == "1" ]
+    then
+        echo $1
+    fi
+}
+
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="latest"
 fi
-username="$(get_json "$env" 'username')"
+username="crobays" #"$(get_json "$env" 'username')"
 if [ ! -d /workspace/workspace-image ]
 then
     username="crobays"
@@ -201,6 +214,13 @@ then
     exit
 fi
 
+lock="/workspace/.system/git.json.lock"
+truth="/workspace/config/git.json"
+if [ ! $RERUN_CONTAINER ] && [ "$(cat $lock)" != "$(cat $truth)" ]
+then
+    RERUN_CONTAINER=1
+fi
+
 if [ $RERUN_CONTAINER ]
 then
     docker rm -f "$NAME" 2>/dev/null
@@ -211,13 +231,15 @@ container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 
 username="$(get_json "$env" 'username')"
 if [ "$container_state_running" == "" ]
 then
+    log "docker run"
     docker run \
         --name "$NAME" \
         --hostname "$HOSTNAME-$NAME" \
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --env "CONFIG_DIR=/workspace/config" \
-        --env "LOG_LEVEL=1" \
+        --env "SYSTEM_DIR=/workspace/.system" \
+        --env "LOG_LEVEL=$LOG_LEVEL" \
         --env "DOCKER_NAME=$NAME" \
         --env "TIMEZONE=$(get_json "$env" 'timezone')" \
         --env "USERNAME=$username" \
@@ -226,11 +248,13 @@ then
         "$workspace_base_image:$IMAGE_TAG"
 elif [ "$container_state_running" == "false" ]
 then
+    log "docker start"
     docker start \
         --interactive \
         "$NAME"
 elif [ "$container_state_running" == "true" ]
 then
+    log "docker exec"
     docker exec \
         --interactive \
         --tty \

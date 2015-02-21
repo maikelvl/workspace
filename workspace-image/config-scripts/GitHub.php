@@ -2,13 +2,14 @@
 
 class GitHub extends GitService {
 
-	protected $config_service_name = 'github';
+	protected $service_name = 'github';
 	protected $https = TRUE;
 	protected $domain = 'github.com';
 	protected $user = 'git';
 	protected $port = 22;
 	protected $apiSubDomain = 'api';
 	protected $tokenParam = 'access_token';
+	protected $ssh_keys_uri = '/settings/ssh';
 	protected $apiUris = [
 		'user-keys' => 'user/keys',
 		'user' => 'user',
@@ -20,12 +21,12 @@ class GitHub extends GitService {
 	{
 		$user = $this->getServiceUser();
 		
-		if ( ! array_key_exists('login', $user))
+		if (array_key_exists('login', $user))
 		{
-			throw new Exception("Could not get user from ".get_called_class(), 1);
+			return $user['login'];
 		}
 
-		return $user['login'];
+		return '';//throw new Exception("Could not get Github user from ".get_called_class(), 1);
 	}
 
 	public function getRepositories()

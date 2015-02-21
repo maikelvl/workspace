@@ -10,3 +10,4 @@
 /workspace.sublime-workspace
 *.log
 *.tar
+*.nfs*

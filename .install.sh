@@ -1,7 +1,7 @@
 #!/bin/bash
 
-#WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
-WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
+WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
+#WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
 #VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
 VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.5-2209127.dmg"
 SILENT_LEVEL=1 # 0 = none, 1 = only downloads, 2 = all requests
@@ -47,7 +47,8 @@ function start ()
 	then
 		install_vagrant
 	fi
-
+	vagrant plugin install vagrant-triggers
+	
 	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
 		install_virtualbox
@@ -139,8 +140,17 @@ function set_up_workspace()
 
 function generate_environment_file()
 {
+	instances="1"
+	memory="1024"
+	cpus="2"
+	network="public"
+	network_interface="en0: Wi-Fi (Airport)"
+	if [ "$PROVIDER" == "virtualbox" ]
+	then
+		network="private"
+	fi
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:01:01"
-	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": 512,\n\"cpus\": 1,\n\"network\": \"private\",\n\"network-interface\": false,\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"instances\": $instances,\n\"memory\": $memory,\n\"cpus\": $cpus,\n\"network\": \"$network\",\n\"network-interface\": \"$network_interface\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 }
 
 function set_up_config()
@@ -236,20 +246,18 @@ function install_vagrant ()
 	# -- install Vagrant ------------------------------------------------------------
 	application_name="Vagrant"
 	command="vagrant"
+	
 	download_and_install \
 		"$command" \
 		"http://www.vagrantup.com/downloads" \
 		"vagrant*.dmg" \
 		"" \
 		"$application_name"
+	
+	add_to_uninstaller "trash \"/opt/$command\""
 
-	command_location="$(which $command)"
-	if [ -d "$HOME/Applications" ]
-	then
-		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
-		sudo ln -sf "$HOME/Applications/$application_name/bin/$command" "$command_location"
-		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
-	fi
+	# trash the /opt folder if it's empty
+	add_to_uninstaller "if [ \"\$(ls -A /opt)\" == \"\" ];then sudo rmdir \"/opt\";fi"
 
 	sed -i "" "s/read my_answer/my_answer=\"Yes\"/" "$WORKSPACE/.system/uninstall-vagrant.sh"
 	sed -i "" "s/key_exit 0/#key_exit 0/" "$WORKSPACE/.system/uninstall-vagrant.sh"
@@ -257,6 +265,8 @@ function install_vagrant ()
 	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
 	add_to_uninstaller "echo \"Continue uninstalling...\""
 	add_to_uninstaller "trash \"$command_location\""
+
+	info "Vagant installed"
 }
 
 function install_virtualbox ()
@@ -614,8 +624,10 @@ function install()
 			volume_path="/Volumes/$volume_name"
 			hdiutil attach -mountpoint "$volume_path" "$package"
 			osascript -e 'tell application "Finder"' -e 'close front window' -e 'end tell'
-			echo "Please wait a sec..."
-			sudo cp -rf $volume_path/* $extraction_path/
+			echo "Copying DMG content to $extraction_path. Please wait a sec..."
+			sudo cp -rf $volume_path/*.pkg $extraction_path/
+			sudo cp -rf $volume_path/*.tool $extraction_path/
+			echo "Detaching $volume_path"
 			hdiutil detach "$volume_path"
 			;;
 		zip)
@@ -658,6 +670,7 @@ function install()
 	app="$(ls $extraction_path | grep .app | head -1)"
 	if [ "$pkg" != "" ]
 	then
+		echo "Installing package $extraction_path/$pkg..."
 		sudo installer -verboseR -pkg "$extraction_path/$pkg" -target /
 		uninstall_script="$(ls $extraction_path | grep .tool | head -1)"
 		if [ "$uninstall_script" != "" ]
@@ -677,6 +690,7 @@ function install()
 		dest_app_path="$dest_application_path/$(basename "$app_path")"
 		if [ "$app_path" != "$dest_app_path" ]
 		then
+			echo "Moving $app_path to $dest_app_path..."
 			sudo mv -f "$app_path" "$dest_app_path"
 		fi
 

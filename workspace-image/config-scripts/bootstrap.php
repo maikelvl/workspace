@@ -6,13 +6,19 @@ if ( ! array_key_exists('CONFIG_DIR', $_SERVER))
 	exit('Missing env variable CONFIG_DIR');
 }
 
-if( ! array_key_exists('LOG_LEVEL', $_SERVER))
+if ( ! array_key_exists('SYSTEM_DIR', $_SERVER))
+{
+	exit('Missing env variable SYSTEM_DIR');
+}
+
+if ( ! array_key_exists('LOG_LEVEL', $_SERVER))
 {
 	$_SERVER['LOG_LEVEL'] = 1;
 }
 
 define('LOG_LEVEL', strtoupper($_SERVER['LOG_LEVEL']) == 'FALSE' ? 0 : intval($_SERVER['LOG_LEVEL']));
 define('CONFIG_DIR', $_SERVER['CONFIG_DIR']);
+define('SYSTEM_DIR', $_SERVER['SYSTEM_DIR']);
 define('SSH_KEY_TITLE', $_SERVER['USER'].'@'.$_SERVER['HOSTNAME']);
 define('SSH_KEY_BASE_TITLE', strrev(strstr(strrev(SSH_KEY_TITLE), strrev('workspace-'))));
 
@@ -31,17 +37,11 @@ $git = new Git();
 $git->setConfigFile(CONFIG_DIR.'/git.json')
 	->setUser()
 	->setPushBehavior()
-	->writeIgnore(getenv('HOME')."/.config/git/ignore");
+	->writeIgnore(getenv('HOME')."/.config/git/ignore")
+	->registerServices();
 
-$github = new GitHub($git);
-$github->register();
-
-$gitlab = new GitLab($git);
-$gitlab->register();
-
-$config = new WorkspaceConfig($github, $gitlab);
+$config = new WorkspaceConfig();
+$config->setServices($git->getServices());
 $config->setWorkspaceRepo($git);
 $config->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json');
 $config->setZshrc();
-
-Logger::log("end", 1);

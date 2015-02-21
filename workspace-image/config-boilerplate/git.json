@@ -5,9 +5,13 @@
 	},
 	"services": {
 		"github": {
+			"service": "github",
+			"active": true,
 		    "token": "your-github-token-here"
 		},
 		"gitlab": {
+			"service": "gitlab",
+			"active": false,
 		    "https": true,
 		    "domain": "gitlab.com",
 		    "port": 22,

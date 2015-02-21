@@ -8,7 +8,7 @@ CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
 
 # # Defaults for config options defined in CONFIG
 $env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
-$num_instances = 5
+$num_instances = $env['instances'] ? $env['instances'] : 1
 $update_channel = $env['coreos-update-channel'] ? $env['coreos-update-channel'] : 'stable'
 $enable_serial_logging = false
 $vb_gui = false
@@ -16,13 +16,16 @@ $vb_gui = false
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   config.vm.box = 'coreos-%s' % $update_channel
+  box_version = 'current'
   if $env['coreos-version'] then
     config.vm.box_version = $env['coreos-version']
+    box_version = $env['coreos-version']
   end
-  config.vm.box_url = 'http://%s.release.core-os.net/amd64-usr/current/coreos_production_vagrant.json' % $update_channel
+
+  config.vm.box_url = "http://#{$update_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant.json"
 
   config.vm.provider :vmware_fusion do |v, override|
-    override.vm.box_url = 'http://%s.release.core-os.net/amd64-usr/current/coreos_production_vagrant_vmware_fusion.json' % $update_channel
+    override.vm.box_url = "http://#{$update_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant_vmware_fusion.json"
   end
 
   config.vm.provider :virtualbox do |v|
@@ -43,6 +46,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     config.vm.define vm_name do |coreos|
+    
+      coreos.trigger.after :up do
+        run "touch ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :destroy do
+        run "rm ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :halt do
+        run "rm ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :reload do
+        run "touch ./.system/coreos-%02d-running" % i
+      end
 
       coreos.vm.hostname = $env['hostname']+'-'+vm_name
       
@@ -114,6 +133,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           chmod +x /workspace/bin-coreos/*
           get ubuntu:trusty
           get phusion/baseimage:0.9.15
+          get crobays/workspace
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
           docker version > /workspace/workspace-image/docker/docker-version
         '

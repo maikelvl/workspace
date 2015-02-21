@@ -6,9 +6,11 @@ abstract class GitService {
 	protected $domain;
 	protected $user = 'git';
 	protected $port = 22;
-	protected $shortName;
+	protected $shortName = FALSE;
+	protected $remoteName = FALSE;
 	protected $tokenParam;
 	protected $token;
+	protected $configRepo = FALSE;
 	protected $apiSubDomain;
 	protected $apiVersion;
 	protected $apiUri;
@@ -22,10 +24,9 @@ abstract class GitService {
 	protected $repositories = NULL;
 	protected $config = array();
 
-	public function __construct(Git $git)
+	public function setConfig($config)
 	{
-		$this->config = $config = $git->serviceConfig($this->config_service_name);
-
+		$this->config = $config;
 		if (array_key_exists('https', $config))
 		{
 			$this->setHttps($config['https']);
@@ -45,28 +46,33 @@ abstract class GitService {
 		{
 			$this->setPort($config['port']);
 		}
-		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->config_service_name;
+		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
 		$this->setShortName($shortName);
+
+		if (array_key_exists('api-version', $config))
+		{
+			$this->setApiVersion($config['api-version']);
+		}
 
 		if (array_key_exists('token', $config))
 		{
 			$this->setToken($config['token']);
 		}
 
-		if (array_key_exists('api-version', $config))
+		if (array_key_exists('config-repo', $config))
 		{
-			$this->setApiVersion($config['api-version']);
+			$this->setConfigRepo($config['config-repo']);
+		}
+
+		if (array_key_exists('remote-name', $config))
+		{
+			$this->setRemoteName($config['remote-name']);
 		}
 	}
 
 	public function config()
 	{
 		return $this->config;
-	}
-
-	public function baseUrl()
-	{
-		return 'http'.($this->https ? 's' : '').'://'.$this->domain;
 	}
 
 	public function register()
@@ -122,6 +128,18 @@ abstract class GitService {
 		return $this;
 	}
 
+	public function setConfigRepo($configRepo)
+	{
+		$this->configRepo = $configRepo;
+		return $this;
+	}
+
+	public function setRemoteName($remoteName)
+	{
+		$this->remoteName = $remoteName;
+		return $this;
+	}
+
 	public function setApiVersion($apiVersion)
 	{
 		$this->apiVersion = $apiVersion;
@@ -136,6 +154,11 @@ abstract class GitService {
 		$ssh->setUser($this->user);
 		$ssh->setPort($this->port);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
+		$workspace_identityfile = CONFIG_DIR.'/.ssh/'.basename($identityfile);
+		if ( ! $this->token)
+		{
+			$identityfile = $workspace_identityfile;
+		}
 		$ssh->setIdentityfile($identityfile);
 		$ssh->setStricthostkeychecking(FALSE);
 		$ssh->addConfigEntry();
@@ -145,8 +168,14 @@ abstract class GitService {
 
 		if ( ! $this->token)
 		{
-			Logger::log("Please set your ".get_called_class()." token.", 0);
+			Logger::log("The following public key is stored in ".dirname($identityfile).". Add this key to your ".get_called_class().": ".$this->getBaseUrl().$this->ssh_keys_uri, 0);
+			Logger::log(file_get_contents($identityfile.'.pub'), 0);
 			return FALSE;
+		}
+
+		if (is_file($workspace_identityfile))
+		{
+			Logger::log("A new SSH key pair is generated inside the container at ~/.ssh/. You can safely delete $workspace_identityfile", 0);
 		}
 
 		$existingKeys = $this->listKeys();
@@ -212,12 +241,22 @@ abstract class GitService {
 		return $this->shortName;
 	}
 
+	public function getConfigRepo()
+	{
+		return $this->configRepo;
+	}
+
+	public function getRemoteName()
+	{
+		return $this->remoteName;
+	}
+
 	public function getDomain()
 	{
 		return $this->domain;
 	}
 
-	public function getServicesetUser()
+	public function getServiceUser()
 	{
 		if ($this->serviceUser === NULL)
 		{
@@ -228,14 +267,14 @@ abstract class GitService {
 
 	public function getServiceUsername()
 	{
-		$user = $this->getServicesetUser();
+		$user = $this->getServiceUser();
 
-		if ( ! array_key_exists('username', $user))
+		if (array_key_exists('username', $user))
 		{
-			throw new Exception("Could not get user from ".get_called_class(), 1);
+			return $user['username'];
 		}
-
-		return $user['username'];
+		
+		return '';//throw new Exception("Could not get Git user from ".get_called_class(), 1);
 	}
 
 	public function getRepositories()
@@ -249,12 +288,27 @@ abstract class GitService {
 
 	protected function getProtocol()
 	{
-		return $this->https ? 'https' : 'http';
+		return 'http'.($this->https ? 's' : '');
+	}
+
+	public function getBaseUrl()
+	{
+		return $this->getProtocol().'://'.$this->domain;
+	}
+
+	public function getShortRepoUrl($repo_url)
+	{
+		$new_repo_url = str_replace($this->getBaseUrl().'/', $this->getShortName().':', $repo_url);
+		if ($new_repo_url == $repo_url)
+		{
+			return FALSE;
+		}
+		return $new_repo_url;
 	}
 
 	protected function getApiUrl()
 	{
-		$domain = $this->domain;
+		$domain = $this->getDomain();
 		if ($this->apiSubDomain)
 		{
 			$domain = $this->apiSubDomain.'.'.$domain;

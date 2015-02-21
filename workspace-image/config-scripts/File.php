@@ -19,7 +19,10 @@ class File {
 
 	static public function read($file)
 	{
-		$handle = fopen($file, "r");
+		if ( ! $handle = fopen($file, "r"))
+		{
+			throw new Exception("File: $file not found");
+		}
 		$contents = fread($handle, filesize($file));
 		fclose($handle);
 		return $contents;

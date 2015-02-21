@@ -1,4 +1,7 @@
 #!/bin/bash
+
+# TODO:
+# - Fix bug where at failing importing tar image, after rebuilding image is saved without version (:latest, :nr)
 usage()
 {
 cat << EOF
@@ -15,12 +18,13 @@ OPTIONS:
 	-p (provision)      Provision the instance
 	-d (destroy)        Kill and destroy instance
 	-s (status)         See Vagrants global status
+	-v (debug)			Vagrant debug mode
 
 EOF
 }
 
 count=0
-while getopts "hc:rRpds" OPTION
+while getopts "hc:rRpdsv" OPTION
 do
 	case $OPTION in
 		h|help)
@@ -44,6 +48,9 @@ do
 			;;
 		s|status)
 			STATUS=1
+			;;
+		v|verbose|debug)
+			DEBUG="--debug"
 			;;
 		?)
 			usage
@@ -223,10 +230,13 @@ fi
 
 INSTANCE="$(printf "%0*d\n" 2 ${INSTANCE:-1})"
 
+running_file="$WORKSPACE/.system/coreos-$INSTANCE-running"
+
 if [ $REBUILD ] || [ $DESTROY ]
 then
 	info "Destroying coreos-$INSTANCE..."
 	vagrant destroy -f "coreos-$INSTANCE" 2>/dev/null
+	
 	if [ $DESTROY ]
 	then
 		vagrant global-status
@@ -234,16 +244,30 @@ then
 	fi
 fi
 
+if [ ! $RELOAD ] && [ -f "$running_file" ]
+then
+	info "Logging in to coreos-$INSTANCE..."
+	vagrant ssh "coreos-$INSTANCE"
+	info "... checking status"
+	status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
+	if [ "${status/not running/}" != "$status" ]
+	then
+		rm "$running_file"
+		./coreos
+	fi
+	exit
+fi
+
 info "Looking for status coreos-$INSTANCE..."
 status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" != "$status" ]
 then
 	info "Resuming coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE"
+	vagrant up "coreos-$INSTANCE" $DEBUG
 elif [ "${status/not created/}" != "$status" ]
 then
 	info "Creating coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE"
+	vagrant up "coreos-$INSTANCE" $DEBUG
 else
 	if [ "$INSTANCE" == "01" ] && [ "$(vagrant ssh --command "ls -A /workspace" "coreos-$INSTANCE")" == "" ]
 	then
@@ -271,6 +295,7 @@ fi
 status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" == "$status" ]
 then
+	touch "$running_file"
 	if [ "$COMMAND" != "" ]
 	then
 		info "Running your command on coreos-$INSTANCE..."
