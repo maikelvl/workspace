@@ -22,10 +22,9 @@ abstract class GitService {
 	protected $repositories = NULL;
 	protected $config = array();
 
-	public function __construct(Git $git)
+	public function setConfig($config)
 	{
-		$this->config = $config = $git->serviceConfig($this->config_service_name);
-
+		$this->config = $config;
 		if (array_key_exists('https', $config))
 		{
 			$this->setHttps($config['https']);
@@ -45,7 +44,7 @@ abstract class GitService {
 		{
 			$this->setPort($config['port']);
 		}
-		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->config_service_name;
+		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
 		$this->setShortName($shortName);
 
 		if (array_key_exists('token', $config))
@@ -131,6 +130,10 @@ abstract class GitService {
 		$ssh->setUser($this->user);
 		$ssh->setPort($this->port);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
+		if ( ! $this->token)
+		{
+			$identityfile = CONFIG_DIR.'/.ssh/'.basename($identityfile);
+		}
 		$ssh->setIdentityfile($identityfile);
 		$ssh->setStricthostkeychecking(FALSE);
 		$ssh->addConfigEntry();
@@ -140,7 +143,10 @@ abstract class GitService {
 
 		if ( ! $this->token)
 		{
-			Logger::log("Please set your ".get_called_class()." token.", 0);
+			Logger::log(
+				"\n"."The following public key is stored in ".dirname($identityfile).". Add this key to your ".get_called_class().": ".$this->getBaseUrl().$this->ssh_keys_uri.
+				"\n\n".file_get_contents($identityfile.'.pub')
+			, 0);
 			return FALSE;
 		}
 

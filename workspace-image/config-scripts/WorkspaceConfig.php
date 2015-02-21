@@ -1,10 +1,10 @@
 <?php
 
 class WorkspaceConfig {
-	
-	public function __construct()
+
+	public function setServices($services)
 	{
-		$this->services = func_get_args();
+		$this->services = $services;
 		$this->setConfigRepo();
 	}
 
