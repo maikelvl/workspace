@@ -79,7 +79,9 @@ function start ()
 	sleep 2
 	open --background "$WORKSPACE/env.json"
 	open --background "$WORKSPACE/config/git.json"
+	add_to_uninstaller "trash \"$WORKSPACE\""
 	add_to_uninstaller "echo \"Workspace uninstalled succesfully!\""
+	add_to_uninstaller "echo \"Your old workspace is located in you trash can.\""
 }
 
 function uninstall_previous_workspace ()
@@ -131,7 +133,6 @@ function set_up_workspace()
 	repo_part_3="${repo_part_2#*/}"
 	repo_part_4="${repo_part_3#*/}"
 	echo "${WORKSPACE_REPO%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git" > "$WORKSPACE/.system/upstream-workspace-repo"
-	add_to_uninstaller "trash \"$WORKSPACE\""
 
 	generate_environment_file
 
