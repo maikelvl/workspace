@@ -46,6 +46,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     config.vm.define vm_name do |coreos|
+    
+      coreos.trigger.after :up do
+        run "touch ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :destroy do
+        run "rm ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :halt do
+        run "rm ./.system/coreos-%02d-running" % i
+      end
+
+      coreos.trigger.after :reload do
+        run "touch ./.system/coreos-%02d-running" % i
+      end
 
       coreos.vm.hostname = $env['hostname']+'-'+vm_name
       

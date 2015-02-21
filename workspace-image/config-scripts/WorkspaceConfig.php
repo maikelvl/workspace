@@ -10,7 +10,7 @@ class WorkspaceConfig {
 
 	public function setConfigRepo()
 	{
-		if(is_dir(CONFIG_DIR.'/.git'))
+		if (is_dir(CONFIG_DIR.'/.git'))
 		{
 			return $this;
 		}
@@ -30,7 +30,7 @@ class WorkspaceConfig {
 	{
 		$config = $service->config();
 		
-		if(  ! array_key_exists('config-repo', $config))
+		if (  ! array_key_exists('config-repo', $config))
 		{
 			return FALSE;
 		}
@@ -72,7 +72,7 @@ class WorkspaceConfig {
 			return $this;
 		}
 
-		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
+		if ( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
 		{
 			return $this;
 		}
