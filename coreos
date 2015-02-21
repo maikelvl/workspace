@@ -2,7 +2,6 @@
 
 # TODO:
 # - Fix bug where at failing importing tar image, after rebuilding image is saved without version (:latest, :nr)
-
 usage()
 {
 cat << EOF
@@ -231,15 +230,25 @@ fi
 
 INSTANCE="$(printf "%0*d\n" 2 ${INSTANCE:-1})"
 
+running_file="$WORKSPACE/.system/coreos-$INSTANCE-running"
+
 if [ $REBUILD ] || [ $DESTROY ]
 then
 	info "Destroying coreos-$INSTANCE..."
 	vagrant destroy -f "coreos-$INSTANCE" 2>/dev/null
+	
 	if [ $DESTROY ]
 	then
 		vagrant global-status
 		exit
 	fi
+fi
+
+if [ ! $RELOAD ] && [ -f "$running_file" ]
+then
+	info "Logging in to coreos-$INSTANCE..."
+	vagrant ssh "coreos-$INSTANCE"
+	exit
 fi
 
 info "Looking for status coreos-$INSTANCE..."
