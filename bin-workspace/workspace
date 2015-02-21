@@ -1,2 +1,2 @@
 #!/bin/bash
-echo "Exit this workspace before starting another workspace"
+cd /workspace
