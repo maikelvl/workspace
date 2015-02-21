@@ -249,8 +249,6 @@ function set_up_projects ()
 function install_vagrant ()
 {
 	mkdir -p "$VAGRANT_HOME"
-	echo "$VAGRANT_HOME"
-	exit
 	add_to_uninstaller "cd \"$WORKSPACE\" && vagrant destroy -f"
 	# -- install Vagrant ------------------------------------------------------------
 	application_name="Vagrant"
