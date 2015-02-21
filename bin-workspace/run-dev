@@ -3,8 +3,10 @@
 cd /workspace/projects
 
 get crobays/haproxy-ubuntu
-get crobays/gulp
+#get crobays/gulp
 get crobays/nginx-php
+get crobays/nginx-php-centos6
+get crobays/nginx-php-centos7
 get crobays/mysql
 
 fig kill

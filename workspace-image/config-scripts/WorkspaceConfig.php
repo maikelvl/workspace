@@ -1,51 +1,72 @@
 <?php
 
 class WorkspaceConfig {
-	
-	public function __construct()
+
+	public function setServices($services)
 	{
-		$this->services = func_get_args();
+		$this->services = $services;
 		$this->setConfigRepo();
 	}
 
 	public function setConfigRepo()
 	{
-		foreach($this->services as $service)
+		if (is_dir(CONFIG_DIR.'/.git'))
 		{
-			$config = $service->config();
-			if(is_dir(CONFIG_DIR.'/.git'))
-			{
-				return $this;
-			}
-
-			if(  ! array_key_exists('config-repo', $config))
-			{
-				continue;
-			}
-
-			$repo_name = $service->getServiceUsername().'/'.$config['config-repo'];
-			$host = $service->getDomain();
-			if (array_search($repo_name, $service->getRepositories()) === FALSE)
-			{
-				Logger::log("No config repo $repo_name found on $host", 1);
-				continue;
-			}
-			$shortName = $service->getShortName();
-			$config_repo = $shortName.':'.$repo_name.'.git';
-			$tmp_config_git_dir = CONFIG_DIR.'-git';
-			exec('git clone '.$config_repo.' '.$tmp_config_git_dir, $res);
-
-			if (is_dir($tmp_config_git_dir))
-			{
-				rename($tmp_config_git_dir.'/.git', CONFIG_DIR.'/.git');
-				File::rrmdir($tmp_config_git_dir);
-				chdir(CONFIG_DIR);
-				exec('git reset --hard');
-			}
-			Logger::log("Cloned config repo $repo_name from $host", 1);
 			return $this;
 		}
-		Logger::log("No config repo $repo_name found in services", 1);
+
+		foreach($this->services as $service)
+		{
+			if ($this->setConfigRepoService($service))
+			{
+				break;
+			}
+		}
+
+		return $this;
+	}
+
+	public function setConfigRepoService($service)
+	{
+		if ( ! $config_repo = $service->getConfigRepo())
+		{
+			return FALSE;
+		}
+
+		if ( ! $service_username = $service->getServiceUsername())
+		{
+			return FALSE;
+		}
+
+		$repo_name = $service_username.'/'.$config_repo;
+		$host = $service->getDomain();
+		if (array_search($repo_name, $service->getRepositories()) === FALSE)
+		{
+			Logger::log("No config repo $repo_name found on $host", 0);
+			return FALSE;
+		}
+
+		$config_repo_url = $service->getBaseUrl().'/'.$repo_name.'.git';
+		$tmp_config_git_dir = dirname(CONFIG_DIR).'/.'.basename(CONFIG_DIR).'-git';
+		$this->cloneRepo($config_repo_url, $tmp_config_git_dir);
+		$this->resetRepo($tmp_config_git_dir, CONFIG_DIR);
+
+		return TRUE;
+	}
+
+	public function resetRepo($from, $to)
+	{
+		if ( ! is_dir($from.'/.git'))
+		{
+			throw new Exception("No Git folder: $from", 1);
+		}
+
+		rename($from.'/.git', $to.'/.git');
+		File::rrmdir($from);
+		chdir($to);
+		Logger::log('git reset --hard', 2);
+		exec('git reset --hard', $res);
+		Logger::log("Reset repo $to", 1);
 		return $this;
 	}
 
@@ -56,55 +77,74 @@ class WorkspaceConfig {
 			return $this;
 		}
 
-		if( ! is_file($upstream_repo = '/workspace/.system/upstream-workspace-repo'))
+		if ( ! is_file($upstream_repo_file = '/workspace/.system/upstream-workspace-repo'))
 		{
 			return $this;
 		}
 		
 		# Replace the front repo url with the short name for using SSH
-		$repo_url = File::read($upstream_repo);
+		$repo_url = trim(File::read($upstream_repo_file));
+		$tmp_config_git_dir = '/workspace/.workspace-git';
+		$this->cloneRepo($repo_url, $tmp_config_git_dir);
+		$this->resetRepo($tmp_config_git_dir, '/workspace');
+		return $this;
+	}
+
+	public function cloneRepo($repo_url, $destination)
+	{
 		$short_name = FALSE;
+		$remote_name = FALSE;
 		foreach($this->services as $service)
 		{
-			$new_repo_url = str_replace($service->baseUrl().'/', $service->getShortName().':', $repo_url);
-			if($new_repo_url != $repo_url)
+			if ( ! $new_repo_url = $service->getShortRepoUrl($repo_url))
+			{
+				continue;
+			}
+			
+			if ($service->getServiceUsername())
 			{
 				$repo_url = $new_repo_url;
-				$short_name = $service->getShortName();
-				break;
 			}
+
+			$short_name = $service->getShortName();
+			$remote_name = $service->getRemoteName();
+			break;
 		}
 
 		Logger::log("Cloning $repo_url");
-		exec("git clone $repo_url /workspace/.workspace-git");
-		if( ! is_dir("/workspace/.workspace-git/.git"))
+		Logger::log("git clone $repo_url $destination", 2);
+		exec("git clone $repo_url $destination");
+		if ( ! is_dir("$destination/.git"))
 		{
-			Logger::log("Fail to clone $repo_url");
+			Logger::log("Failed to clone $repo_url");
 			return $this;
 		}
-		rename("/workspace/.workspace-git/.git", "/workspace/.git");
-		File::rrmdir("/workspace/.workspace-git");
-		chdir('/workspace');
-		exec('git reset --hard');
+		chdir($destination);
 		if ($short_name)
 		{
-			exec("git remote rename origin \"$short_name\"");
+			Logger::log("git remote set-url origin \"$repo_url\"", 2);
+			exec("git remote set-url origin \"$repo_url\"");
 		}
+
+		if ($remote_name)
+		{
+			Logger::log("git remote rename origin \"$remote_name\"", 2);
+			exec("git remote rename origin \"$remote_name\"");
+		}
+
+		return $this;
 	}
 
 	public function installOhMyZsh($config_file)
 	{
-		if ( is_dir(CONFIG_DIR.'/oh-my-zsh'))
+		if (is_dir(CONFIG_DIR.'/oh-my-zsh'))
 		{
 			return $this;
 		}
 
 		$config = is_file($config_file) ? json_decode(file_get_contents($config_file), TRUE) : array();
-		$oh_my_zsh_git = array_key_exists('repo', $config) ? $config['repo'] : 'https://github.com/crobays/oh-my-zsh.git';
-
-		Logger::log("Cloning $oh_my_zsh_git ...");
-		exec("git clone $oh_my_zsh_git ".CONFIG_DIR."/oh-my-zsh");
-		
+		$repo_url = array_key_exists('repo', $config) ? $config['repo'] : 'https://github.com/crobays/oh-my-zsh.git';
+		$this->cloneRepo($repo_url, CONFIG_DIR.'/oh-my-zsh');
 		return $this;
 	}
 
