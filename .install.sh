@@ -11,6 +11,8 @@ PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
 VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
 update_uninstaller=1
+echo "$VAGRANT_HOME"
+exit
 
 function start ()
 {
