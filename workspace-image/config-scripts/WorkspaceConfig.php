@@ -80,6 +80,7 @@ class WorkspaceConfig {
 		# Replace the front repo url with the short name for using SSH
 		$repo_url = trim(File::read($upstream_repo));
 		$short_name = FALSE;
+		$remote_name = FALSE;
 		foreach($this->services as $service)
 		{
 			if ( ! $new_repo_url = $service->getShortRepoUrl($repo_url))
@@ -93,12 +94,14 @@ class WorkspaceConfig {
 			}
 
 			$short_name = $service->getShortName();
+			$remote_name = $service->getRemoteName();
 			break;
 		}
 
 		Logger::log("Cloning $repo_url");
 		exec("git clone $repo_url /workspace/.workspace-git");
-		if( ! is_dir("/workspace/.workspace-git/.git"))
+
+		if ( ! is_dir("/workspace/.workspace-git/.git"))
 		{
 			Logger::log("Fail to clone $repo_url");
 			return $this;
@@ -107,11 +110,17 @@ class WorkspaceConfig {
 		File::rrmdir("/workspace/.workspace-git");
 		chdir('/workspace');
 		exec('git reset --hard');
+
 		if ($short_name)
 		{
 			exec("git remote set-url origin \"$repo_url\"");
-			exec("git remote rename origin \"$short_name\"");
 		}
+
+		if ($remote_name)
+		{
+			exec("git remote rename origin \"$remote_name\"");
+		}
+		return $this;
 	}
 
 	public function installOhMyZsh($config_file)
@@ -124,6 +133,7 @@ class WorkspaceConfig {
 		$config = is_file($config_file) ? json_decode(file_get_contents($config_file), TRUE) : array();
 		$repo_url = array_key_exists('repo', $config) ? $config['repo'] : 'https://github.com/crobays/oh-my-zsh.git';
 		$short_name = FALSE;
+		$remote_name = FALSE;
 		foreach($this->services as $service)
 		{
 			if ( ! $new_repo_url = $service->getShortRepoUrl($repo_url))
@@ -137,15 +147,21 @@ class WorkspaceConfig {
 			}
 
 			$short_name = $service->getShortName();
+			$remote_name = $service->getRemoteName();
 			break;
 		}
 
 		Logger::log("Cloning $repo_url ...");
 		exec("git clone $repo_url ".CONFIG_DIR."/oh-my-zsh");
+		
 		if ($short_name)
 		{
 			exec("git remote set-url origin \"$repo_url\"");
-			exec("git remote rename origin \"$short_name\"");
+		}
+
+		if ($remote_name)
+		{
+			exec("git remote rename origin \"$remote_name\"");
 		}
 		return $this;
 	}
