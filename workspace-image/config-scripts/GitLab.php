@@ -2,10 +2,11 @@
 
 class GitLab extends GitService {
 
-	protected $config_service_name = 'gitlab';
+	protected $service_name = 'gitlab';
 	protected $domain = 'gitlab.com';
 	protected $user = 'git';
 	protected $tokenParam = 'private_token';
+	protected $ssh_keys_uri = '/profile/keys';
 	protected $apiUris = [
 		'user-keys' => 'user/keys',
 		'user' => 'user',

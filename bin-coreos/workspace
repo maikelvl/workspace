@@ -14,37 +14,42 @@ OPTIONS:
     -R [tag] (rebuild)  Rebuild workspace image from Dockerfile with new tag
     -c (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
+    -v (debug)          See verbose logs
 
 EOF
 }
 BASE_NAME="workspace"
+LOG_LEVEL="0"
 count=0
-while getopts “ht:rR:cd” OPTION
+while getopts “ht:rR:cdv” OPTION
 do
          case $OPTION in
-                 h)
-                         usage
-                         exit 1
-                         ;;
-                 t)
-                         IMAGE_TAG="$OPTARG"
-                         ;;
-                 r)
-                         RERUN_CONTAINER=1
-                         ;;
-                 R)
-                         REBUILD_IMAGE_TAG="$OPTARG"
-                         ;;
-                 c)
-                         USE_CACHE=1
-                         ;;
-                 d)
-                         DESTROY=1
-                         ;;
-                 ?)
-                         usage
-                         exit
-                         ;;
+            h)
+                usage
+                exit 1
+                ;;
+            t)
+                IMAGE_TAG="$OPTARG"
+                ;;
+            r)
+                RERUN_CONTAINER=1
+                ;;
+            R)
+                REBUILD_IMAGE_TAG="$OPTARG"
+                ;;
+            c)
+                USE_CACHE=1
+                ;;
+            d)
+                DESTROY=1
+                ;;
+            v)
+                LOG_LEVEL="1"
+                ;;
+            ?)
+                usage
+                exit
+                ;;
          esac
         count=`expr $count + 1`
         if [ "$OPTARG" ]
@@ -217,7 +222,7 @@ then
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --env "CONFIG_DIR=/workspace/config" \
-        --env "LOG_LEVEL=1" \
+        --env "LOG_LEVEL=$LOG_LEVEL" \
         --env "DOCKER_NAME=$NAME" \
         --env "TIMEZONE=$(get_json "$env" 'timezone')" \
         --env "USERNAME=$username" \
