@@ -59,6 +59,10 @@ class Ssh {
 	public function generateKey($type = "rsa")
 	{
 		$hostname = gethostname();
+		if ( ! is_dir($dir = dirname($this->identityfile)))
+		{
+			mkdir($dir, 0700, TRUE);
+		}
 		$public_file = $this->identityfile.".pub";
 		exec("ssh-keygen -f ".$this->identityfile." -t $type -N \"\" -C \"$hostname:".basename($public_file)."\"", $res, $return_var);
 		if ($return_var || ! is_file($this->identityfile) || ! is_file($this->identityfile))
