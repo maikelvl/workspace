@@ -2,13 +2,14 @@
 
 class GitHub extends GitService {
 
-	protected $config_service_name = 'github';
+	protected $service_name = 'github';
 	protected $https = TRUE;
 	protected $domain = 'github.com';
 	protected $user = 'git';
 	protected $port = 22;
 	protected $apiSubDomain = 'api';
 	protected $tokenParam = 'access_token';
+	protected $ssh_keys_uri = '/settings/ssh';
 	protected $apiUris = [
 		'user-keys' => 'user/keys',
 		'user' => 'user',

@@ -4,7 +4,13 @@ class Logger {
 
 	static public function log($msg, $level = 1)
 	{
-		if($level > LOG_LEVEL)
+		if ($level == 0)
+		{
+			echo $msg."\n";
+			return;
+		}
+
+		if ($level > LOG_LEVEL)
 		{
 			return;
 		}

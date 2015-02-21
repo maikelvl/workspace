@@ -6,7 +6,7 @@ if ( ! array_key_exists('CONFIG_DIR', $_SERVER))
 	exit('Missing env variable CONFIG_DIR');
 }
 
-if( ! array_key_exists('LOG_LEVEL', $_SERVER))
+if ( ! array_key_exists('LOG_LEVEL', $_SERVER))
 {
 	$_SERVER['LOG_LEVEL'] = 1;
 }
@@ -31,15 +31,11 @@ $git = new Git();
 $git->setConfigFile(CONFIG_DIR.'/git.json')
 	->setUser()
 	->setPushBehavior()
-	->writeIgnore(getenv('HOME')."/.config/git/ignore");
+	->writeIgnore(getenv('HOME')."/.config/git/ignore")
+	->registerServices();
 
-$github = new GitHub($git);
-$github->register();
-
-$gitlab = new GitLab($git);
-$gitlab->register();
-
-$config = new WorkspaceConfig($github, $gitlab);
+$config = new WorkspaceConfig();
+$config->setServices($git->getServices());
 $config->setWorkspaceRepo($git);
 $config->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json');
 $config->setZshrc();
