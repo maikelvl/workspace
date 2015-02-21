@@ -102,6 +102,14 @@ function get_json()
     echo $1 | sed -e 's/^[{}]*//g' | awk -F=':' -v RS=',' "\$1~/\"$2\"/ {print}" | sed -e "s/\"$2\"://" | tr -d "\n\t" | sed -e 's/\\"/"/g' | sed -e 's/\\\\/\\/g' | sed -e 's/^[ \t]*//g' | sed -e 's/^"//'  -e 's/"$//'
 }
 
+function log()
+{
+    if [ "$LOG_LEVEL" == "1" ]
+    then
+        echo $1
+    fi
+}
+
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="latest"
@@ -216,6 +224,7 @@ container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 
 username="$(get_json "$env" 'username')"
 if [ "$container_state_running" == "" ]
 then
+    log "docker run"
     docker run \
         --name "$NAME" \
         --hostname "$HOSTNAME-$NAME" \
@@ -231,11 +240,13 @@ then
         "$workspace_base_image:$IMAGE_TAG"
 elif [ "$container_state_running" == "false" ]
 then
+    log "docker start"
     docker start \
         --interactive \
         "$NAME"
 elif [ "$container_state_running" == "true" ]
 then
+    log "docker exec"
     docker exec \
         --interactive \
         --tty \
