@@ -235,11 +235,11 @@ running_file="$WORKSPACE/.system/coreos-$INSTANCE-running"
 if [ $REBUILD ] || [ $DESTROY ]
 then
 	info "Destroying coreos-$INSTANCE..."
-	vagrant destroy -f "coreos-$INSTANCE" 2>/dev/null
+	vagrant destroy $DEBUG --force "coreos-$INSTANCE" 2>/dev/null
 	
 	if [ $DESTROY ]
 	then
-		vagrant global-status
+		vagrant global-status $DEBUG
 		exit
 	fi
 fi
@@ -249,14 +249,14 @@ function vagrant_ssh()
 	if [ "${COMMAND:0:9}" == "workspace" ]
 	then
 		info "Logging into workspace on coreos-$INSTANCE..."
-		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
+		vagrant ssh $DEBUG --command "$COMMAND" "coreos-$INSTANCE"
 	elif [ "$COMMAND" != "" ]
 	then
 		info "Running your command on coreos-$INSTANCE..."
-		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
+		vagrant ssh $DEBUG --command "$COMMAND" "coreos-$INSTANCE"
 	else
 		info "Logging into coreos-$INSTANCE..."
-		vagrant ssh "coreos-$INSTANCE"
+		vagrant ssh $DEBUG "coreos-$INSTANCE"
 	fi
 }
 
@@ -278,11 +278,11 @@ status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" != "$status" ]
 then
 	info "Resuming coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE" $DEBUG
+	vagrant up $DEBUG "coreos-$INSTANCE"
 elif [ "${status/not created/}" != "$status" ]
 then
 	info "Creating coreos-$INSTANCE..."
-	vagrant up "coreos-$INSTANCE" $DEBUG
+	vagrant up $DEBUG "coreos-$INSTANCE"
 else
 	if [ "$INSTANCE" == "01" ] && [ "$(vagrant ssh --command "ls -A /workspace" "coreos-$INSTANCE")" == "" ]
 	then
@@ -293,16 +293,16 @@ else
 		info "Reloading coreos-$INSTANCE"
 		if [ $PROVISION ]
 		then
-			vagrant reload "coreos-$INSTANCE"
+			vagrant reload $DEBUG "coreos-$INSTANCE"
 		else
-			vagrant reload --provision "coreos-$INSTANCE"
+			vagrant reload $DEBUG --provision "coreos-$INSTANCE"
 		fi
 	else
 		info "Already running coreos-$INSTANCE"
 		if [ $PROVISION ]
 		then
 			info "Provisioning coreos-$INSTANCE..."
-			vagrant provision "coreos-$INSTANCE"
+			vagrant provision $DEBUG "coreos-$INSTANCE"
 		fi
 	fi
 fi
