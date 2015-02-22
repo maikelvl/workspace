@@ -1,0 +1,11 @@
+#!/bin/bash
+cd /workspace/projects
+
+# get crobays/haproxy-ubuntu
+# get crobays/gulp
+# get crobays/nginx-php
+# get crobays/mysql
+
+fig kill
+fig rm --force
+fig up
