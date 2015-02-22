@@ -45,5 +45,3 @@ $config->setServices($git->getServices());
 $config->setWorkspaceRepo($git);
 $config->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json');
 $config->setZshrc();
-
-Logger::log("end", 1);
