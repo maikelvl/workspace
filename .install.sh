@@ -5,8 +5,8 @@ WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
 VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.5-2209127.dmg"
 SILENT_LEVEL=1 # 0 = none, 1 = only downloads, 2 = all requests
 DOWNLOADS_DIRECTORY="$HOME/Downloads"
-PROVIDER="$1"
-PROVIDER="${PROVIDER//_/-}"
+FIRST_ARG="$1"
+FIRST_ARG="${FIRST_ARG//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
 VAGRANT_VERSION="${3:-1.6.5}"
 export VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
@@ -14,8 +14,17 @@ update_uninstaller=1
 
 function start ()
 {
-	echo "Administrator privileges are required for some operations..."
-	sudo echo ""
+	message="Administrator permissions are required for:"
+	if [ "$FIRST_ARG" == "update-vagrant" ] && [ -d "$WORKSPACE/.vagrant" ]
+	then
+		info "Updating Vagrant to $VAGRANT_VERSION"
+		message="$message\n- Updating Vagrant $VAGRANT_VERSION"
+		warning "$message"
+		install_vagrant
+		exit
+	fi
+
+	PROVIDER="$FIRST_ARG"
 	if [ "$PROVIDER" == "" ]
 	then
 		if [ -d "/Applications/VMWare Fusion.app" ] || [ -d "$HOME/Applications/VMWare Fusion.app" ]
@@ -32,12 +41,26 @@ function start ()
 
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
 	then
+		message="$message\n- Uninstalling previous Workspace"
+	fi
+	message="$message\n- Installing Vagrant $VAGRANT_VERSION"
+	message="$message\n- Installing $PROVIDER"
+	message="$message\n- Getting the current timezone"
+	warning "$message"
+	sudo echo ""
+
+	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
+	then
 		uninstall_previous_workspace
 		timeout 10 "Installing new Workspace"
 	else
 		info "Installing new Workspace..."
 	fi
 
+}
+
+function complete_install ()
+{
 	set_up_workspace
 	add_shell_profile_to_bash_profile
 	set_up_config
@@ -46,6 +69,7 @@ function start ()
 	if [ ! -d "/Applications/Vagrant" ] && [ ! -d "$HOME/Applications/Vagrant" ]
 	then
 		install_vagrant
+		add_vagrant_uninstallers
 	fi
 	vagrant plugin install vagrant-triggers
 	
@@ -176,6 +200,7 @@ function add_shell_profile_to_bash_profile ()
 	fi
 	bash_profile_addition="$bash_profile_addition\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\""
 	bash_profile_addition="$bash_profile_addition\nfunction workspace(){ coreos -c \"workspace \$@\"; }"
+	bash_profile_addition="$bash_profile_addition\nfunction update-vagrant() { cat \"\$WORKSPACE/.install.sh\" | bash -s update-vagrant \"\$WORKSPACE\" \"\$1\"; }"
 	bash_profile_addition="$bash_profile_addition\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
@@ -270,7 +295,12 @@ function install_vagrant ()
 		"" \
 		"$application_name" \
 		"$VAGRANT_VERSION"
-	
+
+	info "Vagant installed"
+}
+
+function add_vagrant_uninstallers ()
+{
 	add_to_uninstaller "trash \"/opt/$command\""
 
 	# trash the /opt folder if it's empty
@@ -282,8 +312,6 @@ function install_vagrant ()
 	rm -rf "$WORKSPACE/.system/uninstall-vagrant.sh"
 	add_to_uninstaller "echo \"Continue uninstalling...\""
 	add_to_uninstaller "trash \"$command_location\""
-
-	info "Vagant installed"
 }
 
 function install_virtualbox ()
@@ -443,7 +471,7 @@ function ask ()
     then
     	echo -n "$2"
 	else
-		echo "$1"
+		echo -e "$1"
 	fi
     printf "$NC"
 }
@@ -451,21 +479,21 @@ function ask ()
 function success ()
 {
     printf "$green"
-    echo "$1"
+    echo -e "$1"
     printf "$NC"
 }
 
 function warning ()
 {
     printf "$orange"
-    echo "$1"
+    echo -e "$1"
     printf "$NC"
 }
 
 function error ()
 {
     printf "$red"
-    echo "$1"
+    echo -e "$1"
     printf "$NC"
 }
 
@@ -530,66 +558,75 @@ function download_and_install ()
 		else
 			current_version="$(version $command)"
 			echo "Current $application_name version: $current_version"
+			if [ "$current_version" == "$requested_version" ]
+			then
+				install="installed"
+			fi
 		fi
 	fi
 
-	info "Fetching downloads page $downloads_link..."
-	#find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version"
-	download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version")"
-
-	if [ "$download_link" == "" ]
+	if [ "$install" == "installed" ]
 	then
-		error "No download link found on $downloads_link"
+		info "Already on version $requested_version"
 	else
-		if [ "$latest_version" != "" ]
+		info "Fetching downloads page $downloads_link..."
+		#find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version"
+		download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version")"
+
+		if [ "$download_link" == "" ]
 		then
-			info "Latest $application_name version: $latest_version ($downloads_link)"
-
-			download_version="$latest_version"
-
-			if [ "$specific_version" != "" ]
+			error "No download link found on $downloads_link"
+		else
+			if [ "$latest_version" != "" ]
 			then
-				download_version="$specific_version"
-				download_link="${download_link//$latest_version/$download_version}"
-				info "Forcing $application_name version: $specific_version";
-			fi
+				info "Latest $application_name version: $latest_version ($downloads_link)"
 
-			if [ "$current_version" != "$download_version" ]
-			then
+				download_version="$latest_version"
+
+				if [ "$specific_version" != "" ]
+				then
+					download_version="$specific_version"
+					download_link="${download_link//$latest_version/$download_version}"
+					info "Forcing $application_name version: $specific_version";
+				fi
+
+				if [ "$current_version" != "$download_version" ]
+				then
+					install="yes"
+				fi
+			else
 				install="yes"
 			fi
-		else
-			install="yes"
-		fi
 
-		if [ "$install" == "yes" ]
-		then
-			if [ "${download_link:0:1}" == "/" ] && [ "${download_link:0:2}" != "//" ]
+			if [ "$install" == "yes" ]
 			then
-				domain_name=$(echo $downloads_link | cut -d'/' -f3)
-				download_link="$domain_name$download_link"
-			fi
-			dest="$DOWNLOADS_DIRECTORY/$(basename $download_link)"
-			sudo mkdir -p $(dirname $DOWNLOADS_DIRECTORY)
-			if [ ! -f "$dest" ]
-			then
-				download \
-					"$download_link" \
+				if [ "${download_link:0:1}" == "/" ] && [ "${download_link:0:2}" != "//" ]
+				then
+					domain_name=$(echo $downloads_link | cut -d'/' -f3)
+					download_link="$domain_name$download_link"
+				fi
+				dest="$DOWNLOADS_DIRECTORY/$(basename $download_link)"
+				sudo mkdir -p $(dirname $DOWNLOADS_DIRECTORY)
+				if [ ! -f "$dest" ]
+				then
+					download \
+						"$download_link" \
+						"$dest" \
+						"$application_name"
+				fi
+				install \
+					"$command" \
 					"$dest" \
 					"$application_name"
+			elif [ "$current_version" != "" ]
+			then
+				info "$application_name already on latest version: $current_version"
+			else
+				success "$application_name already installed"
 			fi
-			install \
-				"$command" \
-				"$dest" \
-				"$application_name"
-		elif [ "$current_version" != "" ]
-		then
-			info "$application_name already on latest version: $current_version"
-		else
-			success "$application_name already installed"
+			info "Downloaded $download_link"
+		
 		fi
-		info "Downloaded $download_link"
-	
 	fi
 
 	echo "-- $application_name end --"
