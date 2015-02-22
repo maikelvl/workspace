@@ -116,6 +116,7 @@ then
 fi
 
 image_tag_username="crobays"
+git_config_file="/workspace/config/git.json"
 if [ ! -d /workspace/workspace-image ]
 then
     pull_image=1
@@ -126,7 +127,7 @@ else
     fi
 
     workspace_base_dir="/workspace/workspace-image"
-    if [ "$(cat /workspace/config/git.json)" == "$(cat "$workspace_base_dir/config-boilerplate/git.json")" ]
+    if [ "$(cat $git_config_file)" == "$(cat "$workspace_base_dir/config-boilerplate/git.json")" ]
     then
         warning "First set your Git credentials in ./config/git.json"
         exit
@@ -244,9 +245,8 @@ then
     exit
 fi
 
-lock="/workspace/.system/git.json.lock"
-truth="/workspace/config/git.json"
-if [ ! $RERUN_CONTAINER ] && [ "$(cat $lock)" != "$(cat $truth)" ]
+git_config_lock_file="/workspace/.system/git.json.lock"
+if [ ! $RERUN_CONTAINER ] && [ -f "$git_config_lock_file" ] && [ "$(cat $git_config_lock_file)" != "$(cat $git_config_file)" ]
 then
     RERUN_CONTAINER=1
 fi
