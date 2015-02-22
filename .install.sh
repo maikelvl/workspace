@@ -140,6 +140,7 @@ function set_up_workspace()
 
 function generate_environment_file()
 {
+	instances="1"
 	memory="1024"
 	cpus="2"
 	network="public"
@@ -149,7 +150,7 @@ function generate_environment_file()
 		network="private"
 	fi
 	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:01:01"
-	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"memory\": $memory,\n\"cpus\": $cpus,\n\"network\": \"$network\",\n\"network-interface\": \"$network_interface\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
+	echo -e "{\n\"username\": \"$USER\",\n\"hostname\": \"${hostname%.*}\",\n\"timezone\": \"$timezone\",\n\"provider\": \"$PROVIDER\",\n\"instances\": $instances,\n\"memory\": $memory,\n\"cpus\": $cpus,\n\"network\": \"$network\",\n\"network-interface\": \"$network_interface\",\n\"start-mac-addr\": \"$rand_mac_addr\"\n}" > "$WORKSPACE/env.json"
 }
 
 function set_up_config()
