@@ -248,6 +248,13 @@ if [ ! $RELOAD ] && [ -f "$running_file" ]
 then
 	info "Logging in to coreos-$INSTANCE..."
 	vagrant ssh "coreos-$INSTANCE"
+	info "... checking status"
+	status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
+	if [ "${status/not running/}" != "$status" ]
+	then
+		rm "$running_file"
+		./coreos
+	fi
 	exit
 fi
 
@@ -288,6 +295,7 @@ fi
 status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" == "$status" ]
 then
+	touch "$running_file"
 	if [ "$COMMAND" != "" ]
 	then
 		info "Running your command on coreos-$INSTANCE..."
