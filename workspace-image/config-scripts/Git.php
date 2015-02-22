@@ -77,7 +77,7 @@ class Git {
 	{
 		foreach($this->config['services'] as $service_config)
 		{
-			$this->setServices($service_config);
+			$this->setService($service_config);
 		}
 		return $this;
 	}
