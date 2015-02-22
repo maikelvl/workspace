@@ -37,11 +37,12 @@ $git = new Git();
 $git->setConfigFile(CONFIG_DIR.'/git.json')
 	->setUser()
 	->setPushBehavior()
-	->writeIgnore(getenv('HOME')."/.config/git/ignore")
-	->registerServices();
+	->writeIgnore(getenv('HOME')."/.config/git/ignore");
 
-$config = new WorkspaceConfig();
-$config->setServices($git->getServices());
-$config->setWorkspaceRepo($git);
+$config = new WorkspaceConfig($git);
+$config->setWorkspaceRepo();
 $config->installOhMyZsh(CONFIG_DIR.'/oh-my-zsh.json');
 $config->setZshrc();
+
+$git->registerServices();
+$config->setConfigRepo();
