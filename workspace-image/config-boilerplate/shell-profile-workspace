@@ -23,11 +23,11 @@ function docker_login()
 alias art="php artisan"
 
 export ENVIRONMENT="dev"
-export PATH=$HOME/bin:/usr/local/bin:$PATH
+export PATH="$HOME/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="/usr/local/node/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="/workspace/bin-workspace:$PATH"
+export PATH="$CONFIG_DIR/bin:/workspace/bin-workspace:$PATH"
 export PATH="$PATH:/workspace/bin-coreos"
 export PATH="./vendor/bin:$PATH"
 export TUGBOAT_CONFIG_PATH="$CONFIG_DIR/tugboat.yml"
@@ -36,3 +36,4 @@ source ~/.rvm/scripts/rvm
 
 sudo chmod +x /workspace/bin-workspace/*
 sudo chmod +x /workspace/bin-coreos/*
+sudo chmod +x $CONFIG_DIR/bin/*
