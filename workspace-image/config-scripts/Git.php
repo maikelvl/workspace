@@ -19,6 +19,7 @@ class Git {
 			Logger::log("There is an syntax error in your $config_file", 0);
 			exit;
 		}
+		$this->setServices();
 		copy($config_file, SYSTEM_DIR.'/'.basename($config_file).'.lock');
 		return $this;
 	}
@@ -72,16 +73,16 @@ class Git {
 		return $this->config['services'][$service_name];
 	}
 
-	public function registerServices()
+	public function setServices()
 	{
 		foreach($this->config['services'] as $service_config)
 		{
-			$this->registerService($service_config);
+			$this->setServices($service_config);
 		}
 		return $this;
 	}
 
-	public function registerService($service_config)
+	public function setService($service_config)
 	{
 		if (array_key_exists('active', $service_config) && ! $service_config['active'])
 		{
@@ -100,7 +101,6 @@ class Git {
 				throw new Exception("Service ".$service_config['service']." is not supported", 1);
 		}
 		$service->setConfig($service_config);
-		$service->register();
 		array_push($this->services, $service);
 		return $this;
 	}
@@ -108,6 +108,21 @@ class Git {
 	public function getServices()
 	{
 		return $this->services;
+	}
+
+	public function registerServices()
+	{
+		foreach($this->getServices() as $service)
+		{
+			$this->registerService($service);
+		}
+		return $this;
+	}
+
+	public function registerService($service)
+	{
+		$service->register();
+		return $this;
 	}
 
 	private function writeConfigItem($key, $value)

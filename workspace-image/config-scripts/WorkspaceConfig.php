@@ -2,10 +2,11 @@
 
 class WorkspaceConfig {
 
-	public function setServices($services)
+	protected $git;
+
+	public function __construct(Git $git)
 	{
-		$this->services = $services;
-		$this->setConfigRepo();
+		$this->git = $git;
 	}
 
 	public function setConfigRepo()
@@ -15,7 +16,7 @@ class WorkspaceConfig {
 			return $this;
 		}
 
-		foreach($this->services as $service)
+		foreach($this->git->services() as $service)
 		{
 			if ($this->setConfigRepoService($service))
 			{
@@ -94,7 +95,7 @@ class WorkspaceConfig {
 	{
 		$short_name = FALSE;
 		$remote_name = FALSE;
-		foreach($this->services as $service)
+		foreach($this->git->services() as $service)
 		{
 			if ( ! $new_repo_url = $service->getShortRepoUrl($repo_url))
 			{
