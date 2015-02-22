@@ -26,7 +26,7 @@ EOF
 count=0
 while getopts "hc:rRpdsv" OPTION
 do
-	case $OPTION in
+	case "$OPTION" in
 		h|help)
 			usage
 			exit 1

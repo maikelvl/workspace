@@ -168,16 +168,19 @@ function add_shell_profile_to_bash_profile ()
 	bash_profile_file="$HOME/.bash_profile"
 	start_line="# === Workspace ${WORKSPACE/$HOME/~} aliases start ==="
 	end_line="# === Workspace ${WORKSPACE/$HOME/~} aliases end ==="
-	add_bash_line="$start_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\"\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\"\nalias workspace=\"cd \$WORKSPACE && \$WORKSPACE/coreos -c workspace\""
+	bash_line="$start_line"
+	bash_line="$bash_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\""
 	if [ "$VAGRANT_HOME" == "$WORKSPACE/.vagrant.d" ]
 	then
-		add_bash_line="$add_bash_line\nexport VAGRANT_HOME=\"\$WORKSPACE/.vagrant.d\""
+		bash_line="$bash_line\nexport VAGRANT_HOME=\"\$WORKSPACE/.vagrant.d\""
 	fi
-	add_bash_line="$add_bash_line\n$end_line"
+	bash_line="$bash_line\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\""
+	bash_line="$bash_line\nfunction workspace(){ coreos -c \"workspace \$@\"; }"
+	bash_line="$bash_line\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
 		bash_profile="$(cat "$bash_profile_file")"
-		if [ "${bash_profile/$add_bash_line/}" == "$bash_profile" ]
+		if [ "${bash_profile/$bash_line/}" == "$bash_profile" ]
 		then
 			add_line=1
 		fi
