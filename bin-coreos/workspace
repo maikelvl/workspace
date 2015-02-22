@@ -133,13 +133,21 @@ workspace_image_latest_file="$workspace_archive_dir/$username-SLASH-workspace-CO
 workspace_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
 workspace_rebuild_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
 NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${1:-1})"
-
+workspace_status_file="/workspace/.system/workspace-status"
+if [ -f "$workspace_status_file" ]
+then
+    status="$(cat $workspace_status_file)"
+    echo "Your workspace image is $status in another process. Please retry when ready."
+    exit
+fi
 if [ ! $REBUILD_IMAGE_TAG ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
 then
     if [ -f "$workspace_image_file" ]
     then
         info "Loading $workspace_base_image:$IMAGE_TAG from $workspace_image_file"
+        echo "loading" > "$workspace_status_file"
         docker load --input "$workspace_image_file"
+        rm "$workspace_status_file"
         if [ "$IMAGE_TAG" != "latest" ]
         then
             docker tag "$workspace_base_image:$IMAGE_TAG" "$workspace_base_image:latest"
@@ -158,19 +166,24 @@ then
 
     if [ $pull_image ]
     then
+        echo "pulling" > "$workspace_status_file"
         docker pull "$workspace_base_image:$REBUILD_IMAGE_TAG"
+        rm "$workspace_status_file"
     else
         no_cache="--no-cache"
         if [ $USE_CACHE ]
         then
             no_cache="$no_cache=false"
         else
+            no_cache="$no_cache=true"
             start_date="$(date)"
         fi
+        echo "building" > "$workspace_status_file"
         docker build \
             --tag "$workspace_base_image:$REBUILD_IMAGE_TAG" \
             $no_cache \
             "$workspace_base_dir"
+        rm "$workspace_status_file"
     fi
 
     if [ "$(docker inspect $workspace_base_image:$REBUILD_IMAGE_TAG 2>/dev/null)" != "[]" ]
@@ -191,14 +204,18 @@ then
             rm -f "$workspace_image_file"
         fi
         info "Saving $workspace_base_image:$REBUILD_IMAGE_TAG to $workspace_rebuild_image_file"
+        echo "saving" > "$workspace_status_file"
         docker save --output "$workspace_rebuild_image_file" "$workspace_base_image:$REBUILD_IMAGE_TAG"
+        rm "$workspace_status_file"
         if [ "$REBUILD_IMAGE_TAG" != "latest" ]
         then
             if [ -f "$workspace_image_latest_file" ]
             then
                 rm -f "$workspace_image_latest_file"
             fi
+            echo "saving" > "$workspace_status_file"
             docker save --output "$workspace_image_latest_file" "$workspace_base_image:latest"
+            rm "$workspace_status_file"
         fi
     else
         error "Sorry to say... but building $workspace_base_image:$REBUILD_IMAGE_TAG failed"
