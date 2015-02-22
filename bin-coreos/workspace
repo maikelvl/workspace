@@ -14,14 +14,14 @@ OPTIONS:
     -R [tag] (rebuild)  Rebuild workspace image from Dockerfile with new tag
     -c (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
-    -v (debug)          See verbose logs
+    -l (log level)      Log level 1: Actions 2: with execs and curls
 
 EOF
 }
 BASE_NAME="workspace"
 LOG_LEVEL="0"
 count=0
-while getopts “ht:rR:cdv” OPTION
+while getopts “ht:rR:cdl:” OPTION
 do
          case $OPTION in
             h)
@@ -43,8 +43,8 @@ do
             d)
                 DESTROY=1
                 ;;
-            v)
-                LOG_LEVEL="1"
+            l)
+                LOG_LEVEL="$OPTARG"
                 ;;
             ?)
                 usage
