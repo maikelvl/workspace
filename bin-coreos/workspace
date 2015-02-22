@@ -120,9 +120,9 @@ if [ ! -d /workspace/workspace-image ]
 then
     pull_image=1
 else
-    if [ -f "/workspace/workspace-image/image-tag-username" ]
+    if [ -f "/workspace/.system/workspace-image-tag-username" ]
     then
-        image_tag_username="$(cat /workspace/workspace-image/image-tag-username)"
+        image_tag_username="$(cat /workspace/.system/workspace-image-tag-username)"
     fi
 
     workspace_base_dir="/workspace/workspace-image"
@@ -189,7 +189,7 @@ then
         username="$(get_json "$env" 'username')"
         if [ "$username" != "$image_tag_username" ]
         then
-            echo "$username" > /workspace/workspace-image/image-tag-username
+            echo "$username" > /workspace/.system/workspace-image-tag-username
         fi
         echo "building" > "$workspace_status_file"
         docker build \
