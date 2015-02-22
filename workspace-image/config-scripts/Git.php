@@ -19,6 +19,7 @@ class Git {
 			Logger::log("There is an syntax error in your $config_file", 0);
 			exit;
 		}
+		copy($config_file, SYSTEM_DIR.'/'.basename($config_file).'.lock');
 		return $this;
 	}
 
