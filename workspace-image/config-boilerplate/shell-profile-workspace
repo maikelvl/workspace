@@ -33,7 +33,7 @@ export PATH="./vendor/bin:$PATH"
 export DIGITALOCEAN_CRANE_TOKEN=""
 
 source ~/.rvm/scripts/rvm
-rvm --quiet-curl --install --default use $(rvm list strings)
+rvm --quiet-curl --install --default use $(rvm list strings) 2>/dev/null
 
 sudo chmod +x /workspace/bin-workspace/*
 sudo chmod +x /workspace/bin-coreos/*
