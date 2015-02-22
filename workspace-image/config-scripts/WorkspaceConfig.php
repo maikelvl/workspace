@@ -16,7 +16,7 @@ class WorkspaceConfig {
 			return $this;
 		}
 
-		foreach($this->git->services() as $service)
+		foreach($this->git->getServices() as $service)
 		{
 			if ($this->setConfigRepoService($service))
 			{
@@ -95,7 +95,7 @@ class WorkspaceConfig {
 	{
 		$short_name = FALSE;
 		$remote_name = FALSE;
-		foreach($this->git->services() as $service)
+		foreach($this->git->getServices() as $service)
 		{
 			if ( ! $new_repo_url = $service->getShortRepoUrl($repo_url))
 			{
