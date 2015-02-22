@@ -10,6 +10,7 @@ abstract class GitService {
 	protected $remoteName = FALSE;
 	protected $tokenParam;
 	protected $token;
+	protected $configRepo = FALSE;
 	protected $apiSubDomain;
 	protected $apiVersion;
 	protected $apiUri;
@@ -48,9 +49,9 @@ abstract class GitService {
 		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
 		$this->setShortName($shortName);
 
-		if (array_key_exists('remote-name', $config))
+		if (array_key_exists('api-version', $config))
 		{
-			$this->setRemoteName($config['remote-name']);
+			$this->setApiVersion($config['api-version']);
 		}
 
 		if (array_key_exists('token', $config))
@@ -58,9 +59,14 @@ abstract class GitService {
 			$this->setToken($config['token']);
 		}
 
-		if (array_key_exists('api-version', $config))
+		if (array_key_exists('config-repo', $config))
 		{
-			$this->setApiVersion($config['api-version']);
+			$this->setConfigRepo($config['config-repo']);
+		}
+
+		if (array_key_exists('remote-name', $config))
+		{
+			$this->setRemoteName($config['remote-name']);
 		}
 	}
 
@@ -112,12 +118,6 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function setRemoteName($remoteName)
-	{
-		$this->remoteName = $remoteName;
-		return $this;
-	}
-
 	public function setToken($token)
 	{
 		if (preg_match('/your-.*-here/i', $token))
@@ -125,6 +125,18 @@ abstract class GitService {
 			return $this;
 		}
 		$this->token = $token;
+		return $this;
+	}
+
+	public function setConfigRepo($configRepo)
+	{
+		$this->configRepo = $configRepo;
+		return $this;
+	}
+
+	public function setRemoteName($remoteName)
+	{
+		$this->remoteName = $remoteName;
 		return $this;
 	}
 
@@ -227,6 +239,11 @@ abstract class GitService {
 	public function getShortName()
 	{
 		return $this->shortName;
+	}
+
+	public function getConfigRepo()
+	{
+		return $this->configRepo;
 	}
 
 	public function getRemoteName()
