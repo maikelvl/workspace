@@ -1,5 +1,4 @@
 #!/bin/bash
-
 WORKSPACE_REPO="https://github.com/crobays/workspace/archive/master.zip"
 #WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
 #VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
@@ -235,6 +234,12 @@ function add_shell_profile_to_bash_profile ()
 				else
 					echo -e "\$new_bash_profile_file" > $bash_profile_file
 				fi
+
+				if [ "$(cat $bash_profile_file)" == "" ]
+				then
+					rm "$bash_profile_file"
+				fi
+
 			fi
 EOF
 	fi
