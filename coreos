@@ -244,10 +244,21 @@ then
 	fi
 fi
 
+function vagrant_ssh()
+{
+	if [ "$COMMAND" != "" ]
+	then
+		info "Running your command on coreos-$INSTANCE..."
+		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
+	else
+		info "Logging in to coreos-$INSTANCE..."
+		vagrant ssh "coreos-$INSTANCE"
+	fi
+}
+
 if [ ! $RELOAD ] && [ -f "$running_file" ]
 then
-	info "Logging in to coreos-$INSTANCE..."
-	vagrant ssh "coreos-$INSTANCE"
+	vagrant_ssh
 	info "... checking status"
 	status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 	if [ "${status/not running/}" != "$status" ]
@@ -296,12 +307,5 @@ status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 if [ "${status/not running/}" == "$status" ]
 then
 	touch "$running_file"
-	if [ "$COMMAND" != "" ]
-	then
-		info "Running your command on coreos-$INSTANCE..."
-		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
-	else
-		info "Logging in to coreos-$INSTANCE..."
-		vagrant ssh "coreos-$INSTANCE"
-	fi
+	vagrant_ssh
 fi
