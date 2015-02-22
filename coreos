@@ -248,14 +248,14 @@ function vagrant_ssh()
 {
 	if [ "${COMMAND:0:9}" == "workspace" ]
 	then
-		info "Logging in to workspace on coreos-$INSTANCE..."
+		info "Logging into workspace on coreos-$INSTANCE..."
 		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
 	elif [ "$COMMAND" != "" ]
 	then
 		info "Running your command on coreos-$INSTANCE..."
 		vagrant ssh --command "$COMMAND" "coreos-$INSTANCE"
 	else
-		info "Logging in to coreos-$INSTANCE..."
+		info "Logging into coreos-$INSTANCE..."
 		vagrant ssh "coreos-$INSTANCE"
 	fi
 }
