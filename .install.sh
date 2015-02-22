@@ -168,19 +168,19 @@ function add_shell_profile_to_bash_profile ()
 	bash_profile_file="$HOME/.bash_profile"
 	start_line="# === Workspace ${WORKSPACE/$HOME/~} aliases start ==="
 	end_line="# === Workspace ${WORKSPACE/$HOME/~} aliases end ==="
-	bash_line="$start_line"
-	bash_line="$bash_line\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\""
+	bash_profile_addition="$start_line"
+	bash_profile_addition="$bash_profile_addition\nexport WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\""
 	if [ "$VAGRANT_HOME" == "$WORKSPACE/.vagrant.d" ]
 	then
-		bash_line="$bash_line\nexport VAGRANT_HOME=\"\$WORKSPACE/.vagrant.d\""
+		bash_profile_addition="$bash_profile_addition\nexport VAGRANT_HOME=\"\$WORKSPACE/.vagrant.d\""
 	fi
-	bash_line="$bash_line\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\""
-	bash_line="$bash_line\nfunction workspace(){ coreos -c \"workspace \$@\"; }"
-	bash_line="$bash_line\n$end_line"
+	bash_profile_addition="$bash_profile_addition\nalias coreos=\"cd \$WORKSPACE && \$WORKSPACE/coreos\""
+	bash_profile_addition="$bash_profile_addition\nfunction workspace(){ coreos -c \"workspace \$@\"; }"
+	bash_profile_addition="$bash_profile_addition\n$end_line"
 	if [ -f "$bash_profile_file" ]
 	then
 		bash_profile="$(cat "$bash_profile_file")"
-		if [ "${bash_profile/$bash_line/}" == "$bash_profile" ]
+		if [ "${bash_profile/$bash_profile_addition/}" == "$bash_profile" ]
 		then
 			add_line=1
 		fi
@@ -190,7 +190,7 @@ function add_shell_profile_to_bash_profile ()
 
 	if [ add_line ]
 	then
-		echo -e "$add_bash_line" >> "$bash_profile_file"
+		echo -e "$bash_profile_addition" >> "$bash_profile_file"
 
 		add_to_uninstaller << EOF
 			if [ -f "$bash_profile_file" ]
