@@ -30,7 +30,7 @@ export PATH="$PATH:$HOME/.local/bin"
 export PATH="$CONFIG_DIR/bin:/workspace/bin-workspace:$PATH"
 export PATH="$PATH:/workspace/bin-coreos"
 export PATH="./vendor/bin:$PATH"
-export TUGBOAT_CONFIG_PATH="$CONFIG_DIR/tugboat.yml"
+export DIGITALOCEAN_CRANE_TOKEN=""
 source ~/.rvm/scripts/rvm
 # rvm --quiet-curl --install --default use 2.1.3
 
