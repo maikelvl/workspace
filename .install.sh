@@ -8,6 +8,7 @@ DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="$1"
 PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
+VAGRANT_VERSION="${3:-1.6.5}"
 export VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
 update_uninstaller=1
 
@@ -267,7 +268,8 @@ function install_vagrant ()
 		"http://www.vagrantup.com/downloads" \
 		"vagrant*.dmg" \
 		"" \
-		"$application_name"
+		"$application_name" \
+		"$VAGRANT_VERSION"
 	
 	add_to_uninstaller "trash \"/opt/$command\""
 
@@ -474,6 +476,7 @@ function download_and_install ()
 	download_link_base_pattern="$3"
 	specific_version="$4"
 	application_name="$5"
+	requested_version="$6"
 
 	function version()
 	{
@@ -531,7 +534,9 @@ function download_and_install ()
 	fi
 
 	info "Fetching downloads page $downloads_link..."
-	download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern")"
+	#find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version"
+	download_link="$(find_download_link "$downloads_link" "$download_link_base_pattern" "$requested_version")"
+
 	if [ "$download_link" == "" ]
 	then
 		error "No download link found on $downloads_link"
@@ -742,6 +747,7 @@ function find_download_link()
 {
 	downloads_link="$1"
 	download_link_base_pattern="$2"
+	requested_version="$3"
 	download_link_base_front=""
 	download_link_base_rear=""
 	latest_version=""
@@ -782,6 +788,10 @@ function find_download_link()
 			if [ "$latest_version" == "master" ]
 			then
 				continue
+			fi
+			if [ $requested_version ]
+			then
+				s="${s//$latest_version/$requested_version}"
 			fi
 			echo "$s"
 			return
