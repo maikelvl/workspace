@@ -9,7 +9,7 @@ DOWNLOADS_DIRECTORY="$HOME/Downloads"
 PROVIDER="$1"
 PROVIDER="${PROVIDER//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
-VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
+export VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
 update_uninstaller=1
 
 function start ()
