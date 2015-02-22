@@ -1,6 +1,0 @@
-#!/bin/bash
-curl \
-	--output "/workspace/${1//\//-}.json" \
-	--header "Authorization: Bearer 3209d900654f241035ca1e270273434e808629a7f03fb36d4f031c19901bb6ec" \
-	--url api.digitalocean.com/v2/$1 \
-	--location
