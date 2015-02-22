@@ -129,7 +129,7 @@ then
 	then
 		su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 	fi
-
+	
  	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
 fi
 

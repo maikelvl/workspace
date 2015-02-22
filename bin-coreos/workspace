@@ -214,6 +214,13 @@ then
     exit
 fi
 
+lock="/workspace/.system/git.json.lock"
+truth="/workspace/config/git.json"
+if [ ! $RERUN_CONTAINER ] && [ "$(cat $lock)" != "$(cat $truth)" ]
+then
+    RERUN_CONTAINER=1
+fi
+
 if [ $RERUN_CONTAINER ]
 then
     docker rm -f "$NAME" 2>/dev/null
@@ -231,6 +238,7 @@ then
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --env "CONFIG_DIR=/workspace/config" \
+        --env "SYSTEM_DIR=/workspace/.system" \
         --env "LOG_LEVEL=$LOG_LEVEL" \
         --env "DOCKER_NAME=$NAME" \
         --env "TIMEZONE=$(get_json "$env" 'timezone')" \
