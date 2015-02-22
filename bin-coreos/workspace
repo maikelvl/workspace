@@ -114,12 +114,17 @@ if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="latest"
 fi
-username="crobays" #"$(get_json "$env" 'username')"
+
+image_tag_username="crobays"
 if [ ! -d /workspace/workspace-image ]
 then
-    username="crobays"
     pull_image=1
 else
+    if [ -f "/workspace/workspace-image/image-tag-username" ]
+    then
+        image_tag_username="$(cat /workspace/workspace-image/image-tag-username)"
+    fi
+
     workspace_base_dir="/workspace/workspace-image"
     if [ "$(cat /workspace/config/git.json)" == "$(cat "$workspace_base_dir/config-boilerplate/git.json")" ]
     then
@@ -127,12 +132,14 @@ else
         exit
     fi
 fi
-workspace_base_image="$username/workspace"
+
+workspace_base_image="$image_tag_username/workspace"
 workspace_archive_dir="/workspace/.docker-images"
-workspace_image_latest_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-latest.tar"
-workspace_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
-workspace_rebuild_image_file="$workspace_archive_dir/$username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
+workspace_image_latest_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-latest.tar"
+workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
+workspace_rebuild_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
 NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${1:-1})"
+
 workspace_status_file="/workspace/.system/workspace-status"
 if [ -f "$workspace_status_file" ]
 then
@@ -140,6 +147,7 @@ then
     echo "Your workspace image is $status in another process. Please retry when ready."
     exit
 fi
+
 if [ ! $REBUILD_IMAGE_TAG ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
 then
     if [ -f "$workspace_image_file" ]
@@ -177,6 +185,11 @@ then
         else
             no_cache="$no_cache=true"
             start_date="$(date)"
+        fi
+        username="$(get_json "$env" 'username')"
+        if [ "$username" != "$image_tag_username" ]
+        then
+            echo "$username" > /workspace/workspace-image/image-tag-username
         fi
         echo "building" > "$workspace_status_file"
         docker build \
@@ -245,7 +258,6 @@ fi
 
 container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
 
-username="$(get_json "$env" 'username')"
 if [ "$container_state_running" == "" ]
 then
     log "docker run"
@@ -259,7 +271,7 @@ then
         --env "LOG_LEVEL=$LOG_LEVEL" \
         --env "DOCKER_NAME=$NAME" \
         --env "TIMEZONE=$(get_json "$env" 'timezone')" \
-        --env "USERNAME=$username" \
+        --env "USERNAME=$(get_json "$env" 'username')" \
         --interactive \
         --tty \
         "$workspace_base_image:$IMAGE_TAG"
