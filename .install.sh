@@ -9,7 +9,12 @@ FIRST_ARG="$1"
 FIRST_ARG="${FIRST_ARG//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
 VAGRANT_VERSION="${3:-1.6.5}"
+if [ -d "$HOME/.vagrant.d" ]
+then
+	VAGRANT_HOME="$HOME/.vagrant.d"
+fi
 export VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
+
 update_uninstaller=1
 
 function start ()
