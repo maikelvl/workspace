@@ -75,18 +75,23 @@ class Git {
 
 	public function setServices()
 	{
-		foreach($this->config['services'] as $service_config)
+		foreach($this->config['services'] as $service_name => $service_config)
 		{
-			$this->setService($service_config);
+			$this->setService($service_config, $service_name);
 		}
 		return $this;
 	}
 
-	public function setService($service_config)
+	public function setService($service_config, $service_name)
 	{
 		if (array_key_exists('active', $service_config) && ! $service_config['active'])
 		{
 			return $this;
+		}
+
+		if ( ! array_key_exists('service', $service_config))
+		{
+			$service_config['service'] = $service_name;
 		}
 
 		switch($service_config['service'])
