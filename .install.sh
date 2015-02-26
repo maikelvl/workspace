@@ -61,7 +61,7 @@ function start ()
 	else
 		info "Installing new Workspace..."
 	fi
-
+	complete_install
 }
 
 function complete_install ()
