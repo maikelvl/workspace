@@ -15,13 +15,13 @@ OPTIONS:
     -c (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
     -l (log level)      Log level 1: Actions 2: with execs and curls
-
+    -C (command)        Execute a command in workspace
 EOF
 }
 BASE_NAME="workspace"
 LOG_LEVEL="0"
 count=0
-while getopts “ht:rR:cdl:” OPTION
+while getopts “ht:rR:cdl:C:” OPTION
 do
          case $OPTION in
             h)
@@ -45,6 +45,9 @@ do
                 ;;
             l)
                 LOG_LEVEL="$OPTARG"
+                ;;
+            C)
+                COMMAND="$OPTARG"
                 ;;
             ?)
                 usage
@@ -274,7 +277,8 @@ then
         --env "USERNAME=$(get_json "$env" 'username')" \
         --interactive \
         --tty \
-        "$workspace_base_image:$IMAGE_TAG"
+        "$workspace_base_image:$IMAGE_TAG" \
+        $COMMAND
 elif [ "$container_state_running" == "false" ]
 then
     log "docker start"
@@ -284,9 +288,13 @@ then
 elif [ "$container_state_running" == "true" ]
 then
     log "docker exec"
+    if [ ! $COMMAND ]
+    then
+        COMMAND="$(docker inspect --format='{{(index .Config.Entrypoint 0)}}' "$NAME")"
+    fi
     docker exec \
         --interactive \
         --tty \
         "$NAME" \
-        "$(docker inspect --format='{{(index .Config.Entrypoint 0)}}' "$NAME")"
+        $COMMAND
 fi

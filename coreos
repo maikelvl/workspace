@@ -263,12 +263,17 @@ function vagrant_ssh()
 if [ ! $RELOAD ] && [ -f "$running_file" ]
 then
 	vagrant_ssh
-	info "... checking status"
+	info "checking status... "
 	status="$(vagrant status coreos-$INSTANCE 2>/dev/null)"
 	if [ "${status/not running/}" != "$status" ]
 	then
 		rm "$running_file"
-		./coreos
+		if [ $COMMAND ]
+		then
+			./coreos -c "$COMMAND"
+		else
+			./coreos
+		fi
 	fi
 	exit
 fi
