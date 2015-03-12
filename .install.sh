@@ -266,7 +266,7 @@ function add_shell_profile_to_bash_profile ()
 					echo -e "\$new_bash_profile_file" > $bash_profile_file
 				fi
 
-				if [ "$(cat $bash_profile_file)" == "" ]
+				if [ "\$(cat $bash_profile_file)" == "" ]
 				then
 					rm "$bash_profile_file"
 				fi
