@@ -17,7 +17,7 @@ export VAGRANT_HOME="${VAGRANT_HOME:-$WORKSPACE/.vagrant.d}"
 
 update_uninstaller=1
 
-function start ()
+function start()
 {
 	message="Administrator permissions are required for:"
 	if [ "$FIRST_ARG" == "update-vagrant" ] && [ -d "$WORKSPACE/.vagrant" ]
@@ -191,7 +191,7 @@ function set_up_config()
 	fi
 }
 
-function add_shell_profile_to_bash_profile ()
+function add_shell_profile_to_bash_profile()
 {
 	# Add coreos alias to bash_profile file
 	bash_profile_file="$HOME/.bash_profile"
@@ -276,7 +276,7 @@ EOF
 	fi
 }
 
-function set_up_projects ()
+function set_up_projects()
 {
 	echo "-- Projects start --"
 
@@ -285,7 +285,7 @@ function set_up_projects ()
 	echo "-- Projects end --"
 }
 
-function install_vagrant ()
+function install_vagrant()
 {
 	mkdir -p "$VAGRANT_HOME"
 	add_to_uninstaller "if which vagrant; then vagrant destroy -f;fi"
@@ -304,7 +304,7 @@ function install_vagrant ()
 	info "Vagant installed"
 }
 
-function add_vagrant_uninstallers ()
+function add_vagrant_uninstallers()
 {
 	add_to_uninstaller "trash \"/opt/$command\""
 
@@ -319,7 +319,7 @@ function add_vagrant_uninstallers ()
 	add_to_uninstaller "trash \"$command_location\""
 }
 
-function install_virtualbox ()
+function install_virtualbox()
 {
 	# -- install VirtualBox ------------------------------------------------------------
 	virtual_box_downloads_link="https://www.virtualbox.org/wiki/Downloads"
@@ -359,7 +359,7 @@ function install_virtualbox ()
 	fi
 }
 
-function install_vmware_fusion ()
+function install_vmware_fusion()
 {
 	# -- install VMWare Fusion ------------------------------------------------------------
 	dest="$DOWNLOADS_DIRECTORY/$(basename $VMWARE_FUSION_DMG_LINK)"
@@ -421,7 +421,7 @@ function timeout()
 	echo ""
 }
 
-function add_to_uninstaller ()
+function add_to_uninstaller()
 {
 	if [ $update_uninstaller ]
 	then
@@ -462,14 +462,14 @@ purple="\e[0;35m"
 turquase="\e[0;36m"
 NC="\e[0m"
 
-function info ()
+function info()
 {
     printf "$turquase"
     echo "$1"
     printf "$NC"
 }
 
-function ask ()
+function ask()
 {
     printf "$blue"
     if [ "$1" == "-n" ]
@@ -481,28 +481,28 @@ function ask ()
     printf "$NC"
 }
 
-function success ()
+function success()
 {
     printf "$green"
     echo -e "$1"
     printf "$NC"
 }
 
-function warning ()
+function warning()
 {
     printf "$orange"
     echo -e "$1"
     printf "$NC"
 }
 
-function error ()
+function error()
 {
     printf "$red"
     echo -e "$1"
     printf "$NC"
 }
 
-function download_and_install ()
+function download_and_install()
 {
 	command="$1"
 	downloads_link="$2"
@@ -842,7 +842,7 @@ function find_download_link()
 }
 
 # Removes a directory which is in between two directories: /home/subdir/directory becomes /home/directory
-function remove_sub_dir ()
+function remove_sub_dir()
 {
 	if [ ! -d "$1" ]
 	then
