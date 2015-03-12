@@ -75,7 +75,6 @@ function complete_install()
 	then
 		install_vagrant
 		add_vagrant_uninstallers
-		exit
 	fi
 	vagrant plugin install vagrant-triggers
 	
