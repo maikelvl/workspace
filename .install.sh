@@ -67,7 +67,6 @@ function start()
 function complete_install()
 {
 	set_up_workspace
-	add_shell_profile_to_bash_profile
 	set_up_config
 	set_up_projects
 
@@ -85,6 +84,8 @@ function complete_install()
 	then
 		install_vmware_fusion
 	fi
+	
+	add_shell_profile_to_bash_profile
 
 	success "Workspace installed successfully!"
 	echo ""
