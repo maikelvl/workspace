@@ -64,7 +64,7 @@ function start ()
 	complete_install
 }
 
-function complete_install ()
+function complete_install()
 {
 	set_up_workspace
 	add_shell_profile_to_bash_profile
@@ -113,7 +113,7 @@ function complete_install ()
 	add_to_uninstaller "echo \"Your old workspace is located in you trash can.\""
 }
 
-function uninstall_previous_workspace ()
+function uninstall_previous_workspace()
 {
 	info "Found uninstaller..."
 	timeout 10 "Uninstalling old Workspace"
