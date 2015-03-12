@@ -379,11 +379,11 @@ function install_vmware_fusion()
 		"$dest" \
 		"$application_name"
 
-	if [ -d "$HOME/Applications" ]
-	then
-		sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
-		add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
-	fi
+	# if [ -d "$HOME/Applications" ]
+	# then
+	# 	sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
+	# 	add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
+	# fi
 
 	add_to_uninstaller "trash \"/Library/Application Support/VMWare\""
 	add_to_uninstaller "trash \"/Library/Application Support/VMWare Fusion\""
@@ -727,6 +727,10 @@ function install()
 
 	application_path="Applications"
 	dest_application_path="/$application_path"
+	if [ -d "$HOME/$application_path" ]
+	then
+		dest_application_path="$HOME/$application_path"
+	fi
 	app_path=""
 	pkg="$(ls $extraction_path | grep .pkg | head -1)"
 	app="$(ls $extraction_path | grep .app | head -1)"
@@ -762,13 +766,9 @@ function install()
 
 	if [ "$command" != "" ]
 	then
-		if [ -d "$extraction_path/bin" ]
+		if [ -f "$dest_app_path/bin/$command" ]
 		then
-			sudo mv -f "$extraction_path" "$usr/$command"
-			export PATH="$PATH:$usr/$command/bin"
-		else
-			sudo mkdir -p "$usr/bin"
-			sudo mv $extraction_path/* "$usr/bin/"
+			ln -sf "$dest_app_path/bin/$command" $(which $command)
 		fi
 
 		if [ "$(which $command)" != "" ]
