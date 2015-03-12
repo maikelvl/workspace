@@ -52,6 +52,7 @@ function start()
 	message="$message\n- Installing $PROVIDER"
 	message="$message\n- Getting the current timezone"
 	warning "$message"
+
 	sudo echo ""
 
 	if [ -f "$WORKSPACE/.system/uninstall.sh" ]
@@ -74,6 +75,7 @@ function complete_install()
 	then
 		install_vagrant
 		add_vagrant_uninstallers
+		exit
 	fi
 	vagrant plugin install vagrant-triggers
 	
@@ -379,12 +381,6 @@ function install_vmware_fusion()
 		"$dest" \
 		"$application_name"
 
-	# if [ -d "$HOME/Applications" ]
-	# then
-	# 	sudo mv -f "/Applications/$application_name" "$HOME/Applications/$application_name"
-	# 	add_to_uninstaller "trash \"$HOME/Applications/$application_name\""
-	# fi
-
 	add_to_uninstaller "trash \"/Library/Application Support/VMWare\""
 	add_to_uninstaller "trash \"/Library/Application Support/VMWare Fusion\""
 	add_to_uninstaller "trash \"/Library/Preferences/VMWare Fusion\""
@@ -619,6 +615,7 @@ function download_and_install()
 						"$download_link" \
 						"$dest" \
 						"$application_name"
+					info "Downloaded $download_link"
 				fi
 				install \
 					"$command" \
@@ -630,8 +627,6 @@ function download_and_install()
 			else
 				success "$application_name already installed"
 			fi
-			info "Downloaded $download_link"
-		
 		fi
 	fi
 
@@ -679,8 +674,6 @@ function install()
 	volume_name="$(echo $volume_name | awk '{print tolower($0)}')"
 	extraction_path="$HOME/${filename%.*}-extraction"
 	mkdir -p "$extraction_path"
-	usr="/usr/local"
-	sudo mkdir -p "$usr"
 
 	case "$extension" in
 		dmg)
@@ -727,10 +720,6 @@ function install()
 
 	application_path="Applications"
 	dest_application_path="/$application_path"
-	if [ -d "$HOME/$application_path" ]
-	then
-		dest_application_path="$HOME/$application_path"
-	fi
 	app_path=""
 	pkg="$(ls $extraction_path | grep .pkg | head -1)"
 	app="$(ls $extraction_path | grep .app | head -1)"
@@ -748,6 +737,11 @@ function install()
 	elif [ "$app" != "" ]
 	then
 		app_path="$extraction_path/$app"
+	fi
+
+	if [ -d "$HOME/$application_path" ]
+	then
+		dest_application_path="$HOME/$application_path"
 	fi
 
 	# -- Move to home Applications directory if there is one ------------------------
@@ -768,13 +762,13 @@ function install()
 	then
 		if [ -f "$dest_app_path/bin/$command" ]
 		then
-			ln -sf "$dest_app_path/bin/$command" $(which $command)
+			sudo ln -sf "$dest_app_path/bin/$command" "/usr/local/bin/$command"
 		fi
 
 		if [ "$(which $command)" != "" ]
 		then
 			add_to_uninstaller "trash \"$(which $command)\""
-			success "$application_name $(version $command)"
+			success "$application_name $(version $command) -> $(which $command)"
 		else
 			error "Something went wrong installing $application_name"
 		fi
