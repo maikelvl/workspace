@@ -773,6 +773,7 @@ function install()
 
 		if [ "$(which $command)" != "" ]
 		then
+			add_to_uninstaller "trash \"$(which $command)\""
 			success "$application_name $(version $command)"
 		else
 			error "Something went wrong installing $application_name"
