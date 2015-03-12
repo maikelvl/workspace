@@ -687,8 +687,7 @@ function install()
 			hdiutil attach -mountpoint "$volume_path" "$package"
 			osascript -e 'tell application "Finder"' -e 'close front window' -e 'end tell'
 			echo "Copying DMG content to $extraction_path. Please wait a sec..."
-			sudo cp -rf $volume_path/*.pkg $extraction_path/
-			sudo cp -rf $volume_path/*.tool $extraction_path/
+			sudo cp -rf $volume_path/* $extraction_path/
 			echo "Detaching $volume_path"
 			hdiutil detach "$volume_path"
 			;;
