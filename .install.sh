@@ -309,7 +309,7 @@ function add_vagrant_uninstallers ()
 	add_to_uninstaller "trash \"/opt/$command\""
 
 	# trash the /opt folder if it's empty
-	add_to_uninstaller "if [ \"\$(ls -A /opt)\" == \"\" ];then sudo rmdir \"/opt\";fi"
+	add_to_uninstaller "if [ -d /opt ] && [ \"\$(ls -A /opt)\" == \"\" ];then sudo rmdir \"/opt\";fi"
 
 	sed -i "" "s/read my_answer/my_answer=\"Yes\"/" "$WORKSPACE/.system/uninstall-vagrant.sh"
 	sed -i "" "s/key_exit 0/#key_exit 0/" "$WORKSPACE/.system/uninstall-vagrant.sh"
