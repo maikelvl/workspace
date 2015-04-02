@@ -19,12 +19,12 @@ OPTIONS:
 	-d (destroy)        Kill and destroy instance
 	-s (status)         See Vagrants global status
 	-v (debug)			Vagrant debug mode
-
+	-f (function)		Run a specific function from this executable
 EOF
 }
 
 count=0
-while getopts "hc:rRpdsv" OPTION
+while getopts "hc:rRpdsvf:" OPTION
 do
 	case "$OPTION" in
 		h|help)
@@ -51,6 +51,9 @@ do
 			;;
 		v|verbose|debug)
 			DEBUG="--debug"
+			;;
+		f|function)
+			FUNCTION="$OPTARG"
 			;;
 		?)
 			usage
@@ -101,6 +104,19 @@ function error ()
 	echo "$1"
 	printf "$NC"
 }
+
+function fetch_ip ()
+{
+	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/ip.txt"
+    ip="$(cat ./ip.txt)"
+    #  | sudo tee -a /etc/hosts
+}
+
+if [ $FUNCTION ]
+then
+	$FUNCTION
+	exit
+fi
 
 INSTANCE="$1"
 
