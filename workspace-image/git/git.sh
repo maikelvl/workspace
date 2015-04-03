@@ -73,6 +73,11 @@ make prefix=/usr/local install
 cd ../..
 rm -rf tmp-git-src
 
-echo "git $version fresh installed"
+if [ $(which git) ]
+then
+	echo "Git $version fresh installed"
+else
+	echo "Installing Git failed"
+fi
 
 echo "-- Git end --"
