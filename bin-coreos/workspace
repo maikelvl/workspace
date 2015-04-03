@@ -11,17 +11,18 @@ OPTIONS:
     -h (help)           Show this message
     -t (tag)            The base version of the base (default to \'latest\')
     -r (recreate)       Recreate workspace
-    -R [tag] (rebuild)  Rebuild workspace image from Dockerfile with new tag
-    -c (cache)          Use cache when building base image
+    -b (build)          Build workspace image from Dockerfile with new tag
+    -C (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
     -l (log level)      Log level 1: Actions 2: with execs and curls
-    -C (command)        Execute a command in workspace
+    -c (command)        Run a command
+
 EOF
 }
 BASE_NAME="workspace"
 LOG_LEVEL="0"
 count=0
-while getopts “ht:rR:cdl:C:” OPTION
+while getopts “ht:rbCdl:c:” OPTION
 do
          case $OPTION in
             h)
@@ -34,10 +35,10 @@ do
             r)
                 RERUN_CONTAINER=1
                 ;;
-            R)
-                REBUILD_IMAGE_TAG="$OPTARG"
+            b)
+                BUILD_IMAGE=1
                 ;;
-            c)
+            C)
                 USE_CACHE=1
                 ;;
             d)
@@ -46,7 +47,7 @@ do
             l)
                 LOG_LEVEL="$OPTARG"
                 ;;
-            C)
+            c)
                 COMMAND="$OPTARG"
                 ;;
             ?)
@@ -113,9 +114,12 @@ function log()
     fi
 }
 
+workspace_version_file="/workspace/workspace-version.txt"
 if [ "$IMAGE_TAG" == "" ]
 then
-    IMAGE_TAG="latest"
+    IMAGE_TAG="$(cat $workspace_version_file)"
+else
+    echo "$IMAGE_TAG" > $workspace_version_file
 fi
 
 image_tag_username="crobays"
@@ -139,10 +143,9 @@ fi
 
 workspace_base_image="$image_tag_username/workspace"
 workspace_archive_dir="/workspace/.docker-images"
-workspace_image_latest_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-latest.tar"
 workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
-workspace_rebuild_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$REBUILD_IMAGE_TAG.tar"
-NAME="$BASE_NAME-$(printf "%0*d\n" 2 ${1:-1})"
+NUM="$(printf "%0*d\n" 2 ${1:-1})"
+NAME="$BASE_NAME-$NUM"
 
 workspace_status_file="/workspace/.system/workspace-status"
 if [ -f "$workspace_status_file" ]
@@ -152,7 +155,7 @@ then
     exit
 fi
 
-if [ ! $REBUILD_IMAGE_TAG ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
+if [ ! $BUILD_IMAGE ] && [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
 then
     if [ -f "$workspace_image_file" ]
     then
@@ -160,26 +163,17 @@ then
         echo "loading" > "$workspace_status_file"
         docker load --input "$workspace_image_file"
         rm "$workspace_status_file"
-        if [ "$IMAGE_TAG" != "latest" ]
-        then
-            docker tag "$workspace_base_image:$IMAGE_TAG" "$workspace_base_image:latest"
-        fi
     else
         pull_image=1
     fi
 fi
 
-if [ $REBUILD_IMAGE_TAG ] || [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
+if [ $BUILD_IMAGE ] || [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" == "[]" ]
 then
-    if [ ! $REBUILD_IMAGE_TAG ]
-    then
-        REBUILD_IMAGE_TAG="$IMAGE_TAG"
-    fi
-
     if [ $pull_image ]
     then
         echo "pulling" > "$workspace_status_file"
-        docker pull "$workspace_base_image:$REBUILD_IMAGE_TAG"
+        docker pull "$workspace_base_image:$IMAGE_TAG"
         rm "$workspace_status_file"
     else
         no_cache="--no-cache"
@@ -197,13 +191,13 @@ then
         fi
         echo "building" > "$workspace_status_file"
         docker build \
-            --tag "$workspace_base_image:$REBUILD_IMAGE_TAG" \
+            --tag "$workspace_base_image:$IMAGE_TAG" \
             $no_cache \
             "$workspace_base_dir"
         rm "$workspace_status_file"
     fi
 
-    if [ "$(docker inspect $workspace_base_image:$REBUILD_IMAGE_TAG 2>/dev/null)" != "[]" ]
+    if [ "$(docker inspect $workspace_base_image:$IMAGE_TAG 2>/dev/null)" != "[]" ]
     then
         if [ "$start_date" != "" ]
         then
@@ -211,34 +205,19 @@ then
             echo "Ended:   $(date)"
         fi
 
-        if [ "$REBUILD_IMAGE_TAG" != "latest" ]
-        then
-            docker tag -f "$workspace_base_image:$REBUILD_IMAGE_TAG" "$workspace_base_image:latest"
-        fi
-
         if [ -f "$workspace_image_file" ]
         then
             rm -f "$workspace_image_file"
         fi
-        info "Saving $workspace_base_image:$REBUILD_IMAGE_TAG to $workspace_rebuild_image_file"
+        info "Saving $workspace_base_image:$IMAGE_TAG to $workspace_image_file"
         echo "saving" > "$workspace_status_file"
-        docker save --output "$workspace_rebuild_image_file" "$workspace_base_image:$REBUILD_IMAGE_TAG"
+
+        docker save --output "$workspace_image_file" "$workspace_base_image:$IMAGE_TAG"
         rm "$workspace_status_file"
-        if [ "$REBUILD_IMAGE_TAG" != "latest" ]
-        then
-            if [ -f "$workspace_image_latest_file" ]
-            then
-                rm -f "$workspace_image_latest_file"
-            fi
-            echo "saving" > "$workspace_status_file"
-            docker save --output "$workspace_image_latest_file" "$workspace_base_image:latest"
-            rm "$workspace_status_file"
-        fi
     else
-        error "Sorry to say... but building $workspace_base_image:$REBUILD_IMAGE_TAG failed"
+        error "Building $workspace_base_image:$IMAGE_TAG failed"
         exit
     fi
-    IMAGE_TAG="$REBUILD_IMAGE_TAG"
     RERUN_CONTAINER=1
 fi
 
