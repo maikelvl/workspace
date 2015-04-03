@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.15
+FROM phusion/baseimage:0.9.16
 ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 
@@ -58,7 +58,8 @@ RUN /scripts/other/tree.sh && \
 
 ENV CONFIG_DIR /workspace/config
 
-VOLUME  ["/workspace"]
+VOLUME /workspace
+WORKDIR /workspace
 
 # Run entrypoint
 ADD /config-scripts /scripts/config-scripts

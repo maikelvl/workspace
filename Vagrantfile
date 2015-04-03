@@ -132,7 +132,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           fi
           chmod +x /workspace/bin-coreos/*
           get ubuntu:trusty
-          get phusion/baseimage:0.9.15
+          get phusion/baseimage:0.9.16
           get crobays/workspace
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
           docker version > /workspace/workspace-image/docker/docker-version
