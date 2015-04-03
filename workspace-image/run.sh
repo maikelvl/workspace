@@ -1,12 +1,12 @@
 #!/bin/bash
-export BLACK="\e[0;30m"
-export RED="\e[0;31m"
-export GREEN="\e[0;32m"
-export ORANGE="\e[0;33m"
-export BLUE="\e[0;34m"
-export PURPLE="\e[0;35m"
-export TURQUASE="\e[0;36m"
-export NC="\e[0m"
+BLACK="\e[0;30m"
+RED="\e[0;31m"
+GREEN="\e[0;32m"
+ORANGE="\e[0;33m"
+BLUE="\e[0;34m"
+PURPLE="\e[0;35m"
+TURQUASE="\e[0;36m"
+NC="\e[0m"
 
 function info()
 {
@@ -24,8 +24,8 @@ function success()
 
 function warning ()
 {
-    printf "$orange"
-    echo "$1"
+    printf "$ORANGE"
+    echo -e "$@"
     printf "$NC"
 }
 
@@ -98,7 +98,7 @@ then
 	userhome="$(su "$USERNAME" --command "echo \$HOME")"
 	for i in $(ls -A $HOME)
 	do
-		cp -R --no-clobber "$HOME/$i" "$userhome/"
+		cp --recursive --no-clobber "$HOME/$i" "$userhome/"
 	done
 	chown --recursive "$USERNAME:$USERNAME" "$userhome"
 	chown --recursive "$USERNAME:$USERNAME" /usr/local/bin
