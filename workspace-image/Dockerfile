@@ -58,7 +58,8 @@ RUN /scripts/other/tree.sh && \
 
 ENV CONFIG_DIR /workspace/config
 
-VOLUME  ["/workspace"]
+VOLUME /workspace
+WORKDIR /workspace
 
 # Run entrypoint
 ADD /config-scripts /scripts/config-scripts
