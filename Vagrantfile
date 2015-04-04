@@ -49,6 +49,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
       coreos.trigger.after :up do
         run "touch ./.system/coreos-%02d-running" % i
+        run "./coreos -f fetch_ip"
       end
 
       coreos.trigger.after :destroy do
@@ -61,6 +62,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
       coreos.trigger.after :reload do
         run "touch ./.system/coreos-%02d-running" % i
+        run "./coreos -f fetch_ip"
       end
 
       coreos.vm.hostname = $env['hostname']+'-'+vm_name
