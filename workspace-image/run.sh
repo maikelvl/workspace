@@ -121,6 +121,24 @@ then
 		fi
 	fi
 
+	# Collect enviroment variables and save it for use in SSH session
+	if [ -f $userhome/.zsh-env-vars ]
+	then
+		rm $userhome/.zsh-env-vars
+	fi
+	while read -r e
+	do
+		if [[ $e =~ ([A-Z_]+)=.* ]]
+		then
+			name="${BASH_REMATCH[1]}"
+			if [ ${#name} -gt 1 ] && [ "$name" != "HOME" ]
+			then
+				echo "export ${e/=/=\"}\"" >> $userhome/.zsh-env-vars
+			fi
+		fi
+	done <<< "$(env)"
+	chown $USERNAME:$USERNAME $userhome/.zsh-env-vars
+	
 	# Remove the need for entering a password at sudo
 	sed -i "s/%sudo	ALL=(ALL:ALL) ALL/%sudo	ALL=(ALL) NOPASSWD: ALL/" /etc/sudoers
 
@@ -130,8 +148,12 @@ then
 		su "$USERNAME" --command "$SCRIPTS/config-scripts/bootstrap.php"
 	fi
 	
+	ssh-keygen -q -t rsa -f /workspace/.system/workspace_rsa -N ""
+	cat /workspace/.system/workspace_rsa.pub >> $userhome/.ssh/authorized_keys
+	chmod 600 $userhome/.ssh/authorized_keys
+	chown $USERNAME:$USERNAME $userhome/.ssh/authorized_keys
+
  	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
 fi
 
-cd "/workspace"
-su "$USERNAME"
+/usr/sbin/sshd -D

@@ -164,13 +164,13 @@ class WorkspaceConfig {
 				'rvm',
 			);
 			
-			$template = File::read(CONFIG_DIR.'/oh-my-zsh/templates/zshrc.zsh-template');	
-			
+			$template = File::read(CONFIG_DIR.'/oh-my-zsh/templates/zshrc.zsh-template');
 			$template = preg_replace('/export\sZSH=.*/', 'export ZSH="$CONFIG_DIR/oh-my-zsh"', $template);
 			$template = preg_replace('/plugins=\(.*\)/', 'plugins=('.implode(' ', $plugins).')', $template);
+			is_file($_SERVER['HOME'].'/.zsh-env-vars') && ($template = 'source "$HOME/.zsh-env-vars"'."\n".$template);
 			is_file(CONFIG_DIR."/oh-my-zsh/themes/$theme.zsh-theme") && ($template = preg_replace('/ZSH_THEME=".*"/', "ZSH_THEME=\"$theme\"", $template));
 			is_file(CONFIG_DIR.'/shell-profile-workspace') && ($template .= 'source "$CONFIG_DIR/shell-profile-workspace"'."\n");
-
+			$template .= 'cd /workspace'."\n";
 			File::write($config_zshrc, $template);
 		}
 		is_file($user_zshrc) && unlink($user_zshrc);
