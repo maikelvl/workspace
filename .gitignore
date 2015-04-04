@@ -11,3 +11,4 @@
 *.log
 *.tar
 *.nfs*
+/ip.txt
