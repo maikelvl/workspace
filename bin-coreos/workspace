@@ -114,7 +114,7 @@ function log()
     fi
 }
 
-workspace_version_file="/workspace/workspace-version.txt"
+workspace_version_file="/workspace/.system/workspace-version.txt"
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="$(cat $workspace_version_file)"
@@ -239,41 +239,46 @@ then
 fi
 
 container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
-
 if [ "$container_state_running" == "" ]
 then
+    if [ -f /workspace/.system/workspace_rsa ]
+    then
+        rm /workspace/.system/workspace_rsa
+        rm /workspace/.system/workspace_rsa.pub
+    fi
     log "docker run"
     docker run \
         --name "$NAME" \
         --hostname "$HOSTNAME-$NAME" \
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
+        --publish "6${NUM}22:22" \
         --env "CONFIG_DIR=/workspace/config" \
         --env "SYSTEM_DIR=/workspace/.system" \
         --env "LOG_LEVEL=$LOG_LEVEL" \
         --env "DOCKER_NAME=$NAME" \
         --env "TIMEZONE=$(get_json "$env" 'timezone')" \
         --env "USERNAME=$(get_json "$env" 'username')" \
-        --interactive \
-        --tty \
-        "$workspace_base_image:$IMAGE_TAG" \
-        $COMMAND
-elif [ "$container_state_running" == "false" ]
+        -d \
+        "$workspace_base_image:$IMAGE_TAG"
+    echo -n "Configuring $NAME"
+    while true
+    do
+        echo -n "."
+        sleep 1
+        if [ -f /workspace/.system/workspace_rsa ]
+        then
+            echo ""
+            break
+        fi
+    done
+    docker logs $NAME
+    ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22" -C "echo 'first run'" 2>dev/null
+fi
+
+if [ $COMMAND ]
 then
-    log "docker start"
-    docker start \
-        --interactive \
-        "$NAME"
-elif [ "$container_state_running" == "true" ]
-then
-    log "docker exec"
-    if [ ! $COMMAND ]
-    then
-        COMMAND="$(docker inspect --format='{{(index .Config.Entrypoint 0)}}' "$NAME")"
-    fi
-    docker exec \
-        --interactive \
-        --tty \
-        "$NAME" \
-        $COMMAND
+    ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22" -C "$COMMAND"
+else
+    ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22"
 fi
