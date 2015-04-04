@@ -3,6 +3,7 @@ ENV HOME /root
 RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
 
 MAINTAINER Crobays <crobays@userex.nl>
+
 ENV DEBIAN_FRONTEND noninteractive
 ENV TIMEZONE Etc/UTC
 # Adding scripts in chunks so rebuilding doesn't take so long each time
@@ -68,15 +69,22 @@ ADD /run.sh /root/run.sh
 # Add config boilerplate
 ADD /config-boilerplate /root/config-boilerplate
 
+# Setup SSH
+ADD /ssh/sshd_config /etc/ssh/sshd_config
+RUN ssh-keygen -A
+
+RUN rm /etc/update-motd.d/*
+
 # Add set timezone
 RUN echo "#!/bin/bash\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh && \
-	echo "#!/bin/bash\nif [ -f /workspace/workspace-image/run.sh ]\nthen\n\t/workspace/workspace-image/run.sh\nelse\n\t/root/run.sh\nfi" > /root/start && \
 	chmod +x /etc/my_init.d/* && \
-	chmod +x /root/start && \
+	chmod +x /root/run.sh && \
 	apt-get clean && \
 	rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-ENTRYPOINT ["/root/start"]
+EXPOSE 22
+
+CMD ["/root/run.sh"]
 
 # docker build -t workspace-base-test /workspace/base && \
 # docker run -it --rm -v /workspace:/workspace workspace-base-test bash
