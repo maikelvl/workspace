@@ -274,6 +274,9 @@ then
     done
     docker logs $NAME
     ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22" -C "echo 'first run'" 2>dev/null
+else
+    workspace -r
+    exit
 fi
 
 if [ $COMMAND ]
