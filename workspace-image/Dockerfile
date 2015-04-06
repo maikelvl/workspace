@@ -39,7 +39,7 @@ RUN /scripts/terminal/zsh.sh
 # Docker
 ADD /docker /scripts/docker
 RUN /scripts/docker/docker.sh && \
-	/scripts/docker/fig.sh && \
+	/scripts/docker/docker-compose.sh && \
 	/scripts/docker/maestro-ng.sh
 
 # Provider
