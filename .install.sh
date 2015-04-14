@@ -76,7 +76,6 @@ function complete_install()
 		install_vagrant
 		add_vagrant_uninstallers
 	fi
-	vagrant plugin install vagrant-triggers
 	
 	if [ "$PROVIDER" == "virtualbox" ] && [ ! -d "/Applications/VirtualBox.app" ]
 	then
