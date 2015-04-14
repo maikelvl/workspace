@@ -253,7 +253,10 @@ if [ $REBUILD ] || [ $DESTROY ]
 then
 	info "Destroying coreos-$INSTANCE..."
 	vagrant destroy $DEBUG --force "coreos-$INSTANCE" 2>/dev/null
-	
+	if [ -f "$running_file" ]
+	then
+		rm "$running_file"
+	fi
 	if [ $DESTROY ]
 	then
 		vagrant global-status $DEBUG
