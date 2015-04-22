@@ -115,6 +115,11 @@ function log()
 }
 
 workspace_version_file="/workspace/.system/workspace-version.txt"
+if [ ! -f $workspace_version_file ]
+then
+    echo "latest" > $workspace_version_file
+fi
+
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="$(cat $workspace_version_file)"
@@ -253,6 +258,8 @@ then
         --volume "/workspace:/workspace" \
         --volume "/var/run/docker.sock:/var/run/docker.sock" \
         --publish "6${NUM}22:22" \
+        --publish "6${NUM}80:80" \
+        --publish "6${NUM}01:8000" \
         --env "CONFIG_DIR=/workspace/config" \
         --env "SYSTEM_DIR=/workspace/.system" \
         --env "LOG_LEVEL=$LOG_LEVEL" \
