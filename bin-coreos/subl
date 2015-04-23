@@ -1,0 +1,5 @@
+#!/bin/bash
+path="$@"
+path="$(readlink -f $path)"
+path="${path/\/workspace/\~/workspace}"
+ssh-home-command "~/Applications/Sublime\\ Text.app/Contents/SharedSupport/bin/subl $path"
