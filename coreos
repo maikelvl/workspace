@@ -107,8 +107,8 @@ function error ()
 
 function fetch_ip ()
 {
-	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/ip.txt"
-    ip="$(cat ./.system/ip.txt)"
+	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/.system/coreos-ip"
+    ip="$(cat ./.system/coreos-ip)"
     #  | sudo tee -a /etc/hosts
 }
 
