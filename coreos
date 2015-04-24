@@ -135,9 +135,45 @@ function call_home_rsa_setup()
 	echo "$ip" | awk '{print $2}' > $HOME/workspace/.system/mac-ip
 }
 
+function increase_disk_size()
+{
+	disk_size_file="$HOME/workspace/.system/$1-disk-size"
+	cd $WORKSPACE
+	vagrant halt $1
+	vmware_fusion="/Applications/VMware Fusion.app"
+	if [ -d "$HOME$vmware_fusion" ]
+	then
+		vmware_fusion="$HOME$vmware_fusion"
+	fi
+
+	if [ ! $2 ]
+	then
+		echo "Missing argument: size"
+		exit
+	fi
+	echo "increasing size of $1: ${2}GB"
+	"$vmware_fusion/Contents/Library/vmware-vdiskmanager" -x "${2}GB" "$WORKSPACE/.vagrant/machines/$1/vmware_fusion/"*/*.vmdk && echo $2 > $disk_size_file
+	vagrant up $1
+}
+
+function check_disk_size()
+{
+	disk_size_file="$HOME/workspace/.system/$1-disk-size"
+	size="$(get_json "$env" 'disk')"
+	if [ -f $disk_size_file ]
+	then
+		if [ "$(cat $disk_size_file)" != "$size" ]
+		then
+			increase_disk_size $1 $size
+		fi
+	else
+		increase_disk_size $1 $size
+	fi
+}
+
 if [ $FUNCTION ]
 then
-	$FUNCTION
+	$FUNCTION $@
 	exit
 fi
 
@@ -289,6 +325,7 @@ fi
 
 function vagrant_ssh()
 {
+	check_disk_size coreos-$INSTANCE
 	if [ "${COMMAND:0:9}" == "workspace" ]
 	then
 		info "Logging into workspace on coreos-$INSTANCE..."
