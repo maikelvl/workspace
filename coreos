@@ -112,6 +112,29 @@ function fetch_ip ()
     #  | sudo tee -a /etc/hosts
 }
 
+function call_home_rsa_setup()
+{
+	rsa="$HOME/workspace/.system/call_home_rsa"
+	if [ ! -f "$rsa" ]
+	then
+	    ssh-keygen -t rsa -f $rsa -N "" -C call-home-rsa -q
+	fi
+	authorized_keys="$HOME/.ssh/authorized_keys"
+	if [ -f "$authorized_keys" ]
+	then
+		sed -e "s/.* call-home-rsa//" $authorized_keys > $authorized_keys-tmp
+		mv $authorized_keys-tmp $authorized_keys
+	fi
+	cat $rsa.pub >> $authorized_keys
+	whoami > $HOME/workspace/.system/mac-user
+	ip="$(ifconfig en0 | grep inet | grep -v inet6)"
+	if [ "$ip" == "" ]
+	then
+		ip="$(ifconfig en1 | grep inet | grep -v inet6)"
+	fi
+	echo "$ip" | awk '{print $2}' > $HOME/workspace/.system/mac-ip
+}
+
 if [ $FUNCTION ]
 then
 	$FUNCTION
@@ -263,24 +286,6 @@ then
 		exit
 	fi
 fi
-
-function call_home_rsa_setup()
-{
-	rsa="$HOME/workspace/.system/call_home_rsa"
-	if [ ! -f "$rsa" ]
-	then
-	    ssh-keygen -t rsa -f $rsa -N "" -C call-home-rsa -q
-	fi
-	authorized_keys="$HOME/.ssh/authorized_keys"
-	if [ -f "$authorized_keys" ]
-	then
-		sed -e "s/.* call-home-rsa//" $authorized_keys > $authorized_keys-tmp
-		mv $authorized_keys-tmp $authorized_keys
-	fi
-	cat $rsa.pub >> $authorized_keys
-	whoami > $HOME/workspace/.system/mac-user
-	ifconfig en0 | grep inet | grep -v inet6 | awk '{print $2}' > $HOME/workspace/.system/mac-ip
-}
 
 function vagrant_ssh()
 {
