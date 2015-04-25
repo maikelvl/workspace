@@ -52,7 +52,7 @@ abstract class GitService {
 		{
 			$this->setSshPort($config['ssh-port']);
 		}
-		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
+		$shortName = array_key_exists('remote-name', $config) ? $config['remote-name'] : $this->service_name;
 		$this->setShortName($shortName);
 
 		if (array_key_exists('api-version', $config))
