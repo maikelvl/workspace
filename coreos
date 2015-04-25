@@ -160,6 +160,10 @@ function check_disk_size()
 {
 	disk_size_file="$HOME/workspace/.system/$1-disk-size"
 	size="$(get_json "$env" 'disk')"
+	if [ ! $size ]
+	then
+		size="20"
+	fi
 	if [ -f $disk_size_file ]
 	then
 		if [ "$(cat $disk_size_file)" != "$size" ]
