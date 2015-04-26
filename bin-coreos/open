@@ -1,5 +1,5 @@
 #!/bin/bash
-path="$@"
+path="${@:-./}"
 path="$(readlink -f $path)"
 path="${path/\/workspace/\~/workspace}"
 ssh-home-command "open $path"
