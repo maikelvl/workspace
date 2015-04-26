@@ -235,7 +235,12 @@ fi
 git_config_lock_file="/workspace/.system/git.json.lock"
 if [ ! $RERUN_CONTAINER ] && [ -f "$git_config_lock_file" ] && [ "$(cat $git_config_lock_file)" != "$(cat $git_config_file)" ]
 then
-    RERUN_CONTAINER=1
+    read -p "Your git.json changed. Do you want to reconfigure the workspace? [y/n] " -n 1 -r
+    echo  #                                                                                                                                                                      
+    if [[ $REPLY =~ ^[Yy]$ ]]
+    then
+        RERUN_CONTAINER=1
+    fi
 fi
 
 if [ $RERUN_CONTAINER ]
