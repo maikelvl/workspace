@@ -38,7 +38,7 @@ abstract class GitService {
 			$this->setDomain($config['domain']);
 		}
 
-		if (array_key_exists('http-port', $config))
+		if (array_key_exists('http-port', $config) && $config['http-port'])
 		{
 			$this->setHttpPort($config['http-port']);
 		}
@@ -48,7 +48,7 @@ abstract class GitService {
 			$this->setUser($config['user']);
 		}
 
-		if (array_key_exists('ssh-port', $config))
+		if (array_key_exists('ssh-port', $config) && $config['ssh-port'])
 		{
 			$this->setSshPort($config['ssh-port']);
 		}
