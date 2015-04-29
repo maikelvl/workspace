@@ -231,7 +231,11 @@ then
     docker rm -f "$NAME" 2>/dev/null
     exit
 fi
-
+container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
+if [ "$container_state_running" == "" ]
+then
+    RERUN_CONTAINER=1
+fi
 git_config_lock_file="/workspace/.system/git.json.lock"
 if [ ! $RERUN_CONTAINER ] && [ -f "$git_config_lock_file" ] && [ "$(cat $git_config_lock_file)" != "$(cat $git_config_file)" ]
 then
@@ -243,13 +247,12 @@ then
     fi
 fi
 
-if [ $RERUN_CONTAINER ]
+if [ $RERUN_CONTAINER ] && [ "$container_state_running" != "" ]
 then
     docker rm -f "$NAME" 2>/dev/null
 fi
 
-container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
-if [ "$container_state_running" == "" ]
+if [ $RERUN_CONTAINER ]
 then
     if [ -f /workspace/.system/workspace_rsa ]
     then
