@@ -20,9 +20,7 @@ function docker_login()
 	unset docker
 }
 
-alias art="php artisan"
-
-export ENVIRONMENT="dev"
+export ENVIRONMENT="development"
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="/usr/local/node/bin:$PATH"
