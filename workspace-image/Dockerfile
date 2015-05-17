@@ -53,6 +53,7 @@ RUN /scripts/provider/terraform.sh && \
 ADD /other /scripts/other
 RUN /scripts/other/tree.sh && \
 	/scripts/other/bower.sh && \
+	/scripts/other/dot-json.sh && \
 	/scripts/other/ember-cli.sh && \
 	/scripts/other/composer.sh && \
 	/scripts/other/laravel-installer.sh
