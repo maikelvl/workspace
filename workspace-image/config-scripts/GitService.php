@@ -4,8 +4,9 @@ abstract class GitService {
 
 	protected $https = FALSE;
 	protected $domain;
+	protected $httpPort;
 	protected $user = 'git';
-	protected $port = 22;
+	protected $sshPort = 22;
 	protected $shortName = FALSE;
 	protected $remoteName = FALSE;
 	protected $tokenParam;
@@ -37,16 +38,21 @@ abstract class GitService {
 			$this->setDomain($config['domain']);
 		}
 
+		if (array_key_exists('http-port', $config) && $config['http-port'])
+		{
+			$this->setHttpPort($config['http-port']);
+		}
+
 		if (array_key_exists('user', $config))
 		{
 			$this->setUser($config['user']);
 		}
 
-		if (array_key_exists('port', $config))
+		if (array_key_exists('ssh-port', $config) && $config['ssh-port'])
 		{
-			$this->setPort($config['port']);
+			$this->setSshPort($config['ssh-port']);
 		}
-		$shortName = array_key_exists('short-name', $config) ? $config['short-name'] : $this->service_name;
+		$shortName = array_key_exists('remote-name', $config) ? $config['remote-name'] : $this->service_name;
 		$this->setShortName($shortName);
 
 		if (array_key_exists('api-version', $config))
@@ -96,6 +102,12 @@ abstract class GitService {
 		return $this;
 	}
 
+	public function setHttpPort($httpPort)
+	{
+		$this->httpPort = $httpPort;
+		return $this;
+	}
+
 	public function setUser($user)
 	{
 		if (preg_match('/your-.*-here/i', $user))
@@ -106,9 +118,9 @@ abstract class GitService {
 		return $this;
 	}
 
-	public function setPort($port)
+	public function setSshPort($sshPort)
 	{
-		$this->port = $port;
+		$this->sshPort = $sshPort;
 		return $this;
 	}
 
@@ -152,7 +164,7 @@ abstract class GitService {
 		$ssh->setHost($this->shortName);
 		$ssh->setHostname($this->domain);
 		$ssh->setUser($this->user);
-		$ssh->setPort($this->port);
+		$ssh->setPort($this->sshPort);
 		$identityfile = getenv('HOME')."/.ssh/".str_replace('.', '_', $this->domain)."_rsa";
 		$workspace_identityfile = CONFIG_DIR.'/.ssh/'.basename($identityfile);
 		if ( ! $this->token)
@@ -315,11 +327,17 @@ abstract class GitService {
 		}
 		
 		$url = $this->getProtocol()."://".$domain;
+
+		if ($this->httpPort)
+		{
+			$url .= ':'.$this->httpPort;
+		}
+
 		if ($this->apiUri)
 		{
 			$url .= '/'.trim($this->apiUri, '/');
 		}
-	
+		
 		return $url;
 	}
 

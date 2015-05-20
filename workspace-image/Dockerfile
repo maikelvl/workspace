@@ -51,11 +51,13 @@ RUN /scripts/provider/terraform.sh && \
 
 # other
 ADD /other /scripts/other
-RUN /scripts/other/tree.sh && \
-	/scripts/other/bower.sh && \
-	/scripts/other/ember-cli.sh && \
+RUN /scripts/other/bower.sh && \
 	/scripts/other/composer.sh && \
-	/scripts/other/laravel-installer.sh
+	/scripts/other/dot-json.sh && \
+	/scripts/other/ember-cli.sh && \
+	/scripts/other/laravel-installer.sh && \
+	/scripts/other/travis-cli.sh && \
+	/scripts/other/tree.sh
 
 ENV CONFIG_DIR /workspace/config
 

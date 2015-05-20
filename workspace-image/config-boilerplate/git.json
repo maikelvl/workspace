@@ -14,7 +14,8 @@
 			"active": false,
 		    "https": true,
 		    "domain": "gitlab.com",
-		    "port": 22,
+		    "http-port": false,
+		    "ssh-port": 22,
 		    "api-version": "v3",
 		    "token": "your-gitlab-token-here",
 		    "config-repo": "workspace-config"

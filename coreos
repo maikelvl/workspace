@@ -107,14 +107,77 @@ function error ()
 
 function fetch_ip ()
 {
-	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/.system/coreos-ip"
-    ip="$(cat ./.system/coreos-ip)"
+	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/.system/$1-ip"
+    ip="$(cat ./.system/$1-ip)"
     #  | sudo tee -a /etc/hosts
+}
+
+function call_home_rsa_setup()
+{
+	rsa="$HOME/workspace/.system/call_home_rsa"
+	if [ ! -f "$rsa" ]
+	then
+	    ssh-keygen -t rsa -f $rsa -N "" -C call-home-rsa -q
+	fi
+	authorized_keys="$HOME/.ssh/authorized_keys"
+	if [ -f "$authorized_keys" ]
+	then
+		sed -e "s/.* call-home-rsa//" $authorized_keys > $authorized_keys-tmp
+		mv $authorized_keys-tmp $authorized_keys
+	fi
+	cat $rsa.pub >> $authorized_keys
+	whoami > $HOME/workspace/.system/mac-user
+	ip="$(ifconfig en0 | grep inet | grep -v inet6)"
+	if [ "$ip" == "" ]
+	then
+		ip="$(ifconfig en1 | grep inet | grep -v inet6)"
+	fi
+	echo "$ip" | awk '{print $2}' > $HOME/workspace/.system/mac-ip
+}
+
+function increase_disk_size()
+{
+	disk_size_file="$HOME/workspace/.system/$1-disk-size"
+	cd $WORKSPACE
+	vagrant halt $1
+	vmware_fusion="/Applications/VMware Fusion.app"
+	if [ -d "$HOME$vmware_fusion" ]
+	then
+		vmware_fusion="$HOME$vmware_fusion"
+	fi
+
+	if [ ! $2 ]
+	then
+		echo "Missing argument: size"
+		exit
+	fi
+	echo "increasing size of $1: ${2}GB"
+	"$vmware_fusion/Contents/Library/vmware-vdiskmanager" -x "${2}GB" "$WORKSPACE/.vagrant/machines/$1/vmware_fusion/"*/*.vmdk && echo $2 > $disk_size_file
+	vagrant up $1
+}
+
+function check_disk_size()
+{
+	disk_size_file="$HOME/workspace/.system/$1-disk-size"
+	size="$(get_json "$env" 'disk')"
+	if [ ! $size ]
+	then
+		size="20"
+	fi
+	if [ -f $disk_size_file ]
+	then
+		if [ "$(cat $disk_size_file)" != "$size" ]
+		then
+			increase_disk_size $1 $size
+		fi
+	else
+		increase_disk_size $1 $size
+	fi
 }
 
 if [ $FUNCTION ]
 then
-	$FUNCTION
+	$FUNCTION $@
 	exit
 fi
 
@@ -264,26 +327,9 @@ then
 	fi
 fi
 
-function call_home_rsa_setup()
-{
-	rsa="$HOME/workspace/.system/call_home_rsa"
-	if [ ! -f "$rsa" ]
-	then
-	    ssh-keygen -t rsa -f $rsa -N "" -C call-home-rsa -q
-	fi
-	authorized_keys="$HOME/.ssh/authorized_keys"
-	if [ -f "$authorized_keys" ]
-	then
-		sed -e "s/.* call-home-rsa//" $authorized_keys > $authorized_keys-tmp
-		mv $authorized_keys-tmp $authorized_keys
-	fi
-	cat $rsa.pub >> $authorized_keys
-	whoami > $HOME/workspace/.system/mac-user
-	ifconfig en0 | grep inet | grep -v inet6 | awk '{print $2}' > $HOME/workspace/.system/mac-ip
-}
-
 function vagrant_ssh()
 {
+	check_disk_size coreos-$INSTANCE
 	if [ "${COMMAND:0:9}" == "workspace" ]
 	then
 		info "Logging into workspace on coreos-$INSTANCE..."
