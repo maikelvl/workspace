@@ -23,7 +23,7 @@ function docker_login()
 alias art="php artisan"
 alias package="dot-json ./package.json"
 
-export ENVIRONMENT="dev"
+export ENVIRONMENT="development"
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="/usr/local/node/bin:$PATH"
