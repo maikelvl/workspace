@@ -1,0 +1,7 @@
+#!/bin/bash
+for i in $(ls /workspace/.system/*-ip)
+do
+	basename="$(basename $i)"
+	chars=`expr 14 - ${#basename}`
+	printf '%*s' "$chars" | tr ' ' " " && echo -n "${basename/-ip/}:  " && cat $i
+done
