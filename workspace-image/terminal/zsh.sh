@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "-- ZSH start --"
 
-BRANCH="$1"
+version="zsh-$1"
 
 # Build Zsh from sources on Ubuntu.
 # From http://zsh.sourceforge.net/Arc/git.html and sources INSTALL file.
@@ -16,21 +16,45 @@ set -e
 
 dest="/downloads/zsh"
 if [ ! -d "$dest" ];then
-	git clone git://git.code.sf.net/p/zsh/code "$dest"
+	git clone git://github.com/zsh-users/zsh "$dest"
 fi
-cp -r "$dest" zsh
-cd zsh
+cd "$dest"
 
-# Get lastest stable version, but you can change to any valid branch/tag/commit id
-if [ "$BRANCH" == "" ];then
-	BRANCH=$(git describe --abbrev=0 --tags)
+for tag in $(git tag --sort=-refname)
+do
+    if [ "${tag/dev/}" != "$tag" ]
+    then
+        continue
+    fi
+    if [ "$version" != "" ]
+    then
+        if [ "${tag/$version/}" != "$tag" ]
+        then
+            BRANCH="$tag"
+            break
+        fi
+        continue
+    fi
+    BRANCH="$tag"
+    break
+done
+
+if [ "$BRANCH" == "" ]
+then
+    git tag --column
+    echo "Invalid version: $version"
+    exit 1
 fi
+
+# # Get lastest stable version, but you can change to any valid branch/tag/commit id
+# if [ "$BRANCH" == "" ];then
+# 	BRANCH=$(git describe --abbrev=0 --tags)
+# fi
 
 # Get version number, and revision/commit id when this is available
 ZSH_VERSION=$(echo $BRANCH | cut -d '-' -f2,3,4)
 # Go to desired branch
 git checkout $BRANCH
- 
 # Make configure
 ./Util/preconfig
  
