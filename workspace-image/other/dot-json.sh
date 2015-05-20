@@ -1,6 +1,6 @@
 #!/bin/bash
-echo "-- JSON start --"
+echo "-- Dot-json start --"
 
 /usr/local/node/bin/npm install -g dot-json && echo "JSON installed"
 
-echo "-- JSON end --"
+echo "-- Dot-json end --"
