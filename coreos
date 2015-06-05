@@ -107,8 +107,9 @@ function error ()
 
 function fetch_ip ()
 {
-	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/.system/$1-ip"
-    ip="$(cat ./.system/$1-ip)"
+	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 1 > /workspace/.system/$1-public-ip.txt"
+	./coreos -c "ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1' | tail -n 2 | head -n 1 > /workspace/.system/$1-local-ip.txt"
+    # ip="$(cat ./.system/$1-public-ip.txt)"
     #  | sudo tee -a /etc/hosts
 }
 
@@ -126,18 +127,18 @@ function call_home_rsa_setup()
 		mv $authorized_keys-tmp $authorized_keys
 	fi
 	cat $rsa.pub >> $authorized_keys
-	whoami > $HOME/workspace/.system/mac-user
+	whoami > $HOME/workspace/.system/mac-user.txt
 	ip="$(ifconfig en0 | grep inet | grep -v inet6)"
 	if [ "$ip" == "" ]
 	then
 		ip="$(ifconfig en1 | grep inet | grep -v inet6)"
 	fi
-	echo "$ip" | awk '{print $2}' > $HOME/workspace/.system/mac-ip
+	echo "$ip" | awk '{print $2}' > $HOME/workspace/.system/mac-ip.txt
 }
 
 function increase_disk_size()
 {
-	disk_size_file="$HOME/workspace/.system/$1-disk-size"
+	disk_size_file="$HOME/workspace/.system/$1-disk-size.txt"
 	cd $WORKSPACE
 	vagrant halt $1
 	vmware_fusion="/Applications/VMware Fusion.app"
