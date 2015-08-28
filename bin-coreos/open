@@ -1,5 +1,10 @@
 #!/bin/bash
-path="${@:-./}"
-path="$(readlink -f $path)"
-path="${path/\/workspace/\~/workspace}"
-ssh-home-command "open $path"
+path_or_url="${@:-./}"
+path="$(readlink -f $path_or_url)"
+if [ $path ]
+then
+	path_or_url="$path"
+	path_or_url="${path_or_url/\/workspace/\~/workspace}"
+	echo $path_or_url
+fi
+ssh-home-command "open \"$path_or_url\""

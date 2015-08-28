@@ -1,19 +1,26 @@
-FROM phusion/baseimage:0.9.16
-ENV HOME /root
-RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
+FROM phusion/baseimage:0.9.17
 
 MAINTAINER Crobays <crobays@userex.nl>
 
+ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
 ENV TIMEZONE Etc/UTC
+ENV CONFIG_DIR /workspace/config
+
+RUN rm -rf /etc/service/sshd/down
+RUN /etc/my_init.d/00_regen_ssh_host_keys.sh
+RUN rm /etc/update-motd.d/*
+
+VOLUME /workspace
+WORKDIR /workspace
+
 # Adding scripts in chunks so rebuilding doesn't take so long each time
 
 # Update and server
 ADD /core /scripts/core
 RUN /scripts/core/update.sh && \
 	/scripts/core/dist-upgrade.sh && \
-	/scripts/core/build-essential.sh && \
-	/scripts/core/linux-image-extra.sh
+	/scripts/core/build-essential.sh
 
 # Utilities
 ADD /utilities /scripts/utilities
@@ -59,34 +66,23 @@ RUN /scripts/other/bower.sh && \
 	/scripts/other/travis-cli.sh && \
 	/scripts/other/tree.sh
 
-ENV CONFIG_DIR /workspace/config
-
-VOLUME /workspace
-WORKDIR /workspace
-
 # Run entrypoint
 ADD /config-scripts /scripts/config-scripts
-ADD /run.sh /root/run.sh
 
 # Add config boilerplate
 ADD /config-boilerplate /root/config-boilerplate
 
-# Setup SSH
-ADD /ssh/sshd_config /etc/ssh/sshd_config
-RUN ssh-keygen -A
-
-RUN rm /etc/update-motd.d/*
-
 # Add set timezone
-RUN echo "#!/bin/bash\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh && \
-	chmod +x /etc/my_init.d/* && \
-	chmod +x /root/run.sh && \
-	apt-get clean && \
-	rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN echo "#!/bin/bash\necho \"Timezone: \$TIMEZONE\"\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh
+ADD /run.sh /etc/my_init.d/02-config-user.sh
+
+RUN chmod +x /etc/my_init.d/*
+
+RUN apt-get clean && rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 EXPOSE 22
 
-CMD ["/root/run.sh"]
+CMD ["/sbin/my_init"]
 
 # docker build -t workspace-base-test /workspace/base && \
 # docker run -it --rm -v /workspace:/workspace workspace-base-test bash

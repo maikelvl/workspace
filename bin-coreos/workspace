@@ -115,16 +115,12 @@ function log()
 }
 
 workspace_version_file="/workspace/.system/workspace-version.txt"
-if [ ! -f $workspace_version_file ]
-then
-    echo "latest" > $workspace_version_file
-fi
-
 if [ "$IMAGE_TAG" == "" ]
 then
     IMAGE_TAG="$(cat $workspace_version_file)"
+    build_version="$(date +%Y.%m.%d.%H%M)"
 else
-    echo "$IMAGE_TAG" > $workspace_version_file
+    build_version="$IMAGE_TAG"
 fi
 
 image_tag_username="crobays"
@@ -195,6 +191,8 @@ then
             echo "$username" > /workspace/.system/workspace-image-tag-username
         fi
         echo "building" > "$workspace_status_file"
+        IMAGE_TAG="$build_version"
+        workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
         docker build \
             --tag "$workspace_base_image:$IMAGE_TAG" \
             $no_cache \
@@ -216,9 +214,10 @@ then
         fi
         info "Saving $workspace_base_image:$IMAGE_TAG to $workspace_image_file"
         echo "saving" > "$workspace_status_file"
-
+        workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
         docker save --output "$workspace_image_file" "$workspace_base_image:$IMAGE_TAG"
         rm "$workspace_status_file"
+        echo "$IMAGE_TAG" > $workspace_version_file
     else
         error "Building $workspace_base_image:$IMAGE_TAG failed"
         exit
