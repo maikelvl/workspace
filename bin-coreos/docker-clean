@@ -15,7 +15,7 @@ case $1 in
         remove_dangling
         ;;
     containers)
-        read -p "Are you sure you want to remove all stopped containers?" -n 1 -r
+        read -p "Are you sure you want to remove all stopped containers? " -n 1 -r
         echo  #                                                                                                                                                                      
         if [[ $REPLY =~ ^[Yy]$ ]]
         then

@@ -155,5 +155,3 @@ then
 
  	info "Hi $USERNAME, your password is $USERNAME. (root=root)"
 fi
-
-/usr/sbin/sshd -D
