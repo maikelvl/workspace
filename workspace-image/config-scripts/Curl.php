@@ -121,6 +121,8 @@ class Curl {
 	        $curl_options[CURLOPT_POSTFIELDS] = $this->data;
 	    }
 	   	$curl_options[CURLOPT_USERAGENT] = gethostname();
+	   	$curl_options[CURLOPT_SSL_VERIFYPEER] = FALSE;
+	   	$curl_options[CURLOPT_SSL_VERIFYHOST] = FALSE;
 	    // Send request and wait for response
 	    $handle = curl_init();
 	    Logger::log($curl_options[CURLOPT_CUSTOMREQUEST].' '.$curl_options[CURLOPT_URL], 2);

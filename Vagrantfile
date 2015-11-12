@@ -4,7 +4,7 @@ require 'json'
 
 Vagrant.require_version '>= 1.6.0'
 VAGRANTFILE_API_VERSION = '2'
-CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'config/user-data')
+CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'cluster-setup/vagrant')
 
 # # Defaults for config options defined in CONFIG
 $env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
@@ -46,27 +46,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
     
     config.vm.define vm_name do |coreos|
-    
-      coreos.trigger.after :up do
-        run "touch ./.system/coreos-%02d-running" % i
-        run "./coreos -f fetch_ip coreos-%02d" % i
-      end
 
-      coreos.trigger.after :destroy do
-        run "rm ./.system/coreos-%02d-running" % i
-        run "rm ./.system/coreos-%02d-disk-size" % i
-      end
-
-      coreos.trigger.after :halt do
-        run "rm ./.system/coreos-%02d-running" % i
-      end
-
-      coreos.trigger.after :reload do
-        run "touch ./.system/coreos-%02d-running" % i
-        run "./coreos -f fetch_ip coreos-%02d" % i
-      end
-
-      coreos.vm.hostname = $env['hostname']+'-'+vm_name
+      coreos.vm.hostname = 'vagrant-%02d' % i
       
       if $env['network'] == 'private'
         coreos.vm.network :private_network, ip: "172.16.1.1%02d" % i
@@ -120,23 +101,38 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
-      if File.exist?(CLOUD_CONFIG_PATH)
-        config.vm.provision :file, :source => CLOUD_CONFIG_PATH, :destination => '/tmp/vagrantfile-user-data'
-        config.vm.provision :shell, :inline => 'mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/', :privileged => true
+      coreos.trigger.after :up do
+        run "./coreos update-status %d" % i
       end
 
-      coreos.vm.provision :shell, inline: 'timedatectl set-timezone "'+$env['timezone']+'"'
+      coreos.trigger.after :halt do
+        run "./coreos update-status %d" % i
+      end
 
+      coreos.trigger.after :destroy do
+        run "./coreos update-status %d" % i
+      end
+
+      cloud_config = "#{CLOUD_CONFIG_PATH}/coreos-vagrant-%02d.yml" % i
+      if File.exist?(cloud_config)
+        config.vm.provision :file, :source => cloud_config, :destination => '/tmp/vagrantfile-user-data'
+        coreos.vm.provision :shell, :inline => '
+          sed -i "s/\\$private_ipv4/$(ifconfig ens33 | awk \'/\\<inet\\>/ { print $2}\')/g" /tmp/vagrantfile-user-data
+          sed -i "s/\\$public_ipv4/$(ifconfig ens34 | awk \'/\\<inet\\>/ { print $2}\')/g" /tmp/vagrantfile-user-data
+          mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/', :privileged => true
+      end
+
+      coreos.vm.provision :shell, :inline => 'timedatectl set-timezone "'+$env['timezone']+'"'
+      coreos.vm.provision :shell, :inline => 'echo -e "COREOS_PUBLIC_IPV4=$(ifconfig ens34 | awk \'/\\<inet\\>/ { print $2}\')\nCOREOS_PRIVATE_IPV4=$(ifconfig ens33 | awk \'/\\<inet\\>/ { print $2}\')" > /etc/environment'
       if i == 1
-        coreos.vm.synced_folder '.', '/workspace', id: 'core', type: 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
-        coreos.vm.provision :shell, inline: '
+        coreos.vm.synced_folder '.', '/workspace', :id => 'core', :type => 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
+        coreos.vm.provision :shell, :inline => '
           if [ ! -L /opt/bin ];then
             mkdir /opt && ln --symbolic --force /workspace/bin-coreos /opt/bin
           fi
           chmod +x /workspace/bin-coreos/*
-          get phusion/baseimage:0.9.17
-          version="$(cat /workspace/.system/workspace-version.txt)"
-          get crobays/workspace:$version
+          # version="$(cat /workspace/.system/workspace-version.txt)"
+          # get crobays/workspace:$version
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
           docker version > /workspace/workspace-image/docker/docker-version
         '
