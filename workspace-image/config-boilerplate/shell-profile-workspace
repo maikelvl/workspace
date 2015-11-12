@@ -20,21 +20,24 @@ function docker_login()
 	unset docker
 }
 
+export WORKSPACE="/workspace"
 export ENVIRONMENT="development"
 export PATH="$HOME/bin:/usr/local/bin:$PATH"
 export PATH="$PATH:$HOME/.rvm/bin"
 export PATH="/usr/local/node/bin:$PATH"
 export PATH="$PATH:$HOME/.local/bin"
-export PATH="/workspace/bin-coreos:$PATH"
-export PATH="$CONFIG_DIR/bin:/workspace/bin-workspace:$PATH"
+export PATH="$WORKSPACE/bin-coreos:$PATH"
+export PATH="$CONFIG_DIR/bin:$WORKSPACE/bin-workspace:$PATH"
 export PATH="./vendor/bin:$PATH"
 export DIGITALOCEAN_CRANE_TOKEN=""
+export COMPOSE_API_VERSION=auto
+export PYTHONPATH="$WORKSPACE/.python-packages"
 
 alias package="dot-json ./package.json"
 
-source ~/.rvm/scripts/rvm
-rvm --quiet-curl --install --default use $(rvm list strings) 2>/dev/null
+# source ~/.rvm/scripts/rvm
+# rvm --quiet-curl --install --default use $(rvm list strings) 2>/dev/null
 
-sudo chmod +x /workspace/bin-workspace/*
-sudo chmod +x /workspace/bin-coreos/*
+sudo chmod +x $WORKSPACE/bin-workspace/*
+sudo chmod +x $WORKSPACE/bin-coreos/*
 sudo chmod +x $CONFIG_DIR/bin/*

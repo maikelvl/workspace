@@ -46,23 +46,21 @@ RUN /scripts/terminal/zsh.sh
 # Docker
 ADD /docker /scripts/docker
 RUN /scripts/docker/docker.sh && \
-	/scripts/docker/docker-compose.sh && \
-	/scripts/docker/maestro-ng.sh
+	/scripts/docker/docker-compose.sh
 
 # Provider
-ADD /provider /scripts/provider
-RUN /scripts/provider/terraform.sh && \
-	/scripts/provider/dot.sh && \
-	/scripts/provider/packer.sh && \
-	/scripts/provider/tugboat.sh
+# ADD /provider /scripts/provider
+# RUN /scripts/provider/terraform.sh && \
+# 	/scripts/provider/dot.sh && \
+# 	/scripts/provider/packer.sh && \
+# 	/scripts/provider/tugboat.sh
 
 # other
 ADD /other /scripts/other
 RUN /scripts/other/bower.sh && \
-	/scripts/other/composer.sh && \
 	/scripts/other/dot-json.sh && \
 	/scripts/other/ember-cli.sh && \
-	/scripts/other/laravel-installer.sh && \
+	/scripts/other/fab.sh && \
 	/scripts/other/travis-cli.sh && \
 	/scripts/other/tree.sh
 
