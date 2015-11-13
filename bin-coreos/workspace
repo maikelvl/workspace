@@ -47,6 +47,7 @@ do
                 DESTROY=1
                 ;;
             l)
+                set -x
                 LOG_LEVEL="$OPTARG"
                 ;;
             c)
@@ -232,7 +233,7 @@ then
     docker rm -f "$NAME" 2>/dev/null
     exit
 fi
-container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" 2>/dev/null)"
+container_state_running="$(docker inspect --format='{{.State.Running}}' "$NAME" &2>/dev/null)"
 
 if [ "$container_state_running" == "" ]
 then
