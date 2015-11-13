@@ -37,7 +37,7 @@ RUN /scripts/essential/curl.sh && \
 
 # Git
 ADD /git /scripts/git
-RUN /scripts/git/git.sh 2
+RUN /scripts/git/git.sh
 
 # Terminal
 ADD /terminal /scripts/terminal
