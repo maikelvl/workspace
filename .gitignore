@@ -13,3 +13,4 @@
 *.nfs*
 /ip.txt
 /.data
+*.pyc
