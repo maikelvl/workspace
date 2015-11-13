@@ -305,7 +305,7 @@ fi
 
 if [ $COMMAND ]
 then
-    ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22" -C "$COMMAND"
+    ssh $(get_json "$env" 'username')@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22" -C "$COMMAND"
 else
-    ssh crobays@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22"
+    ssh $(get_json "$env" 'username')@localhost -o "StrictHostKeyChecking no" -o "UserKnownHostsFile=/dev/null" -q -i /workspace/.system/workspace_rsa -p "6${NUM}22"
 fi
