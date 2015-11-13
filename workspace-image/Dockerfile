@@ -60,7 +60,7 @@ ADD /other /scripts/other
 RUN /scripts/other/bower.sh && \
 	/scripts/other/dot-json.sh && \
 	/scripts/other/ember-cli.sh && \
-	/scripts/other/fab.sh && \
+	/scripts/other/fabric.sh && \
 	/scripts/other/travis-cli.sh && \
 	/scripts/other/tree.sh
 
