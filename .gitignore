@@ -12,3 +12,4 @@
 *.tar
 *.nfs*
 /ip.txt
+/.data
