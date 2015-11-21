@@ -1,4 +1,5 @@
 #!/bin/bash
+set -ex
 DOWNLOADS_DIRECTORY="/downloads"
 SILENT_LEVEL=2
 

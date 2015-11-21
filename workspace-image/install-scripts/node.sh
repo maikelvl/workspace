@@ -1,9 +1,10 @@
 #!/bin/bash
+set -ex
 REMOVE_DOWNLOAD_AFTER_INSTALL=1
-if [ -f /workspace/base/utilities/download-and-install.sh ];then
-    source /workspace/base/utilities/download-and-install.sh
+if [ -f /workspace/base/install-scripts/download-and-install.sh ];then
+    source /workspace/base/install-scripts/download-and-install.sh
 else
-    source /scripts/utilities/download-and-install.sh
+    source /scripts/install-scripts/download-and-install.sh
 fi
 
 download_and_install \

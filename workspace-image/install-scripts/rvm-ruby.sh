@@ -1,6 +1,5 @@
 #!/bin/bash
-echo "-- RVM start --"
-
+set -ex
 version="${1:-stable}"
 
 # Creating a temporary user account
@@ -33,5 +32,3 @@ chown --recursive root:root "$HOME/.rvm"
 userdel $tmp_user \
 	--remove \
 	--force
-
-echo "-- RVM end --"
