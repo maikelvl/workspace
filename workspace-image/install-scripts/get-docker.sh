@@ -1,5 +1,5 @@
 #!/bin/sh
-set -e
+set -ex
 #
 # This script is meant for quick & easy install via:
 #   'curl -sSL https://get.docker.com/ | sh'

@@ -1,0 +1,10 @@
+Client version: 1.7.1
+Client API version: 1.19
+Go version (client): go1.4.2
+Git commit (client): df2f73d-dirty
+OS/Arch (client): linux/amd64
+Server version: 1.7.1
+Server API version: 1.19
+Go version (server): go1.4.2
+Git commit (server): df2f73d-dirty
+OS/Arch (server): linux/amd64

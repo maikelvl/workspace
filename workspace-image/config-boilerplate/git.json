@@ -40,6 +40,8 @@
 		"*.msi",
 		"*.msm",
 		"*.msp",
-		".nfs000*"
+		".nfs000*",
+		".idea",
+    	".pycharm_helpers"
 	]
 }
