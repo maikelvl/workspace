@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 set -ex
 
 echo -e "Downloading latest Composer..."
@@ -11,5 +11,5 @@ if [ "$(which composer)" == "" ];then
     printf "\e[0m"
     exit 1
 else
-    echo "$(composer --version) installed"
+	echo "$(composer --version) installed"
 fi

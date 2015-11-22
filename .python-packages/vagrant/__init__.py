@@ -861,6 +861,7 @@ class Vagrant(object):
         '''
         # Make subprocess command
         command = self._make_vagrant_command(args)
+
         with self.out_cm() as out_fh, self.err_cm() as err_fh:
             subprocess.check_call(command, cwd=self.root, stdout=out_fh,
                                   stderr=err_fh, env=self.env)

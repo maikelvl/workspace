@@ -2,7 +2,7 @@
 /.system
 /.vagrant
 /.vagrant.d
-/config
+/home
 /docker
 /projects
 /env.json

@@ -1,75 +1,72 @@
-FROM phusion/baseimage:0.9.17
+FROM alpine:3.2
 
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
-ENV HOME=/root \
-	DEBIAN_FRONTEND=noninteractive \
-	TIMEZONE=Etc/UTC \
-	CONFIG_DIR=/workspace/config
+RUN echo 'http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
+ && echo '@community http://nl.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
+ && echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
 
-RUN rm -rf /etc/service/sshd/down && \
-	/etc/my_init.d/00_regen_ssh_host_keys.sh && \
-	rm /etc/update-motd.d/*
-
-WORKDIR /workspace
-
-RUN add-apt-repository -y ppa:git-core/ppa && \
-	add-apt-repository -y ppa:ondrej/php5 && \
-	apt-get update
-
-RUN apt-get install -y \
-		build-essential \
-		software-properties-common \
-		python-software-properties \
-		gcc \
-		make \
-		autoconf \
-		yodl \
-		libncursesw5-dev \
-		texinfo \
-		checkinstall
-
-RUN apt-get install -y \
+RUN apk add --update \
 		curl \
-		dnsutils \
 		git \
+		less \
+		nodejs \
+		openssh \
+		perl \
+		php-curl \
+		php-json \
+		php-openssl \
+		php-phar \
+		py-crypto \
+		py-pip \
 		ruby-bundler \
+		sudo \
 		tree \
+		tzdata \
+		unzip \
 		vim \
-		zsh
+		zsh \
+ && rm -rf /var/cache/apk/*
 
 ADD /install-scripts /scripts/install-scripts
-RUN /scripts/install-scripts/node.sh && \
-	/scripts/install-scripts/php.sh && \
-	/scripts/install-scripts/php-composer.sh && \
-	/scripts/install-scripts/pip.sh && \
-	/scripts/install-scripts/rvm-ruby.sh stable && \
-	/scripts/install-scripts/docker.sh
-	
+RUN /scripts/install-scripts/docker.sh \
+ && /scripts/install-scripts/git-perl.sh \
+ && /scripts/install-scripts/php-composer.sh
+
 ENV PATH /usr/local/node/bin:$PATH
 RUN npm install -g \
 		bower \
 		ember-cli \
 		dot-json
-RUN pip install \
+
+RUN pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
+ && pip install --no-cache-dir \
 		docker-compose \
 		fabric
 
-RUN apt-get clean && \
-	rm -rf /downloads /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN rm /etc/motd \
+ && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
+ && ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N "" -t rsa \
+ && ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N "" -t dsa \
+ && ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N "" -t ecdsa \
+ && ssh-keygen -f /etc/ssh/ssh_host_ed25519_key -N "" -t ed25519 \
+ && curl -L -o /tmp/oh-my-zsh.zip https://github.com/crobays/oh-my-zsh/archive/master.zip \
+ && unzip /tmp/oh-my-zsh.zip -d /var/lib \
+ && rm /tmp/oh-my-zsh.zip \
+ && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh
 
-# Add config scripts
-ADD /config-scripts /scripts/config-scripts
-
-# Add config boilerplate
-ADD /config-boilerplate /root/config-boilerplate
-
-# Add set timezone
-RUN echo "#!/bin/bash\necho \"Timezone: \$TIMEZONE\"\nif [ ! -f /etc/timezone ] || [ \"\$(cat /etc/timezone)\" != \"\$TIMEZONE\" ]\nthen\n\techo \"\$TIMEZONE\" > /etc/timezone && dpkg-reconfigure -f noninteractive tzdata\nfi" > /etc/my_init.d/01-timezone.sh
-ADD /bootstrap.sh /etc/my_init.d/02-bootstrap.sh
-
-RUN chmod +x /etc/my_init.d/*
+ENV USER=user \
+	HOME=/workspace/home \
+	EDITOR=vim \
+	TIMEZONE=UTC \
+	SSH_KEY=.ssh/workspace_rsa
 
 EXPOSE 22
+WORKDIR /workspace
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start", "version", "help"]
 
-CMD ["/sbin/my_init"]
+ADD home-template /tmp/home-template
+ADD entrypoint.sh /entrypoint.sh
+
+RUN date +%s > /.build-time

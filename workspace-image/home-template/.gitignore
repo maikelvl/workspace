@@ -1,0 +1,7 @@
+/.cache
+/.docker/config.json
+/.ssh
+/.z-data
+/.zcompdump*
+/.zshrc-local
+/.*_history
