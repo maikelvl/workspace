@@ -1,8 +1,0 @@
-#!/bin/bash
-for i in $(ls /workspace/.system/*-ip.txt)
-do
-	basename="$(basename $i)"
-	basename="${basename:0:${#basename}-4}"
-	chars=`expr 20 - ${#basename}`
-	printf '%*s' "$chars" | tr ' ' " " && echo -n "${basename/-ip/}:  " && cat $i
-done

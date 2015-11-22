@@ -1,4 +1,0 @@
-#!/bin/bash
-user=$(cat /workspace/.system/mac-user.txt)
-ip=$(cat /workspace/.system/mac-ip.txt)
-ssh $user@$ip -i /workspace/.system/call_home_rsa -C "$@"
