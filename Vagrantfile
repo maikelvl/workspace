@@ -47,7 +47,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     
     config.vm.define vm_name do |coreos|
 
-      coreos.vm.hostname = 'vagrant-%02d' % i
+      coreos.vm.hostname = 'coreos-%02d' % i
       
       if $env['network'] == 'private'
         coreos.vm.network :private_network, ip: "172.16.1.1%02d" % i
