@@ -1,5 +1,0 @@
-#!/bin/bash
-path="${@:-./}"
-path="$(readlink -f $path)"
-path="${path/\/workspace/\~/workspace}"
-ssh-home-command "/Applications/BBEdit.app/Contents/Helpers/bbdiff $path"
