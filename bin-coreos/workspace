@@ -14,6 +14,7 @@ OPTIONS:
     -t (tag)            The base version of the base (default to \'latest\')
     -r (recreate)       Recreate workspace
     -b (build)          Build workspace image from Dockerfile with new tag
+    -n (no save)        Do not save build to docker-images
     -C (cache)          Use cache when building base image
     -d (destroy)        Kill and destroy workspace container
     -l (log level)      Log level 1: Actions 2: with execs and curls
@@ -23,8 +24,9 @@ EOF
 }
 BASE_NAME="workspace"
 LOG_LEVEL="0"
+SAVE_BUILD=1
 count=0
-while getopts “ht:rbCdl:c:” OPTION
+while getopts “ht:rbnCdl:c:” OPTION
 do
          case $OPTION in
             h)
@@ -39,6 +41,9 @@ do
                 ;;
             b)
                 BUILD_IMAGE=1
+                ;;
+            n)
+                SAVE_BUILD=""
                 ;;
             C)
                 USE_CACHE=1
@@ -211,16 +216,19 @@ then
             echo "Ended:   $(date)"
         fi
 
-        if [ -f "$workspace_image_file" ]
+        if [ $SAVE_BUILD ]
         then
-            rm -f "$workspace_image_file"
+            if [ -f "$workspace_image_file" ]
+            then
+                rm -f "$workspace_image_file"
+            fi
+            info "Saving $workspace_base_image:$IMAGE_TAG to $workspace_image_file"
+            echo "saving" > "$workspace_status_file"
+            workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
+            docker save --output "$workspace_image_file" "$workspace_base_image:$IMAGE_TAG"
+            rm "$workspace_status_file"
+            echo "$IMAGE_TAG" > $workspace_version_file
         fi
-        info "Saving $workspace_base_image:$IMAGE_TAG to $workspace_image_file"
-        echo "saving" > "$workspace_status_file"
-        workspace_image_file="$workspace_archive_dir/$image_tag_username-SLASH-workspace-COLON-$IMAGE_TAG.tar"
-        docker save --output "$workspace_image_file" "$workspace_base_image:$IMAGE_TAG"
-        rm "$workspace_status_file"
-        echo "$IMAGE_TAG" > $workspace_version_file
     else
         error "Building $workspace_base_image:$IMAGE_TAG failed"
         exit
