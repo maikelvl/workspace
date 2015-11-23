@@ -8,6 +8,7 @@ fi
 start() {
     _set_timezone
     _export_environment_variables
+    _create_home_directory
     _create_user
     /usr/sbin/sshd -D
 }
@@ -43,12 +44,16 @@ _export_environment_variables() {
     done
 }
 
+_create_home_directory() {
+    if [ ! -f $HOME/.zshrc ];then
+        cp -rf /tmp/home-template/. $HOME/
+    fi
+    rm -rf /tmp/home-template
+}
+
 _create_user() {
     if ! id -u "$USER" >/dev/null 2>&1; then
-        if [ ! -d $HOME ];then
-            cp -r /tmp/home-template $HOME
-        fi
-        rm -rf /tmp/home-template
+        
         uid=$(ls /workspace -ld | awk '{print $3}')
         if [ "$uid" == "root" ];then
             adduser $USER -D -h $HOME -s /bin/zsh
