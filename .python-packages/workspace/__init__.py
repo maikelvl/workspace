@@ -133,6 +133,7 @@ class Workspace(object):
         self.coreos = coreos_vagrant.CoreOS(self.coreos_instance)
         with open(self.env_file, 'r') as env:
             self.env = json.load(env)
+
         try:
             with open(self.config_file(from_host=True), 'r') as config:
                 self.config.update(**json.load(config))
@@ -195,8 +196,13 @@ class Workspace(object):
             command=command)
 
     def save_config(self):
-        with open(self.config_file(from_host=True), 'w') as config:
-            config.write(json.dumps(self.config, indent=2))
+        config_file = self.config_file(from_host=True)
+        try:
+            with open(config_file, 'w') as config:
+                config.write(json.dumps(self.config, indent=2))
+        except IOError as e:
+            os.makedirs(os.path.dirname(config_file))
+            self.save_config()
         return self
 
     @property
