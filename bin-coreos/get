@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/ash
 usage()
 {
 cat << EOF
@@ -61,28 +61,28 @@ purple="\e[0;35m"
 turquase="\e[0;36m"
 NC="\e[0m"
 
-function info ()
+info()
 {
     printf "$turquase"
     echo "$1"
     printf "$NC"
 }
 
-function success ()
+success()
 {
     printf "$green"
     echo "$1"
     printf "$NC"
 }
 
-function warning ()
+warning()
 {
     printf "$orange"
     echo "$1"
     printf "$NC"
 }
 
-function error ()
+error()
 {
     printf "$red"
     echo "$1"
