@@ -1,4 +1,6 @@
-2.0.0
+# Changelog
+
+## 2.0.0
 - commands have been rewritten in Python
 - the main command is `workspace` which now requires subcommands so this API has changed
 - the second command is `coreos` to handle the virtual machine operations
