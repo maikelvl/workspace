@@ -1,4 +1,9 @@
 #!/bin/bash
+set -e
+if [ $DEBUG ];then
+	set -x
+fi
+
 WORKSPACE_REPO="https://github.com/crobays/workspace/archive/develop.zip"
 #WORKSPACE_REPO="http://gitlab.userx.nl/crobays/workspace/repository/archive.zip?ref=master"
 #VMWARE_FUSION_DMG_LINK="https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.4-1887983.dmg"
