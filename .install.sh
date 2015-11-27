@@ -13,7 +13,7 @@ DOWNLOADS_DIRECTORY="$HOME/Downloads"
 FIRST_ARG="$1"
 FIRST_ARG="${FIRST_ARG//_/-}"
 WORKSPACE="${2:-$HOME/workspace}"
-VAGRANT_VERSION="${3:-1.6.5}"
+VAGRANT_VERSION="${3:-1.7.4}"
 if [ -d "$HOME/.vagrant.d" ]
 then
 	VAGRANT_HOME="$HOME/.vagrant.d"
