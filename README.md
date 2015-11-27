@@ -4,10 +4,10 @@
 A consistent development environment for all your Macs using Vagrant, CoreOS and Docker.
 
 ### Why this project?
-The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace get you up and running by leveraging Vagrant. Combined with CoreOS and Docker this gives you a workspace which is configurable in code, and therefore consistent.
+The usual development machine has all kinds of software installed on the main operating system, which can be a pain to setup and keep consistent across all your machines. This Workspace gets you up and running by leveraging Vagrant combined with CoreOS and Docker this gives you a workspace which is configured in code, thus repeatable and therefore consistent.
 
 ## Workspace installation
-To run Vagrant we need virtual machine software. A free and good option is to use VirtualBox. For performance reasons, you may want to choose VMWare Fusion, however it requires a license for VMWare Fusion itself and the Vagrant VMWare provider.
+To run Vagrant we need virtual machine software. A free and good option is to use VirtualBox. For performance reasons, you may want to choose VMware Fusion, however this requires a license for VMWare Fusion itself and the Vagrant VMWare provider.
 
 #### VirtualBox
 To install your workspace just run the following in your terminal:
@@ -22,7 +22,7 @@ To install with VMWare Fusion run the following instead:
 #### Administrator privileges
 During installation we need administrator privileges for the following:
 - Get your system’s timezone (your workspace will inherit this timezone)
-- Installation of the Vagrant package
+- Installation of Vagrant
 - Installation of VirtualBox or VMWare Fusion
 
 ## Next steps:
