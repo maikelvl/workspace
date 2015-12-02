@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/zsh
 usage()
 {
 cat << EOF
@@ -99,7 +99,7 @@ fi
 
 # If no version is specified, change it to :latest
 image="$IMAGE"
-if [ "$image" == "${image//:/---}" ]
+if [ "$image" = "${image//:/---}" ]
 then
 	image="$image:latest"
 fi
@@ -108,7 +108,6 @@ image_base_name="${image%:*}"
 
 file="${image/\//-SLASH-}"
 file="${file/:/-COLON-}"
-
 mkdir -p "$ARCHIVE_PATH"
 tar="$ARCHIVE_PATH/$file.tar"
 
@@ -120,7 +119,7 @@ then
     fi
 fi
 
-if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ] || [ $REMAKE ]
+if [ "$(docker inspect "$image" 2>/dev/null)" = "[]" ] || [ $REMAKE ]
 then
     if [ -f "$tar" ]
     then
@@ -141,10 +140,10 @@ then
         action="pull"
     fi
 
-    if [ "$(docker inspect "$image" 2>/dev/null)" == "[]" ]
+    if [ "$(docker inspect "$image" 2>/dev/null)" = "[]" ]
     then
         error "Failed to $action $image"
-        if [ "$action" == "load" ]
+        if [ "$action" = "load" ]
         then
             info "Deleting $tar (probably broken)"
             rm -f "$tar"
@@ -153,7 +152,7 @@ then
             exit
         fi
     else
-        if [ "$action" == "build" ]
+        if [ "$action" = "build" ]
         then
             action_past="built"
         else
