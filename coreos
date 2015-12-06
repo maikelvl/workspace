@@ -2,7 +2,7 @@
 import os
 import sys
 
-sys.path.append(os.path.dirname(__file__)+'/.python-packages')
+sys.path.append(os.environ.get('WORKSPACE', os.environ.get('HOME')+'/workspace')+'/.python-packages')
 
 from coreos_vagrant import cli
 
