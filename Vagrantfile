@@ -7,7 +7,7 @@ VAGRANTFILE_API_VERSION = '2'
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'cluster-setup/vagrant')
 
 # # Defaults for config options defined in CONFIG
-$env = JSON.parse(File.read(ENV['WORKSPACE']+'/env.json'))
+$env = JSON.parse(File.join(File.dirname(__FILE__), '/env.json'))
 $num_instances = $env['instances'] ? $env['instances'] : 1
 $update_channel = $env['coreos-update-channel'] ? $env['coreos-update-channel'] : 'stable'
 $enable_serial_logging = false
