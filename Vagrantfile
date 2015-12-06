@@ -7,25 +7,25 @@ VAGRANTFILE_API_VERSION = '2'
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), 'cluster-setup/vagrant')
 
 # # Defaults for config options defined in CONFIG
-$env = JSON.parse(File.join(File.dirname(__FILE__), '/env.json'))
+$env = JSON.parse(File.read(File.join(File.dirname(__FILE__), '/env.json')))
 $num_instances = $env['instances'] ? $env['instances'] : 1
-$update_channel = $env['coreos-update-channel'] ? $env['coreos-update-channel'] : 'stable'
+$release_channel = $env['coreos-release-channel'] ? $env['coreos-release-channel'] : 'stable'
 $enable_serial_logging = false
 $vb_gui = false
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
-  config.vm.box = 'coreos-%s' % $update_channel
+  config.vm.box = 'coreos-%s' % $release_channel
   box_version = 'current'
   if $env['coreos-version'] then
     config.vm.box_version = $env['coreos-version']
     box_version = $env['coreos-version']
   end
 
-  config.vm.box_url = "http://#{$update_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant.json"
+  config.vm.box_url = "http://#{$release_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant.json"
 
   config.vm.provider :vmware_fusion do |v, override|
-    override.vm.box_url = "http://#{$update_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant_vmware_fusion.json"
+    override.vm.box_url = "http://#{$release_channel}.release.core-os.net/amd64-usr/#{box_version}/coreos_production_vagrant_vmware_fusion.json"
   end
 
   config.vm.provider :virtualbox do |v|
@@ -131,8 +131,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
             mkdir /opt && ln --symbolic --force /workspace/bin-coreos /opt/bin
           fi
           chmod +x /workspace/bin-coreos/*
-          # version="$(cat /workspace/.system/workspace-version.txt)"
-          # get crobays/workspace:$version
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
           docker version > /workspace/workspace-image/docker/docker-version
         '
