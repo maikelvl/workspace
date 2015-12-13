@@ -65,7 +65,7 @@ ENV USER=user \
 EXPOSE 22
 WORKDIR /workspace
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["start", "version", "help"]
+CMD ["start"]
 
 ADD home-template /tmp/home-template
 ADD entrypoint.sh /entrypoint.sh
