@@ -132,7 +132,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
           fi
           chmod +x /workspace/bin-coreos/*
           getent group docker | cut -d: -f3 > /workspace/.system/docker-group-id
-          docker version > /workspace/workspace-image/docker/docker-version
+          docker --version | sed -rn "s/[^0-9]*([0-9]*\.[0-9]*\.[0-9]*).*/\1/p" > /workspace/workspace-image/DOCKER_VERSION
         '
       end
     end

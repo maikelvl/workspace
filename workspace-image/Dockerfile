@@ -28,6 +28,7 @@ RUN apk add --update \
 		zsh \
  && rm -rf /var/cache/apk/*
 
+ADD /DOCKER_VERSION /DOCKER_VERSION
 ADD /install-scripts /scripts/install-scripts
 RUN /scripts/install-scripts/docker.sh \
  && /scripts/install-scripts/git-perl.sh \
