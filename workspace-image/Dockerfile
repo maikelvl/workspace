@@ -2,13 +2,13 @@ FROM alpine:3.2
 
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
-RUN echo 'http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
+RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
  && echo '@community http://nl.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
  && echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
 
 RUN apk add --update \
 		curl \
-		git \
+		git@edge \
 		less \
 		nodejs \
 		openssh \
