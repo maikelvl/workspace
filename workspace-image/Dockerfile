@@ -19,6 +19,7 @@ RUN apk add --update \
 		php-phar \
 		py-crypto \
 		py-pip \
+		python3-dev \
 		ruby-bundler \
 		sudo \
 		tree \
@@ -68,6 +69,6 @@ ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]
 
 ADD home-template /tmp/home-template
-ADD entrypoint.sh /entrypoint.sh
+ADD entrypoint.sh /
 
 RUN date +%s > /.build-time
