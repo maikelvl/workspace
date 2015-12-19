@@ -1,7 +1,12 @@
 /.cache
 /.docker/config.json
-/.ssh
+/.npm
+/.npmrc
+/.ssh/authorized_keys
+/.ssh/*_rsa*
+/.viminfo
 /.z-data
 /.zcompdump*
 /.zshrc-local
 /.*_history
+/workspace.json
