@@ -7,6 +7,7 @@ fi
 
 start() {
     _set_timezone
+    _ensure_workspace_git_folder
     _export_environment_variables
     _create_home_directory
     _create_user
@@ -34,6 +35,21 @@ _set_timezone() {
         cp -f /usr/share/zoneinfo/$TIMEZONE /etc/localtime
     else
         echo "Invalid timezone: $TIMEZONE"
+    fi
+}
+
+_ensure_workspace_git_folder() {
+    if [ ! -e /workspace/.git ];then
+        git clone \
+            --no-checkout \
+            --branch $(cat /workspace/.system/upstream-workspace-branch.txt) \
+            $(cat /workspace/.system/upstream-workspace-repo.txt) \
+            /workspace/.system/upstream-workspace \
+        && mv /workspace/.system/upstream-workspace/.git /workspace/.git \
+        && rm -rf \
+                /workspace/.system/upstream-workspace \
+                /workspace/.system/upstream-workspace-branch.txt \
+                /workspace/.system/upstream-workspace-repo.txt
     fi
 }
 

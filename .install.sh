@@ -3,7 +3,8 @@ set -e
 [ $DEBUG ] && set -x
 #YES_TO_ALL=1
 
-WORKSPACE_REPO="https://github.com/crobays/workspace/archive/develop.zip"
+WORKSPACE_BRANCH="develop"
+WORKSPACE_REPO="https://github.com/crobays/workspace/archive/$WORKSPACE_BRANCH.zip"
 VAGRANT_DOWNLOADS_LINK="http://www.vagrantup.com/downloads"
 VIRTUALBOX_DOWNLOADS_LINK="https://www.virtualbox.org/wiki/Downloads"
 VMWARE_FUSION_DMGS="
@@ -399,6 +400,7 @@ _workspace_install_install_workspace() {
 	mkdir -p "$WORKSPACE/.system"
 	git_remote_repo="${WORKSPACE_REPO%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git"
 	echo "$git_remote_repo" > "$WORKSPACE/.system/upstream-workspace-repo.txt"
+	echo "$WORKSPACE_BRANCH" > "$WORKSPACE/.system/upstream-workspace-branch.txt"
 	_workspace_install_success "Succesfully downloaded $git_remote_repo to ${WORKSPACE/$HOME/~}"
 	_workspace_install_add_to_uninstaller "if _workspace_install_confirm \"Do you want to trash \$WORKSPACE?\";then"
 	_workspace_install_add_to_uninstaller "_workspace_install_trash \"\$WORKSPACE\" && echo \"Workspace uninstalled succesfully! (it has moved to your trash can)\""
