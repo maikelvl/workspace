@@ -14,8 +14,8 @@ https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dm
 
 GLOBAL_TEMP_DIR=`mktemp -d -t workspace`
 DOWNLOAD_DIR="$HOME/Downloads"
+WORKSPACE_ZIP="$DOWNLOAD_DIR/workspace.zip"
 UPDATE_UNINSTALLER=1
-
 DEFAULT_WORKSPACE="~/workspace"
 DEFAUlT_HOSTNAME="$(hostname -s)"
 DEFAULT_USERNAME=`whoami`
@@ -32,7 +32,6 @@ VMWARE_FUSION_LINK=
 INSTALL_VAGRANT=
 INSTALL_PROVIDER=
 
-WORKSPACE_ZIP=
 VAGRANT_INSTALLER=
 VIRTUALBOX_INSTALLER=
 VIRTUALBOX_EXT_PACK_INSTALLER=
@@ -288,7 +287,6 @@ _workspace_install_read_vmware_fusion_vagrant_license() {
 
 _workspace_install_download_workspace() {
 	download_link="$WORKSPACE_REPO"
-	WORKSPACE_ZIP="$DOWNLOAD_DIR/workspace.zip"
 	if [ -f $WORKSPACE_ZIP ];then
 		return
 	fi
@@ -392,6 +390,7 @@ _workspace_install_install_workspace() {
 	unzip -q "$DOWNLOAD_DIR/workspace.zip" -d "$workspace_dir"
 	mv $workspace_dir/`ls $workspace_dir` "$WORKSPACE"
 	rm -rf $workspace_dir
+	rm $WORKSPACE_ZIP
 	_workspace_install_add_to_bash_profile "export WORKSPACE=\"${WORKSPACE/$HOME/\$HOME}\""
 	repo_part_1="${WORKSPACE_REPO#*//}"
 	repo_part_2="${repo_part_1#*/}"
