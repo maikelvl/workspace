@@ -22,7 +22,7 @@ def cli():
     pass
 
 
-@cli.command('up', short_help='Starts the workspace')
+@cli.command('up', short_help='Starts the workspace container')
 @click.pass_context
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace')
 @click.option('--rebuild', '-R', is_flag=True, help='Rebuild the workspace')
@@ -40,7 +40,7 @@ def up(ctx, recreate, rebuild):
         click.echo('Unable to create the workspace', err=True)
 
 
-@cli.command('rm', short_help='Starts the workspace')
+@cli.command('rm', short_help='Destroys the workspace container')
 def rm():
     workspace = Workspace()
     try:
@@ -49,7 +49,7 @@ def rm():
         click.echo('Unable to remove the workspace.', err=True)
 
 
-@cli.command('state', short_help='Status of the workspace')
+@cli.command('state', short_help='Status of the workspace container')
 def state():
     workspace = Workspace()
     try:
@@ -58,7 +58,7 @@ def state():
         click.echo('Unable to get workspace state.', err=True)
 
 
-@cli.command('build', short_help='Builds a new workspace')
+@cli.command('build', short_help='Builds a new workspace image')
 @click.option('--no-cache', '-n', is_flag=True, help="Don't use cache")
 @click.option('--force', '-f', is_flag=True, help='Do not prompt to bring the host up')
 def build(no_cache, force):
@@ -67,7 +67,7 @@ def build(no_cache, force):
     workspace.build(no_cache=no_cache)
 
 
-@cli.command('ssh', short_help='SSH into the workspace')
+@cli.command('ssh', short_help='SSH into the workspace container')
 @click.pass_context
 @click.option('--command', '-c', default=None, help='Run a one-off commmand via SSH')
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
@@ -95,7 +95,7 @@ def ssh_config(ctx, force, recreate):
     click.echo(workspace.flat_ssh_config)
 
 
-@cli.command('ssh-command', short_help='Print the SSH command')
+@cli.command('ssh-command', short_help='Print the SSH command to the workspace container')
 @click.option('--command', '-c', default=None, help='Run a one-off commmand via ssh')
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 def ssh_command(command, force):
