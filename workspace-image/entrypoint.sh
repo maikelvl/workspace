@@ -39,17 +39,18 @@ _set_timezone() {
 }
 
 _ensure_workspace_git_folder() {
-    if [ ! -e /workspace/.git ];then
+    if [ ! -e /workspace/.git ] && [ -f /workspace/.system/upstream-workspace-repo.txt ];then
+        branch='master'
+        if [ -f /workspace/.system/upstream-workspace-branch.txt];then
+            branch=$(cat /workspace/.system/upstream-workspace-branch.txt)
+        fi
         git clone \
             --no-checkout \
-            --branch $(cat /workspace/.system/upstream-workspace-branch.txt) \
+            --branch $branch \
             $(cat /workspace/.system/upstream-workspace-repo.txt) \
             /workspace/.system/upstream-workspace \
         && mv /workspace/.system/upstream-workspace/.git /workspace/.git \
-        && rm -rf \
-                /workspace/.system/upstream-workspace \
-                /workspace/.system/upstream-workspace-branch.txt \
-                /workspace/.system/upstream-workspace-repo.txt
+        && rmdir /workspace/.system/upstream-workspace
     fi
 }
 
