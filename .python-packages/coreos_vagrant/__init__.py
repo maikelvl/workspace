@@ -193,7 +193,7 @@ class CoreOS(object):
 
     @property
     def ip(self):
-        return self.ssh_config.get('host-name')
+        return self.ssh(command=r"ifconfig | sed -En 's/.*inet (172\.16\.[0-9]+\.[0-9]+).*/\1/p'")[0].strip()
 
     def ping(self):
         log('Pinging {} ({})'.format(self.name, self.ip))
