@@ -163,6 +163,7 @@ class CoreOSDownError(Exception):
 
 class CoreOS(object):
 
+    workspace_dir = '/workspace'
     _instance = 0
     vm_name = 'coreos-{:02d}'
     name = ''
@@ -193,13 +194,16 @@ class CoreOS(object):
 
     @property
     def ip(self):
-        ip = self.ssh(command=r"ifconfig | sed -En 's/.*inet (172\.16\.[0-9]+\.[0-9]+).*/\1/p'")
+        ip = self.ssh(command="ifconfig | sed -En 's/.*inet (172\.16\.[0-9]+\.[0-9]+).*/\1/p'")
         if ip:
-            return ip[0].strip()
+            ip = ip[0].strip()
+            if re.match(r'\d+\.\d+\.\d+\.\d+', ip):
+                return ip
         return self.ssh_config.get('host-name')
 
     def ping(self):
         log('Pinging {} ({})'.format(self.name, self.ip))
+        log(self.ip)
         response = subprocess.Popen(
             ['ping', '-c1', '-W100', self.ip],
             stdout=subprocess.PIPE).stdout.read()
@@ -249,6 +253,9 @@ class CoreOS(object):
             self.up()
         except subprocess.CalledProcessError as e:
             print e
+
+    def command(self, command, stdout=False):
+        return self.ssh(command=' '.join(command), stdout=stdout)
 
     def ssh(self, command=None, stdout=False):
         try:
