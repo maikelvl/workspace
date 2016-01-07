@@ -13,14 +13,9 @@ RUN apk add --update \
 		nodejs \
 		openssh \
 		perl \
-		php-curl \
-		php-json \
-		php-openssl \
-		php-phar \
 		py-crypto \
 		py-pip \
 		python3-dev \
-		ruby-bundler \
 		sudo \
 		tree \
 		tzdata \
@@ -32,8 +27,7 @@ RUN apk add --update \
 ADD /DOCKER_VERSION /DOCKER_VERSION
 ADD /install-scripts /scripts/install-scripts
 RUN /scripts/install-scripts/docker.sh \
- && /scripts/install-scripts/git-perl.sh \
- && /scripts/install-scripts/php-composer.sh
+ && /scripts/install-scripts/git-perl.sh
 
 ENV PATH /usr/local/node/bin:$PATH
 RUN npm install -g \
