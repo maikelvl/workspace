@@ -75,8 +75,8 @@ def state(ctx):
 @click.option('--force', '-f', is_flag=True, help='Do not prompt to bring the host up')
 def build(ctx, no_cache, force):
     workspace = Workspace(target(ctx.parent.params.get('target')))
-    coreos_vagrant.ensure_coreos_up(workspace.target, force=force)
-    workspace.build(no_cache=no_cache)
+    if coreos_vagrant.ensure_coreos_up(workspace.target, force=force):
+        workspace.build(no_cache=no_cache)
 
 
 @cli.command('ssh', short_help='SSH into the workspace container')
@@ -93,8 +93,8 @@ def ssh(ctx, command, force, recreate, rebuild):
     if recreate:
         workspace.recreate()
         sleep(1)
-    workspace.ensure_workspace_up(force=force)
-    workspace.ssh(command=command)
+    if workspace.ensure_workspace_up(force=force):
+        workspace.ssh(command=command)
 
 
 @cli.command('ssh-config', short_help='Print the SSH config (equivalent of `vagrant ssh-config`)')
@@ -103,8 +103,8 @@ def ssh(ctx, command, force, recreate, rebuild):
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
 def ssh_config(ctx, force, recreate):
     workspace = Workspace(target(ctx.parent.params.get('target')))
-    workspace.ensure_workspace_up(force=force)
-    click.echo(workspace.flat_ssh_config)
+    if workspace.ensure_workspace_up(force=force):
+        click.echo(workspace.flat_ssh_config)
 
 
 @cli.command('ssh-command', short_help='Print the SSH command to the workspace container')
@@ -113,8 +113,8 @@ def ssh_config(ctx, force, recreate):
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 def ssh_command(ctx, command, force):
     workspace = Workspace(target(ctx.parent.params.get('target')))
-    workspace.ensure_workspace_up(force=force)
-    click.echo(' '.join(workspace.ssh_command(command)))
+    if workspace.ensure_workspace_up(force=force):
+        click.echo(' '.join(workspace.ssh_command(command)))
 
 
 def log(string):
@@ -199,8 +199,10 @@ class Workspace(object):
             self.save_config()
 
     def ensure_workspace_up(self, force=True):
-        coreos_vagrant.ensure_coreos_up(self.target, force=force)
+        if not coreos_vagrant.ensure_coreos_up(self.target, force=force):
+            return False
         self.up()
+        return True
 
     def identity_file(self, from_host=False):
         identity_file = '{home_dir}/.ssh/workspace_rsa'
