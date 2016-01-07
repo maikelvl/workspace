@@ -1,30 +1,29 @@
-
+from contextlib import contextmanager
 from textwrap import dedent
-import contextlib
 import os
 import subprocess
 import sys
 
-@contextlib.contextmanager
+@contextmanager
 def stdout_cm():
     ''' Redirect the stdout or stderr of the child process to sys.stdout. '''
     yield sys.stdout
 
 
-@contextlib.contextmanager
+@contextmanager
 def stderr_cm():
     ''' Redirect the stdout or stderr of the child process to sys.stderr. '''
     yield sys.stderr
 
 
-@contextlib.contextmanager
+@contextmanager
 def devnull_cm():
     ''' Redirect the stdout or stderr of the child process to /dev/null. '''
     with open(os.devnull, 'w') as fh:
         yield fh
 
 
-@contextlib.contextmanager
+@contextmanager
 def none_cm():
     ''' Use the stdout or stderr file handle of the parent process. '''
     yield None
