@@ -46,7 +46,7 @@ RUN rm /etc/motd \
  && ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N "" -t dsa \
  && ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N "" -t ecdsa \
  && ssh-keygen -f /etc/ssh/ssh_host_ed25519_key -N "" -t ed25519 \
- && curl -L -o /tmp/oh-my-zsh.zip https://github.com/crobays/oh-my-zsh/archive/master.zip \
+ && curl -L -o /tmp/oh-my-zsh.zip https://github.com/maikelvl/oh-my-zsh/archive/master.zip \
  && unzip /tmp/oh-my-zsh.zip -d /var/lib \
  && rm /tmp/oh-my-zsh.zip \
  && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh
