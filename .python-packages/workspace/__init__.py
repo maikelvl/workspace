@@ -132,12 +132,35 @@ class DockerMachine():
 
     @property
     def ip(self):
-        return self.command(['docker-machine', 'ip', self.name])[0].strip()
+        return self.local_command(['docker-machine', 'ip', self.name])[0].strip()
 
     def ping(self):
         return True
 
-    def command(self, cmd, stdout=False):
+    @property
+    def ssh_config(self):
+        inspect_array = self.local_command(['docker-machine', 'inspect', self.name])
+        inspect = json.loads(' '.join(inspect_array))
+        driver = inspect['Driver']
+        ssh_config = {
+            'host': str(driver['MachineName']),
+            'host-name': '127.0.0.1',
+            'user': driver['SSHUser'],
+            'port': str(driver['SSHPort']),
+            'identity-file': driver['SSHKeyPath'],
+        }
+        return ssh_config
+
+    def command(self, command, stdout=False):
+        return self.ssh(command=' '.join(command), stdout=stdout)
+
+    def ssh(self, command=None, stdout=False):
+        try:
+            return ssh_utils.ssh(ssh_config=self.ssh_config, command=command, stdout=stdout)
+        except ssh_utils.SshException as e:
+            pass
+
+    def local_command(self, cmd, stdout=False):
         if stdout:
             with none_cm() as out_fh, none_cm() as err_fh:
                 subprocess.check_call(cmd, stdout=out_fh,
@@ -333,6 +356,7 @@ class Workspace(object):
                 '--name={}'.format(self.name),
                 '--hostname={}'.format(self.hostname),
                 '--volume={}:/workspace'.format(self.workspace_dir),
+                '--volume=/var/run/docker.sock:/var/run/docker.sock',
                 '--publish={}:22'.format(self.ssh_port),
                 '--env=USER={}'.format(self.user),
                 '--env=HOME=/workspace/home',
