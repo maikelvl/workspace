@@ -30,7 +30,14 @@ def none_cm():
 
 
 class SshException(Exception):
-    pass
+
+    def __init__(self, e, command):
+        super(SshException, self).__init__(e)
+        self.returncode = e.returncode
+        self.command = command
+
+    def __str__(self):
+        return "Command '{}' failed".format(self.command)
 
 
 ssh_options = {
@@ -94,5 +101,5 @@ def ssh(ssh_config, command=None, stdout=False):
                            stderr=subprocess.PIPE)
             return ssh_process.stdout.readlines()
     except subprocess.CalledProcessError as e:
-        raise SshException
+        raise SshException(e, command=command)
 

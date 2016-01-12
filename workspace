@@ -7,4 +7,4 @@ sys.path.append(os.environ.get('WORKSPACE', os.environ.get('HOME')+'/workspace')
 from workspace import cli
 
 if __name__ == '__main__':
-	cli()
+    cli()

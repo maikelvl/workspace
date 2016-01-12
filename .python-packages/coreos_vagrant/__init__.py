@@ -92,7 +92,7 @@ def status_all():
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 def ssh(instance, command, force):
     coreos = CoreOS(instance)
-    if ensure_coreos_up(coreos=coreos, force=force):
+    if coreos.ensure_up(force=force):
         result = coreos.ssh(command, stdout=True)
         if result is not None:
             click.echo(''.join(result))
@@ -105,7 +105,7 @@ def ssh(instance, command, force):
 def ssh_config(instance, fetch, force):
     coreos = CoreOS(instance)
     coreos.fetch = fetch
-    if ensure_coreos_up(coreos=coreos, force=force):
+    if coreos.ensure_up(force=force):
         click.echo(coreos.flat_ssh_config)
 
 
@@ -117,7 +117,7 @@ def ssh_config(instance, fetch, force):
 def ssh_command(instance, fetch, command, force):
     coreos = CoreOS(instance)
     coreos.fetch = fetch
-    if ensure_coreos_up(coreos=coreos, force=force):
+    if coreos.ensure_up(force=force):
         click.echo(' '.join(coreos.ssh_command(command)))
 
 
@@ -128,7 +128,7 @@ def ssh_command(instance, fetch, command, force):
 def ip(instance, fetch, force):
     coreos = CoreOS(instance)
     coreos.fetch = fetch
-    if ensure_coreos_up(coreos=coreos, force=force):
+    if coreos.ensure_up(force=force):
         click.echo(coreos.ip)
 
 
@@ -138,19 +138,6 @@ def update_status(instance):
     coreos = CoreOS(instance)
     coreos.update_status()
 
-
-def ensure_coreos_up(coreos, force=True):
-    try:
-        coreos.ping()
-    except CoreOSDownError as e:
-        bring_up = force or click.confirm("Do you want to bring '{}' up?".format(coreos.name))
-        if not bring_up:
-            return False
-        try:
-            coreos.up()
-        except subprocess.CalledProcessError as e:
-            click.echo('Error which not shoud occur', err=True)
-    return True
 
 def log(string):
     if os.environ.get('DEBUG', False):
@@ -180,6 +167,19 @@ class CoreOS(object):
         if instance:
             self.instance = instance
 
+    def ensure_up(self, force=True):
+        try:
+            self.ping()
+        except CoreOSDownError as e:
+            bring_up = force or click.confirm("Do you want to bring '{}' up?".format(self.name))
+            if not bring_up:
+                return False
+            try:
+                self.up()
+            except subprocess.CalledProcessError as e:
+                click.echo('Error which not shoud occur', err=True)
+        return True
+
     @property
     def instance(self):
         return self._instance
@@ -203,14 +203,13 @@ class CoreOS(object):
 
     def ping(self):
         log('Pinging {} ({})'.format(self.name, self.ip))
-        log(self.ip)
         response = subprocess.Popen(
             ['ping', '-c1', '-W100', self.ip],
             stdout=subprocess.PIPE).stdout.read()
         if r'100.0% packet loss' not in response:
-            return
+            return True
         self.fetch_ssh_config()
-        self.ping()
+        return self.ping()
 
     def up(self):
         try:
