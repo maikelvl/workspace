@@ -13,8 +13,6 @@ RUN apk add --update \
 		nodejs \
 		openssh \
 		perl \
-		py-crypto \
-		py-pip \
 		python3-dev \
 		sudo \
 		tree \
@@ -22,23 +20,20 @@ RUN apk add --update \
 		unzip \
 		vim \
 		zsh \
- && rm -rf /var/cache/apk/*
+ && rm -rf /var/cache/apk/* \
+ && ln -sf python3 /usr/bin/python
+
+ENV PATH /usr/local/node/bin:$PATH
 
 ADD /DOCKER_VERSION /DOCKER_VERSION
 ADD /install-scripts /scripts/install-scripts
 RUN /scripts/install-scripts/docker.sh \
  && /scripts/install-scripts/git-perl.sh
 
-ENV PATH /usr/local/node/bin:$PATH
-RUN npm install -g \
-		bower \
-		ember-cli \
-		dot-json
-
-RUN pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
+RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
+ && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
  && pip install --no-cache-dir \
-		docker-compose \
-		fabric
+ 		docker-compose
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
@@ -46,7 +41,7 @@ RUN rm /etc/motd \
  && ssh-keygen -f /etc/ssh/ssh_host_dsa_key -N "" -t dsa \
  && ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N "" -t ecdsa \
  && ssh-keygen -f /etc/ssh/ssh_host_ed25519_key -N "" -t ed25519 \
- && curl -L -o /tmp/oh-my-zsh.zip https://github.com/maikelvl/oh-my-zsh/archive/master.zip \
+ && curl --location --url https://github.com/maikelvl/oh-my-zsh/archive/master.zip --output /tmp/oh-my-zsh.zip \
  && unzip /tmp/oh-my-zsh.zip -d /var/lib \
  && rm /tmp/oh-my-zsh.zip \
  && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh
