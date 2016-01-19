@@ -1,4 +1,3 @@
-from contextlib import contextmanager
 from datetime import datetime
 import json
 import os
@@ -7,18 +6,17 @@ import subprocess
 from textwrap import dedent
 from time import sleep
 
+import base_host
 import click
-import ssh_utils
 import coreos_vagrant
-
-@contextmanager
-def none_cm():
-    ''' Use the stdout or stderr file handle of the parent process. '''
-    yield None
+import docker_machine
+import ssh_utils
+import utils
 
 os.environ.setdefault('WORKSPACE', '{}/workspace'.format(os.environ.get('HOME')))
 VERSION = '0.1.0'
 WORKSPACE = os.environ.get('WORKSPACE')
+
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
@@ -26,35 +24,40 @@ WORKSPACE = os.environ.get('WORKSPACE')
 def cli(host):
     pass
 
-def get_host(host_type):
-    if host_type == 'coreos':
-        return coreos_vagrant.CoreOS(1)
-    return DockerMachineget_Host(1)
 
 @cli.command('up', short_help='Starts the workspace container')
 @click.pass_context
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace')
 @click.option('--rebuild', '-R', is_flag=True, help='Rebuild the workspace')
-def up(ctx, recreate, rebuild):
-    if rebuild:
-        ctx.invoke(build, force=force)
-        recreate = True
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
-    if recreate:
-        workspace.recreate()
-        sleep(1)
+@click.option('--force', '-f', is_flag=True, help='Do not prompt to bring the host up')
+def up(ctx, recreate, rebuild, force):
+    host = get_host(ctx.parent.params.get('host'))
     try:
+        if rebuild:
+            ctx.invoke(build, force=force)
+            recreate = True
+        workspace = Workspace(host)
+        if recreate:
+            workspace.recreate()
+            sleep(1)
         workspace.up()
+    except base_host.HostDownException:
+        if not confirm_host_up(force=force, name=host.name):
+            return
+        host.up()
+        ctx.invoke(up, recreate=recreate, rebuild=rebuild, force=True)
+    except ssh_utils.SshException as e:
+        exit(e.returncode)
     except subprocess.CalledProcessError as e:
         click.echo('Unable to create the workspace', err=True)
 
 
-@cli.command('rm', short_help='Destroys the workspace container')
+@cli.command('remove', short_help='Destroys the workspace container')
 @click.pass_context
-def rm(ctx):
+def remove(ctx):
     workspace = Workspace(get_host(ctx.parent.params.get('host')))
     try:
-        workspace.rm()
+        workspace.remove()
     except subprocess.CalledProcessError as e:
         click.echo('Unable to remove the workspace.', err=True)
 
@@ -63,10 +66,14 @@ def rm(ctx):
 @click.pass_context
 def state(ctx):
     workspace = Workspace(get_host(ctx.parent.params.get('host')))
+    state = None
     try:
-        click.echo(workspace.state)
+        state = workspace.state
+    except base_host.HostDownException:
+        state = 'host-down'
     except subprocess.CalledProcessError as e:
         click.echo('Unable to get workspace state.', err=True)
+    click.echo(state)
 
 
 @cli.command('build', short_help='Builds a new workspace image')
@@ -76,8 +83,15 @@ def state(ctx):
 def build(ctx, no_cache, force):
     host = get_host(ctx.parent.params.get('host'))
     workspace = Workspace(host)
-    if host.ensure_up(force=force):
+    try:
         workspace.build(no_cache=no_cache)
+    except base_host.HostDownException:
+        if not confirm_host_up(force=force, name=host.name):
+            return
+        host.up()
+    except WorkspaceDownException:
+        workspace.up()
+        ctx.invoke(build, no_cache=no_cache, force=True)
 
 
 @cli.command('ssh', short_help='SSH into the workspace container')
@@ -86,19 +100,27 @@ def build(ctx, no_cache, force):
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace')
 @click.option('--rebuild', '-R', is_flag=True, help='Rebuild the workspace')
-def ssh(ctx, command, force, recreate, rebuild):
-    if rebuild:
-        ctx.invoke(build, force=force)
-        recreate = True
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
-    if recreate:
-        workspace.recreate()
-        sleep(1)
+def ssh(ctx, command, force, recreate, rebuild, host_type=None):
+    if host_type is None:
+        host_type = ctx.parent.params.get('host')
+    host = get_host(host_type)
+    workspace = Workspace(host)
     try:
+        if rebuild:
+            ctx.invoke(build, force=force)
+            recreate = True
+        if recreate:
+            workspace.recreate()
+        sleep(1)
         workspace.ssh(command=command)
+    except base_host.HostDownException:
+        if not confirm_host_up(force=force, name=host.name):
+            return
+        host.up()
+        ctx.invoke(ssh, command=command, force=True, recreate=recreate, rebuild=rebuild, host_type=host_type)
     except WorkspaceDownException:
-        if workspace.ensure_up(force=force):
-            workspace.ssh(command=command)
+        workspace.up()
+        ctx.invoke(ssh, command=command, force=True, recreate=recreate, rebuild=rebuild, host_type=host_type)
     except ssh_utils.SshException as e:
         exit(e.returncode)
 
@@ -108,169 +130,54 @@ def ssh(ctx, command, force, recreate, rebuild):
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
 def ssh_config(ctx, force, recreate):
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
-    if workspace.ensure_up(force=force):
+    host = get_host(ctx.parent.params.get('host'))
+    workspace = Workspace(host)
+    try:
+        if recreate:
+            workspace.recreate()
         click.echo(workspace.flat_ssh_config)
+    except base_host.HostDownException:
+        if not confirm_host_up(force=force, name=host.name):
+            return
+        host.up()
+        ctx.invoke(ssh_config, force=True, recreate=recreate)
+    except WorkspaceDownException:
+        workspace.up()
+        ctx.invoke(ssh_config, force=True, recreate=recreate)
 
 
 @cli.command('ssh-command', short_help='Print the SSH command to the workspace container')
 @click.pass_context
 @click.option('--command', '-c', default=None, help='Run a one-off commmand via ssh')
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
-def ssh_command(ctx, command, force):
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
-    if workspace.ensure_up(force=force):
+@click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
+def ssh_command(ctx, command, force, recreate):
+    host = get_host(ctx.parent.params.get('host'))
+    workspace = Workspace(host)
+    try:
+        if recreate:
+            workspace.recreate()
         click.echo(' '.join(workspace.ssh_command(command)))
+    except base_host.HostDownException:
+        if not confirm_host_up(force=force, name=host.name):
+            return
+        host.up()
+        ctx.invoke(ssh_command, command=command, force=True, recreate=recreate)
+    except WorkspaceDownException:
+        workspace.up()
+        ctx.invoke(ssh_command, command=command, force=True, recreate=recreate)
 
 
-def log(string):
-    if os.environ.get('DEBUG', False):
-        click.echo('==> '+string)
-
-def local_command(cmd, stdout=False):
-    log(' '.join(cmd))
-    if stdout:
-        with none_cm() as out_fh, none_cm() as err_fh:
-            subprocess.check_call(cmd, stdout=out_fh,
-                stderr=err_fh)
-    else:
-        ssh_process = subprocess.Popen(cmd, shell=False,
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
-        return ssh_process.stdout.readlines()
+def confirm_host_up(force, name):
+    bring_up = force or click.confirm(
+        "Do you want to bring '{}' up?".format(name))
+    return bring_up
 
 
-class HostDownException(Exception):
-    pass
-
-class DockerMachine():
-
-    def create(self, name, provider, cpu_count=None, disk_size=None, memory_size=None):
-
-        flags = {
-            'provider': provider,
-            'cpu': 'cpu-count',
-            'disk': 'disk-size',
-            'memory': 'memory',
-            'cpu-count': cpu_count,
-            'memory-size': memory_size,
-            'disk-size': disk_size,
-        }
-
-        if provider == 'vmwarefusion':
-            flags['memory'] = 'memory-size'
-
-        options = []
-        options.append('--driver={provider}'.format(**flags))
-        if cpu_count is not None:
-            options.append('--{provider}-{cpu}={cpu-count}'.format(**flags))
-        if disk_size is not None:
-            if disk_size < 500:
-                flags['disk-size'] = disk_size * 1000
-            options.append('--{provider}-{disk}={disk-size}'.format(**flags))
-        if memory_size is not None:
-            options.append('--{provider}-{memory}={memory-size}'.format(**flags))
-        self.execute(['create'] + options + [name])
-
-    def start(self, name):
-        self.execute(['start', name])
-
-    def status(self, name):
-        status_list = self.execute(['status', name], stdout=False)
-        if status_list:
-            return status_list[0].strip()
-        raise HostDownException
-
-    def ip(self, name):
-        ip_list = self.execute(['ip', name], stdout=False)
-        if ip_list:
-            return ip_list[0].strip()
-        raise HostDownException
-
-    def inspect(self, name):
-        inspect_list = self.execute(['inspect', name], stdout=False)
-        if inspect_list:
-            return json.loads(' '.join(inspect_list))
-        raise HostDownException
-
-    def execute(self, command, stdout=True):
-        command = ['docker-machine'] + command
-        return local_command(command, stdout=stdout)
-
-
-class DockerMachineget_Host():
-    
-    home_dir = '~'
-    workspace_dir = '~/workspace'
-    vm_name = '{}-boot2docker-{:02d}'
-    env = {}
-
-    def __init__(self, instance=0):
-        self.instance = instance
-        self.docker_machine = DockerMachine()
-
-    def ensure_up(self, force=True):
-        try:
-            status = self.docker_machine.status(self.name)
-            return True
-        except HostDownException:
-            bring_up = force or click.confirm(
-                "Do you want to bring '{}' up?".format(self.name))
-            if not bring_up:
-                return False
-            self.up()
-            try:
-                return self.ensure_up(force=bring_up)
-            except subprocess.CalledProcessError as e:
-                click.echo('Unkown error '+str(e), err=True)
-
-    def up(self):
-        try:
-            self.docker_machine.start(self.name)
-        except subprocess.CalledProcessError:
-            self.docker_machine.create(self.name,
-                provider=self.env.get('provider'), cpu_count=self.env.get('cpus'),
-                disk_size=self.env.get('disk'), memory_size=self.env.get('memory'))
-
-    @property
-    def name(self):
-        return self.vm_name.format(self.env.get('provider'), int(self.instance))
-
-    @property
-    def ip(self):
-        return self.docker_machine.ip(self.name)
-
-    def ping(self):
-        log('Pinging {} ({})'.format(self.name, self.ip))
-        response = subprocess.Popen(
-            ['ping', '-c1', '-W100', self.ip],
-            stdout=subprocess.PIPE).stdout.read()
-        if r'100.0% packet loss' not in response:
-            return True
-        return False
-
-    def command(self, command, stdout=False):
-        return self.ssh(command=' '.join(command), stdout=stdout)
-
-    @property
-    def ssh_config(self):
-        inspect = self.docker_machine.inspect(self.name)
-        driver = inspect['Driver']
-        ssh_config = {
-            'host': str(driver['MachineName']),
-            'host-name': driver['IPAddress'],
-            'user': driver['SSHUser'],
-            'port': '22',
-            'identity-file': driver['SSHKeyPath'],
-        }
-        return ssh_config
-
-    def ssh(self, command=None, stdout=False):
-        ssh_config = self.ssh_config
-        try:
-            return ssh_utils.ssh(ssh_config=ssh_config, command=command, stdout=stdout)
-        except ssh_utils.SshException as e:
-            exit()
+def get_host(host_type):
+    if host_type == 'coreos':
+        return coreos_vagrant.Host(1)
+    return docker_machine.Host(1)
 
 
 class WorkspaceDownException(Exception):
@@ -281,35 +188,36 @@ class Workspace(object):
 
     name = 'workspace'
     yes_to_all = False
-    config = {
-        'current-image-tag': 'crobays/workspace:latest',
-        'ssh-port': 60022,
-        'hostname': 'workspace',
-    }
-    env = {}
+
     ssh_config_file = '{}/.system/ssh-workspace-config'.format(WORKSPACE)
-    env_file = '{}/env.json'.format(WORKSPACE)
     version = VERSION
+    _config = None
 
     def __init__(self, host):
         self.host = host
-        with open(self.env_file, 'r') as env:
-            self.env = json.load(env)
-            if self.env.get('provider') is not None:
-                self.env['provider'] = self.env.get('provider').replace('-', '')
-            self.host.env = self.env
-        try:
-            with open(self.config_file(from_host=True), 'r') as config:
-                self.config.update(**json.load(config))
-        except IOError:
-            self.config['new-image-tag-template'] = '{}/workspace:{}'.format(self.user, '{datetime}')
-            self.save_config()
 
-    def ensure_up(self, force=True):
-        if not self.host.ensure_up(force=force):
-            return False
-        self.up()
-        return True
+    @property
+    def config(self):
+        if self._config is not None:
+            return self._config
+        default_config = {
+             'current-image-tag': 'crobays/workspace:latest',
+             'ssh-port': 60022,
+             'hostname': 'workspace',
+             'new-image-tag-template': '{}/workspace:{}'.format(self.user,
+                                                                '{datetime}'),
+        }
+
+        try:
+            with open(self.config_file(from_host=True), 'r') as f:
+                global_config = json.load(f)
+                self._config = global_config.get(self.host.name, default_config)
+                self.save_config()
+            f.close()
+        except IOError:
+            self._config = {self.host.name: default_config}
+            self.save_config()
+        return self.config
 
     def identity_file(self, from_host=False):
         identity_file = '{home_dir}/.ssh/workspace_rsa'
@@ -353,11 +261,11 @@ class Workspace(object):
 
     @property
     def user(self):
-        return self.env.get('username')
+        return self.host.env.get('username')
 
     @property
     def timezone(self):
-        return self.env.get('timezone')
+        return self.host.env.get('timezone')
 
     @property
     def flat_ssh_config(self):
@@ -367,7 +275,7 @@ class Workspace(object):
         try:
             ssh_utils.ssh(ssh_config=self.ssh_config, command=command, stdout=True)
         except Exception as e:
-                # Suppress non-zero exits when SSH shell session is ended
+            # Suppress non-zero exits when SSH shell session is ended
             if self.state != 'running':
                 raise WorkspaceDownException
             if command is not None:
@@ -375,15 +283,19 @@ class Workspace(object):
 
     def ssh_command(self, command=None):
         if command is not None:
-            log('SSH: ' + command)
+            utils.log('SSH: ' + command)
         return ssh_utils.ssh_command(ssh_config=self.ssh_config,
             command=command)
 
     def save_config(self):
         config_file = self.config_file(from_host=True)
         try:
-            with open(config_file, 'w') as config:
-                config.write(json.dumps(self.config, indent=2))
+            f = open(config_file, 'r')
+            global_config = json.load(f)
+            global_config[self.host.name] = self._config
+            with open(config_file, 'w') as f:
+                f.write(json.dumps(global_config, indent=2))
+            f.close()
         except IOError as e:
             os.makedirs(os.path.dirname(config_file))
             self.save_config()
@@ -398,7 +310,6 @@ class Workspace(object):
             'port': str(self.ssh_port),
             'identity-file': self.identity_file(from_host=True),
         }
-        
         return ssh_config
 
     def build(self, no_cache=False):
@@ -424,14 +335,10 @@ class Workspace(object):
 
     @property
     def state(self):
-        if not self.host.ping():
-            return 'host-down'
-
         cmd = ['docker', 'inspect', '--format="{{json .State}}"', 'workspace']
         response = self.command(cmd, stdout=False)
         if not response:
             return 'not-created'
-
         states = json.loads(response[0])
         if states.get('Running'):
             return 'running'
@@ -445,7 +352,7 @@ class Workspace(object):
 
     def up(self):
         state = self.state
-        log('workspace ' + state)
+        utils.log('workspace state: '+state)
         if state == 'running':
             return True
         if state in ('stopped', 'paused'):
@@ -460,10 +367,16 @@ class Workspace(object):
         self.command(cmd, stdout=True)
 
     def recreate(self):
-        self.rm()
+        self.remove()
         self.create()
 
+    def has_image(self):
+        cmd = ['docker', 'images', '-q', self.image_tag]
+        return bool(self.command(cmd, stdout=False))
+
     def create(self):
+        if not self.has_image():
+            self.build()
 
         cmd = ['docker', 'run',
                 '--detach',
@@ -479,10 +392,10 @@ class Workspace(object):
                 self.image_tag]
         self.command(cmd, stdout=False)
 
-    def rm(self):
+    def remove(self):
         cmd = ['docker', 'rm', '--force', '--volumes', self.hostname]
         self.command(cmd, stdout=False)
 
     def command(self, cmd, stdout=True):
-        log(' '.join(cmd))
+        utils.log(' '.join(cmd))
         return self.host.command(cmd, stdout=stdout)

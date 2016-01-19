@@ -1,3 +1,4 @@
+# Put custom shell stuff in here (these will be tracked by git)
 export ENVIRONMENT="development"
 export PATH="/usr/local/node/bin:$PATH"
 export PATH="/workspace/bin-coreos:$PATH"
@@ -7,3 +8,8 @@ export PYTHONPATH="/workspace/.python-packages"
 
 sudo chmod +x /workspace/bin-coreos/*
 sudo chmod +x $CONFIG_DIR/bin/*
+
+alias docker-self='export DOCKER_TLS_VERIFY="" && export DOCKER_HOST="" && export DOCKER_CERT_PATH="" && export DOCKER_MACHINE_NAME=""'
+
+
+#set-docker-client-versionggh

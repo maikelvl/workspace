@@ -1,5 +1,6 @@
 /.cache
 /.docker/config.json
+/.idea
 /.npm
 /.npmrc
 /.ssh/authorized_keys

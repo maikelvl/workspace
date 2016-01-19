@@ -1,0 +1,18 @@
+#!/bin/sh
+[ $DEBUG ] && set -x
+docker_version="$1"
+if [ "$docker_version" == "" ];then
+    docker_version="$(get-docker-server-version)"
+fi
+
+for binary in $(ls /usr/bin/docker-$docker_version* 2>/dev/null);do
+    docker_binary="$binary"
+done
+
+if [ "$docker_binary" == "" ];then
+    echo "Docker version $DOCKER_VERSION not installed. Exiting."
+    exit 1
+fi
+
+export DOCKER_VERSION=${docker_binary:16}
+ln -sf docker-$DOCKER_VERSION /usr/bin/docker

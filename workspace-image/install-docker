@@ -1,0 +1,12 @@
+#/bin/ash
+set -e
+docker_version="$1"
+if [ "$docker_version" == "" ];then
+    echo "Please provide a Docker version number as argument"
+    exit 1
+fi
+curl \
+    --location \
+    --url https://get.docker.com/builds/Linux/x86_64/docker-$docker_version \
+    --output /usr/bin/docker-$docker_version && \
+chmod +x /usr/bin/docker-$docker_version

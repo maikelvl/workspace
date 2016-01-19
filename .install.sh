@@ -41,6 +41,7 @@ VMWARE_FUSION_INSTALLER=
 
 _workspace_install_start() {
 	_workspace_install_read_workspace
+	_workspace_install_read_docker_machine
 	_workspace_install_read_vagrant
 	_workspace_install_read_provider
 	_workspace_install_read_environment_file
@@ -49,6 +50,10 @@ _workspace_install_start() {
 	
 	_workspace_install_download_workspace
 
+	if [ $INSTALL_DOCKER_MACHINE ];then
+		_workspace_install_download_docker_machine
+	fi
+
 	if [ $INSTALL_VAGRANT ];then
 		_workspace_install_download_vagrant
 	fi
@@ -56,16 +61,20 @@ _workspace_install_start() {
 	if [ $INSTALL_PROVIDER ];then
 		_workspace_install_download_provider
 	fi
+	
 	_workspace_install_install_workspace
-	if [ $INSTALL_VAGRANT ];then
-		_workspace_install_install_vagrant
+	
+	if [ $INSTALL_DOCKER_MACHINE ];then
+		_workspace_install_install_docker_machine
 	fi
 
-	echo "" && vagrant plugin install vagrant-triggers
-
-	if [ "$PROVIDER" == "vmware-fusion" ];then
-		echo "" && vagrant plugin install vagrant-vmware-fusion
-		echo "" && vagrant plugin license vagrant-vmware-fusion $GLOBAL_TEMP_DIR/license-vagrant-vmware-fusion.lic
+	if [ $INSTALL_VAGRANT ];then
+		_workspace_install_install_vagrant
+		echo "" && vagrant plugin install vagrant-triggers
+		if [ "$PROVIDER" == "vmware-fusion" ];then
+			echo "" && vagrant plugin install vagrant-vmware-fusion
+			echo "" && vagrant plugin license vagrant-vmware-fusion $GLOBAL_TEMP_DIR/license-vagrant-vmware-fusion.lic
+		fi
 	fi
 
 	if [ $INSTALL_PROVIDER ];then
@@ -116,6 +125,33 @@ _workspace_install_read_workspace() {
 		WORKSPACE="$HOME/$WORKSPACE"
 	fi
 	export WORKSPACE="${WORKSPACE/\~/$HOME}"
+}
+
+_workspace_install_read_docker_machine() {
+	if [ "$(which docker-machine)" != "" ];then
+		docker_machine_installed=1
+		docker_machine_version="`docker_machine --version | sed -En 's/[^0-9]*([0-9]*\.[0-9]*\.[0-9]*).*/\1/p'`"
+		_workspace_install_success "Docker Machine $docker_machine_version is installed"
+	fi
+	echo ""
+	if [ ! $docker_machine_installed ];then
+		_workspace_install_warning "Docker machine is not installed."
+		prompt="Should I install Docker Machine for you?"
+	else
+		prompt="Should I install a specific/newer Docker Machine for you?"
+	fi
+
+	INSTALL_DOCKER_MACHINE=
+	if ! _workspace_install_confirm "$prompt";then
+		echo "" && read -p "Please press 'Enter/Return' when you have installed Docker Machine. " proceed
+		_workspace_install_read_docker_machine
+	else
+		echo ""
+		DEFAULT_DOCKER_MACHINE_VERSION="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')"
+		[ $YES_TO_ALL ] || read -p "Which Docker Machine version? [$DEFAULT_DOCKER_MACHINE_VERSION]: " DOCKER_MACHINE_VERSION
+		DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-$DEFAULT_DOCKER_MACHINE_VERSION}"
+		INSTALL_DOCKER_MACHINE=1
+	fi
 }
 
 _workspace_install_read_vagrant() {
@@ -307,6 +343,22 @@ _workspace_install_get_vmware_fusion_link() {
 	done
 }
 
+_workspace_install_download_docker_machine() {
+	download_link="https://github.com/docker/machine/releases/download/v$DOCKER_MACHINE_VERSION/docker-machine_darwin-amd64"
+
+	DOCKER_MACHINE_BINARY="$DOWNLOAD_DIR/docker-machine-v$DOCKER_MACHINE_VERSION"
+	if [ -f $DOCKER_MACHINE_BINARY ];then
+		return
+	fi
+	_workspace_install_info "Downloading Docker Machine v$DOCKER_MACHINE_VERSION"
+	_workspace_install_info "($download_link)..."
+	
+	sudo curl \
+ 		--location \
+		--url $download_link \
+		--output $DOCKER_MACHINE_BINARY \
+}
+
 _workspace_install_download_vagrant() {
 	pattern="vagrant*.dmg"
 	_workspace_install_info "Searching $VAGRANT_DOWNLOADS_LINK for $pattern ($VAGRANT_VERSION)..."
@@ -405,6 +457,12 @@ _workspace_install_install_workspace() {
 	_workspace_install_add_to_uninstaller "if _workspace_install_confirm \"Do you want to trash \$WORKSPACE?\";then"
 	_workspace_install_add_to_uninstaller "_workspace_install_trash \"\$WORKSPACE\" && echo \"Workspace uninstalled succesfully! (it has moved to your trash can)\""
 	_workspace_install_add_to_uninstaller "fi"
+}
+
+_workspace_install_install_docker_machine() {
+	_workspace_install_info "Installing Docker Machine $DOCKER_MACHINE_VERSION..."
+	sudo mv $DOCKER_MACHINE_BINARY /usr/bin/docker-machine
+	sudo chmod +x /usr/bin/docker-machine
 }
 
 _workspace_install_install_vagrant() {
