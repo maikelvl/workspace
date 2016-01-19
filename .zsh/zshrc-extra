@@ -1,0 +1,26 @@
+export ENVIRONMENT="development"
+export PATH="/usr/local/node/bin:$PATH"
+export PATH="$WORKSPACE/bin-coreos:$PATH"
+export PYTHONPATH="$WORKSPACE/.python-packages"
+
+docker_connect() {
+    if [ ! $1 ];then
+        echo "docker-connect <name> [host:port]"
+        return
+    fi
+    unset DOCKER_TLS_VERIFY
+    unset DOCKER_CERT_PATH
+    unset DOCKER_HOST
+    export DOCKER_MACHINE_NAME=$1
+    if [ -d $HOME/.docker/machine/machines/$1 ];then
+        eval $(docker-machine env $1)
+    fi
+    
+    if [ $2 ];then
+        export DOCKER_HOST=tcp://$2
+    fi
+    set-docker-client-version
+}
+
+alias docker-connect="docker_connect"
+alias docker-self="docker_connect self"

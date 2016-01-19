@@ -63,11 +63,13 @@ class DockerMachine():
 
 class Host(base_host.BaseHost):
     
-    vm_name = 'boot2docker-{:02d}'
+    _docker_machine = None
 
-    def __init__(self, instance=0):
-        super(Host, self).__init__(instance)
-        self.docker_machine = DockerMachine()
+    @property
+    def docker_machine(self):
+        if self._docker_machine is None:
+            self._docker_machine = DockerMachine()
+        return self._docker_machine
 
     def up(self):
         try:

@@ -1,0 +1,3 @@
+# Put custom shell stuff in here (these will be tracked by git)
+
+# alias docker-myserver="docker_connect myserver"

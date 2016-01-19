@@ -68,17 +68,16 @@ RUN rm /etc/motd \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme
 
 ENV USER=user \
-	HOME=/workspace/home \
 	EDITOR=vim \
 	TIMEZONE=UTC \
 	SSH_KEY=.ssh/workspace_rsa
 
 EXPOSE 22
-WORKDIR /workspace
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["start"]
 
 COPY home-template /tmp/home-template
+COPY home-workspace-template /tmp/home-workspace-template
 COPY /get-docker-server-version /usr/bin/get-docker-server-version
 COPY /set-docker-client-version /usr/bin/set-docker-client-version
 COPY entrypoint.sh /

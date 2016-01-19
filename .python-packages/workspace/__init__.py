@@ -13,14 +13,15 @@ import docker_machine
 import ssh_utils
 import utils
 
-os.environ.setdefault('WORKSPACE', '{}/workspace'.format(os.environ.get('HOME')))
-VERSION = '0.1.0'
-WORKSPACE = os.environ.get('WORKSPACE')
+VERSION = '2.0.0'
+
+
+HOSTS_PATH = os.path.join(os.getcwd(), 'hosts')
 
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
-@click.option('--host', '-t', default='docker-machine', help='Specify host')
+@click.option('--host', '-H', default='boot2docker-01', help='Specify host [docker-machine-01]')
 def cli(host):
     pass
 
@@ -174,10 +175,23 @@ def confirm_host_up(force, name):
     return bring_up
 
 
-def get_host(host_type):
-    if host_type == 'coreos':
-        return coreos_vagrant.Host(1)
-    return docker_machine.Host(1)
+def get_host(host_dir):
+
+    host_type = None
+    host_dir = os.path.join(HOSTS_PATH, host_dir)
+    env_file = os.path.join(host_dir, 'env.json')
+    try:
+        with open(env_file, 'r') as f:
+            env = json.load(f)
+            host_type = env.get('host-type')
+    except IOError:
+        click.echo('Host file not found: {}'.format(
+            env_file.replace(os.environ.get('HOME'), '~')), err=True)
+        exit(1)
+
+    if host_type == 'coreos-vagrant':
+        return coreos_vagrant.Host(root=host_dir)
+    return docker_machine.Host(root=host_dir)
 
 
 class WorkspaceDownException(Exception):
@@ -188,60 +202,46 @@ class Workspace(object):
 
     name = 'workspace'
     yes_to_all = False
-
-    ssh_config_file = '{}/.system/ssh-workspace-config'.format(WORKSPACE)
     version = VERSION
     _config = None
+    cwd = os.getcwd()
 
     def __init__(self, host):
         self.host = host
+
+    def identity_file(self):
+        return '{}/.ssh/workspace_rsa'.format(os.environ.get('HOME'))
+
+    @property
+    def config_file(self):
+        return '{}/workspace.json'.format(self.host.root)
+
+    @property
+    def image_dir(self):
+        return '{}/workspace-image'.format(self.cwd)
 
     @property
     def config(self):
         if self._config is not None:
             return self._config
+
         default_config = {
-             'current-image-tag': 'crobays/workspace:latest',
+             'current-image-tag': 'workspace:latest',
              'ssh-port': 60022,
              'hostname': 'workspace',
-             'new-image-tag-template': '{}/workspace:{}'.format(self.user,
-                                                                '{datetime}'),
+             'new-image-tag-template': 'workspace:{}'.format('{datetime}'),
         }
 
         try:
-            with open(self.config_file(from_host=True), 'r') as f:
-                global_config = json.load(f)
-                self._config = global_config.get(self.host.name, default_config)
-                self.save_config()
+            with open(self.config_file, 'r') as f:
+                self._config = json.load(f)
             f.close()
         except IOError:
             self._config = default_config
             self.save_config()
-        return self.config
-
-    def identity_file(self, from_host=False):
-        identity_file = '{home_dir}/.ssh/workspace_rsa'
-        if from_host:
-            return identity_file.format(home_dir='{}/home'.format(WORKSPACE))
-        return identity_file.format(home_dir=self.home_dir)
-
-    def config_file(self, from_host=False):
-        config_file = '{home_dir}/workspace.json'
-        if from_host:
-            return config_file.format(home_dir='{}/home'.format(WORKSPACE))
-        return config_file.format(home_dir=self.home_dir)
-
-    @property
-    def workspace_dir(self):
-        return self.host.workspace_dir.replace('~', os.environ.get('HOME'))
-
-    @property
-    def home_dir(self):
-        return '{}/home'.format(self.workspace_dir)
-
-    @property
-    def image_dir(self):
-        return '{}/workspace-image'.format(self.workspace_dir)
+        except ValueError as e:
+            utils.log('There is a syntax error in {}: {}'.format(self.config_file, e))
+        return self._config
 
     @property
     def ssh_port(self):
@@ -261,7 +261,7 @@ class Workspace(object):
 
     @property
     def user(self):
-        return self.host.env.get('username')
+        return os.environ.get('USER')
 
     @property
     def timezone(self):
@@ -288,13 +288,10 @@ class Workspace(object):
             command=command)
 
     def save_config(self):
-        config_file = self.config_file(from_host=True)
+        config_file = self.config_file
         try:
-            f = open(config_file, 'r')
-            global_config = json.load(f)
-            global_config[self.host.name] = self._config
             with open(config_file, 'w') as f:
-                f.write(json.dumps(global_config, indent=2))
+                f.write(json.dumps(self.config, indent=2))
             f.close()
         except IOError as e:
             os.makedirs(os.path.dirname(config_file))
@@ -308,7 +305,7 @@ class Workspace(object):
             'host-name': self.host.ip,
             'user': self.user,
             'port': str(self.ssh_port),
-            'identity-file': self.identity_file(from_host=True),
+            'identity-file': self.identity_file(),
         }
         return ssh_config
 
@@ -340,6 +337,8 @@ class Workspace(object):
         if not response:
             return 'not-created'
         states = json.loads(response[0])
+        if states is None:
+            return 'stopped'
         if states.get('Running'):
             return 'running'
         if states.get('Paused'):
@@ -382,21 +381,21 @@ class Workspace(object):
                 '--detach',
                 '--name={}'.format(self.name),
                 '--hostname={}'.format(self.hostname),
-                '--volume={}:/workspace'.format(self.workspace_dir),
+                '--volume={0}:{0}'.format(os.environ.get('HOME')),
                 '--volume=/var/run/docker.sock:/var/run/docker.sock',
                 '--publish={}:22'.format(self.ssh_port),
                 '--env=USER={}'.format(self.user),
-                '--env=HOME=/workspace/home',
+                '--env=HOME={}'.format(os.environ.get('HOME')),
+                '--env=WORKSPACE={}'.format(self.cwd),
                 '--env=TIMEZONE={}'.format(self.timezone),
-                '--env=SSH_KEY={}'.format(self.identity_file().replace(self.home_dir, '/workspace/home')),
+                '--env=SSH_KEY={}'.format(self.identity_file()),
                 self.image_tag]
-        self.command(cmd, stdout=False)
+        self.command(cmd)
 
     def remove(self):
         cmd = ['docker', 'rm', '--force', '--volumes', self.hostname]
         self.command(cmd, stdout=False)
 
     def command(self, cmd, stdout=True):
-        print(cmd)
         utils.log(' '.join(cmd))
         return self.host.command(cmd, stdout=stdout)
