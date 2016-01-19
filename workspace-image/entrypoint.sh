@@ -4,10 +4,13 @@ if [ $DEBUG ]; then
     set -x
 fi
 
+WORKSPACE=${WORKSPACE:$HOME/workspace}
+HOME=${HOME:-/Users/$USER}
+
 start() {
     _set_timezone
     _ensure_workspace_git_folder
-    _export_environment_variables
+    _prepare_zsh
     _create_home_directory
     _create_user
     set-docker-client-version
@@ -35,39 +38,54 @@ _set_timezone() {
 }
 
 _ensure_workspace_git_folder() {
-    if [ ! -e /workspace/.git ] && [ -f /workspace/.system/upstream-workspace-repo.txt ];then
+    if [ ! -e $WORKSPACE/.git ] && [ -f $WORKSPACE/upstream-workspace-repo.txt ];then
         branch='master'
-        if [ -f /workspace/.system/upstream-workspace-branch.txt];then
-            branch=$(cat /workspace/.system/upstream-workspace-branch.txt)
+        if [ -f $WORKSPACE/upstream-workspace-branch.txt];then
+            branch=$(cat $WORKSPACE/upstream-workspace-branch.txt)
         fi
         git clone \
             --no-checkout \
             --branch $branch \
-            $(cat /workspace/.system/upstream-workspace-repo.txt) \
-            /workspace/.system/upstream-workspace \
-        && mv /workspace/.system/upstream-workspace/.git /workspace/.git \
-        && rmdir /workspace/.system/upstream-workspace
+            $(cat $WORKSPACE/upstream-workspace-repo.txt) \
+            $WORKSPACE/upstream-workspace \
+        && mv $WORKSPACE/upstream-workspace/.git $WORKSPACE/.git \
+        && rmdir $WORKSPACE/upstream-workspace
     fi
 }
 
-_export_environment_variables() {
-    echo '' > /.workspace-env
+_prepare_zsh() {
+    echo "[ -f $WORKSPACE/home/.zshrc ] && source $WORKSPACE/home/.zshrc" > /etc/zsh/zshrc
+    echo '' > /etc/zsh/zshenv
     env | while read env_var;do
-        echo "export $env_var" >> /.workspace-env
+        echo "export $env_var" >> /etc/zsh/zshenv
     done
+    touch $HOME/.zshrc
 }
 
 _create_home_directory() {
-    if [ ! -f $HOME/.zshrc ];then
-        cp -rn /tmp/home-template/. $HOME/
+    if [ ! -d $WORKSPACE/home/ ];then
+        cp -r /tmp/home-workspace-template $WORKSPACE/home
     fi
-    rm -rf /tmp/home-template
+
+    for file in `find /tmp/home-template/`;do
+        home_file="$HOME/${file:19}"
+        if [ -f $file ];then
+            if [ ! -e $home_file ];then
+                cp $file $home_file
+            fi
+        fi
+        if [ -d $file ];then
+            if [ ! -d $home_file ];then
+                mkdir -p $home_file
+            fi
+        fi
+    done
 }
 
 _create_user() {
     if ! id -u "$USER" >/dev/null 2>&1; then
         
-        uid=$(ls /workspace -ld | awk '{print $3}')
+        uid=$(ls $WORKSPACE -ld | awk '{print $3}')
         if [ "$uid" == "root" ];then
             adduser $USER -D -h $HOME -s /bin/zsh
         else

@@ -1,0 +1,11 @@
+#!/usr/bin/env python
+from os import chdir, getcwd, path
+from sys import path as syspath
+
+chdir(path.dirname(path.dirname(__file__)))
+syspath.append(getcwd()+'/.python-packages')
+
+from workspace import cli
+
+if __name__ == '__main__':
+    cli()

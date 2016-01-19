@@ -4,8 +4,8 @@ set -e
 #YES_TO_ALL=1
 
 WORKSPACE_BRANCH="develop"
-WORKSPACE_REPO="https://github.com/crobays/workspace/archive/$WORKSPACE_BRANCH.zip"
-VAGRANT_DOWNLOADS_LINK="http://www.vagrantup.com/downloads"
+WORKSPACE_REPO="https://github.com/maikelvl/workspace/archive/$WORKSPACE_BRANCH.zip"
+VAGRANT_DOWNLOADS_LINK="https://www.vagrantup.com/downloads.html"
 VIRTUALBOX_DOWNLOADS_LINK="https://www.virtualbox.org/wiki/Downloads"
 VMWARE_FUSION_DMGS="
 https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.6-2684343.dmg
@@ -20,12 +20,12 @@ UPDATE_UNINSTALLER=1
 DEFAULT_WORKSPACE="~/workspace"
 DEFAUlT_HOSTNAME="$(hostname -s)"
 DEFAULT_USERNAME=`whoami`
-DEFAULT_VAGRANT_VERSION="1.7.4"
+DEFAULT_VAGRANT_VERSION="1.8.1"
 DEFAUlT_COREOS_RELEASE_CHANNEL="stable"
 DEFAULT_PROVIDER="virtualbox"
 DEFAULT_VMWARE_FUSION_VERSION="6"
 
-VAGRANT_LINK= #"https://releases.hashicorp.com/vagrant/1.7.4/vagrant_1.7.4.dmg"
+VAGRANT_LINK= #"https://releases.hashicorp.com/vagrant/1.8.1/vagrant_1.8.1.dmg"
 VIRTUALBOX_LINK= #"http://download.virtualbox.org/virtualbox/5.0.10/VirtualBox-5.0.10-104061-OSX.dmg"
 VIRTUALBOX_EXT_PACK_LINK= #"http://download.virtualbox.org/virtualbox/5.0.10/Oracle_VM_VirtualBox_Extension_Pack-5.0.10-104061.vbox-extpack"
 VMWARE_FUSION_LINK=
@@ -44,7 +44,6 @@ _workspace_install_start() {
 	_workspace_install_read_docker_machine
 	_workspace_install_read_vagrant
 	_workspace_install_read_provider
-	_workspace_install_read_environment_file
 
 	mkdir -p "$DOWNLOAD_DIR"
 	
@@ -80,11 +79,8 @@ _workspace_install_start() {
 	if [ $INSTALL_PROVIDER ];then
 		_workspace_install_install_provider
 	fi
-	_workspace_install_install_environment_file
 	
-	_workspace_install_add_to_bash_profile "alias coreos=\"\$WORKSPACE/coreos\""
-	_workspace_install_add_to_bash_profile "alias workspace=\"\$WORKSPACE/workspace\""
-	_workspace_install_add_to_bash_profile "alias ws=\"workspace ssh --force\""
+	_workspace_install_add_to_bash_profile "export PATH=\"\$WORKSPACE/bin:\$PATH\""
 
 	_workspace_install_trash "$GLOBAL_TEMP_DIR"
 
@@ -101,12 +97,12 @@ _workspace_install_read_workspace() {
 	WORKSPACE="${WORKSPACE:-$DEFAULT_WORKSPACE}"
 	WORKSPACE="${WORKSPACE/\~/$HOME}"
 	if [ -e "$WORKSPACE" ];then
-		if [ -f "$WORKSPACE/.system/uninstall.sh" ];then
+		if [ -f "$WORKSPACE/.uninstall.sh" ];then
 			echo ""
 			_workspace_install_warning "Another workspace is installed in this location."
 			if _workspace_install_confirm "Do you want to uninstall the current workspace?";then
 				_workspace_install_info "Uninstalling..."
-				bash "YES_TO_ALL=$YES_TO_ALL && source $WORKSPACE/.system/uninstall.sh"
+				source $WORKSPACE/.uninstall.sh
 			else
 				exit
 			fi
@@ -147,7 +143,7 @@ _workspace_install_read_docker_machine() {
 		_workspace_install_read_docker_machine
 	else
 		echo ""
-		DEFAULT_DOCKER_MACHINE_VERSION="$(curl --url https://github.com/docker/machine/releases/latest | sed -En 's/.*tag\/v([^\"]*).*/\1/p')"
+		DEFAULT_DOCKER_MACHINE_VERSION="$(curl --silent --url https://github.com/docker/machine/releases/latest | sed -En 's/.*tag\/v([^\"]*).*/\1/p')"
 		[ $YES_TO_ALL ] || read -p "Which Docker Machine version? [$DEFAULT_DOCKER_MACHINE_VERSION]: " DOCKER_MACHINE_VERSION
 		DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-$DEFAULT_DOCKER_MACHINE_VERSION}"
 		INSTALL_DOCKER_MACHINE=1
@@ -170,30 +166,15 @@ _workspace_install_read_vagrant() {
 	else
 		prompt="Should I install a specific/newer Vagrant for you?"
 	fi
-	DEFAULT_VAGRANT_HOME="$WORKSPACE/.vagrant.d"
-	if [ $VAGRANT_HOME ];then
-		DEFAULT_VAGRANT_HOME="$VAGRANT_HOME"
-	elif [ -d "$HOME/.vagrant.d" ];then
-		DEFAULT_VAGRANT_HOME="$HOME/.vagrant.d"
-	fi
-	VAGRANT_HOME="${VAGRANT_HOME:-$DEFAULT_VAGRANT_HOME}"
-	export VAGRANT_HOME="${VAGRANT_HOME/\~/$HOME}"
 
 	INSTALL_VAGRANT=
 	if ! _workspace_install_confirm "$prompt";then
-		mkdir -p "$VAGRANT_HOME"
-		_workspace_install_add_to_bash_profile "export VAGRANT_HOME=\"${VAGRANT_HOME/$WORKSPACE/\$WORKSPACE}\""
 		echo "" && read -p "Please press 'Enter/Return' when you have installed Vagrant. " proceed
 		_workspace_install_read_vagrant
 	else
 		echo ""
 		[ $YES_TO_ALL ] || read -p "Which Vagrant version? [$DEFAULT_VAGRANT_VERSION]: " VAGRANT_VERSION
 		VAGRANT_VERSION="${VAGRANT_VERSION:-$DEFAULT_VAGRANT_VERSION}"
-		
-		echo ""
-		[ $YES_TO_ALL ] || read -p "Vagrant home [${DEFAULT_VAGRANT_HOME/$HOME/~}]: " VAGRANT_HOME
-		VAGRANT_HOME="${VAGRANT_HOME:-$DEFAULT_VAGRANT_HOME}"
-		export VAGRANT_HOME="${VAGRANT_HOME/\~/$HOME}"
 		INSTALL_VAGRANT=1
 	fi
 }
@@ -226,7 +207,7 @@ _workspace_install_read_provider() {
 					_workspace_install_read_provider
 					return
 				fi
-				if [ ! -f "$VAGRANT_HOME/license-vagrant-vmware-fusion.lic" ];then
+				if [ ! -f "${VAGRANT_HOME:-$HOME/.vagrant.d}/license-vagrant-vmware-fusion.lic" ];then
 					_workspace_install_read_vmware_fusion_vagrant_license
 				fi
 				;;
@@ -449,10 +430,9 @@ _workspace_install_install_workspace() {
 	repo_part_2="${repo_part_1#*/}"
 	repo_part_3="${repo_part_2#*/}"
 	repo_part_4="${repo_part_3#*/}"
-	mkdir -p "$WORKSPACE/.system"
 	git_remote_repo="${WORKSPACE_REPO%%//*}//${repo_part_1%%/*}/${repo_part_2%%/*}/${repo_part_3%%/*}.git"
-	echo "$git_remote_repo" > "$WORKSPACE/.system/upstream-workspace-repo.txt"
-	echo "$WORKSPACE_BRANCH" > "$WORKSPACE/.system/upstream-workspace-branch.txt"
+	echo "$git_remote_repo" > "$WORKSPACE/upstream-workspace-repo.txt"
+	echo "$WORKSPACE_BRANCH" > "$WORKSPACE/upstream-workspace-branch.txt"
 	_workspace_install_success "Succesfully downloaded $git_remote_repo to ${WORKSPACE/$HOME/~}"
 	_workspace_install_add_to_uninstaller "if _workspace_install_confirm \"Do you want to trash \$WORKSPACE?\";then"
 	_workspace_install_add_to_uninstaller "_workspace_install_trash \"\$WORKSPACE\" && echo \"Workspace uninstalled succesfully! (it has moved to your trash can)\""
@@ -463,13 +443,13 @@ _workspace_install_install_docker_machine() {
 	_workspace_install_info "Installing Docker Machine $DOCKER_MACHINE_VERSION..."
 	sudo mv $DOCKER_MACHINE_BINARY /usr/local/bin/docker-machine
 	sudo chmod +x /usr/local/bin/docker-machine
+	_workspace_install_add_to_uninstaller "if _workspace_install_confirm 'Do you want to uninstall Docker Machine?';then"
+	_workspace_install_add_to_uninstaller "_workspace_install_trash \"/usr/local/bin/docker-machine\""
+	_workspace_install_add_to_uninstaller "fi"
 }
 
 _workspace_install_install_vagrant() {
 	_workspace_install_info "Installing Vagrant $VAGRANT_VERSION..."
-	mkdir -p "$VAGRANT_HOME"
-	_workspace_install_add_to_bash_profile "export VAGRANT_HOME=\"${VAGRANT_HOME/$WORKSPACE/\$WORKSPACE}\""
-
 	_workspace_install_install "$VAGRANT_INSTALLER" "Vagrant"
 
 	if [ "$(which vagrant)" == "" ];then
@@ -608,67 +588,6 @@ _workspace_install_provider_nice_name() {
 	esac
 }
 
-_workspace_install_read_environment_file() {
-	if [ ! $USERNAME ];then
-		echo ""
-		[ $YES_TO_ALL ] || read -p "What username to use for your workspace? [$DEFAULT_USERNAME]: " USERNAME
-		USERNAME="${USERNAME:-$DEFAULT_USERNAME}"
-	fi
-
-	if [ ! $COREOS_RELEASE_CHANNEL ];then
-		while [ "$COREOS_RELEASE_CHANNEL" != "stable" ] && [ "$COREOS_RELEASE_CHANNEL" != "beta" ] && [ "$COREOS_RELEASE_CHANNEL" != "alpha" ];do
-			echo ""
-			echo "CoreOS updates on three release channels (alpha|beta|stable)."
-			echo "See https://coreos.com/releases/ for the differences."
-			echo "1. Alpha"
-			echo "2. Beta"
-			echo "3. Stable"
-			[ $YES_TO_ALL ] || read -p "On which CoreOS update channel do you want to be? [$DEFAUlT_COREOS_RELEASE_CHANNEL]: " COREOS_RELEASE_CHANNEL
-			COREOS_RELEASE_CHANNEL=${COREOS_RELEASE_CHANNEL:-$DEFAUlT_COREOS_RELEASE_CHANNEL}
-			case `echo $COREOS_RELEASE_CHANNEL | awk '{print tolower($0)}'` in
-				1|alpha)
-					COREOS_RELEASE_CHANNEL="alpha"
-					;;
-				2|beta)
-					COREOS_RELEASE_CHANNEL="beta"
-					;;
-				3|stable)
-					COREOS_RELEASE_CHANNEL="stable"
-					;;
-				*)
-					COREOS_RELEASE_CHANNEL=
-					;;
-			esac
-		done
-	fi
-}
-
-_workspace_install_install_environment_file() {
-	_workspace_install_info "Installing environment file..."
-	cpus="2"
-	memory="1024"
-	instances="3"
-	network="public"
-	if [ "$PROVIDER" == "virtualbox" ];then
-		network="private"
-	fi
-	network_interface="en0: Wi-Fi (Airport)"
-	rand_mac_addr="00:$(( ( RANDOM % 89 ) + 10 )):$(( ( RANDOM % 89 ) + 10 )):00:01:01"
-	timezone=`readlink /etc/localtime | sed "s/\/usr\/share\/zoneinfo\///"`
-	echo "{" > "$WORKSPACE/env.json"
-	echo "  \"coreos-release-channel\": \"$COREOS_RELEASE_CHANNEL\"," >> "$WORKSPACE/env.json"
-	echo "  \"cpus\": $cpus," >> "$WORKSPACE/env.json"
-	echo "  \"instances\": $instances," >> "$WORKSPACE/env.json"
-	echo "  \"memory\": $memory," >> "$WORKSPACE/env.json"
-	echo "  \"provider\": \"$PROVIDER\"," >> "$WORKSPACE/env.json"
-	echo "  \"network\": \"$network\"," >> "$WORKSPACE/env.json"
-	echo "  \"network-interface\": \"$network_interface\"," >> "$WORKSPACE/env.json"
-	echo "  \"start-mac-addr\": \"$rand_mac_addr\"," >> "$WORKSPACE/env.json"
-	echo "  \"timezone\": \"$timezone\"," >> "$WORKSPACE/env.json"
-	echo "  \"username\": \"$USERNAME\"" >> "$WORKSPACE/env.json"
-	echo "}" >> "$WORKSPACE/env.json"
-}
-
 _workspace_install_add_to_uninstaller() {
 	if [ $UPDATE_UNINSTALLER ];then
 		if [ "$1" != "" ];then
@@ -681,10 +600,11 @@ _workspace_install_add_to_uninstaller() {
 			done
 		fi
 
-		uninstaller_script="$WORKSPACE/.system/uninstall.sh"
+		uninstaller_script="$WORKSPACE/.uninstall.sh"
 		mkdir -p "$(dirname "$uninstaller_script")"
 		if [ ! -f "$uninstaller_script" ];then
 			echo "#!/bin/bash" > $uninstaller_script
+			echo 'touch $HOME/.bash_profile' >> $uninstaller_script
 			echo 'source $HOME/.bash_profile' >> $uninstaller_script
 			type _workspace_install_trash | tail -n +2 >> $uninstaller_script
 			echo "" >> $uninstaller_script
