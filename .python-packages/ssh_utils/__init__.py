@@ -96,6 +96,7 @@ def ssh(ssh_config, command=None, stdout=False):
                 subprocess.check_call(cmd, stdout=out_fh,
                     stderr=err_fh)
         else:
+            
             ssh_process = subprocess.Popen(cmd, shell=False,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)

@@ -1,0 +1,17 @@
+#!/bin/sh
+[ $DEBUG ] && set -x
+if [ "$DOCKER_HOST" != "" ];then
+    if [ "$DOCKER_TLS_VERIFY" == "1" ];then
+        curl_args="--insecure --cert $DOCKER_CERT_PATH/cert.pem --key $DOCKER_CERT_PATH/key.pem"
+    fi
+    response="$(curl --silent --url https://${DOCKER_HOST:6}/version $curl_args)"
+elif [ -e /var/run/docker.sock ];then
+    response="$(curl --silent --unix-socket /var/run/docker.sock http:/version)"
+fi
+
+if [ "$response" == "" ];then
+    >&2 echo "No Docker deamon found. Exiting."
+    exit 1
+fi
+
+echo $response | jq ".Version" -r

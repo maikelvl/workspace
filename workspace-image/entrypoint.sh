@@ -4,23 +4,19 @@ if [ $DEBUG ]; then
     set -x
 fi
 
-
 start() {
     _set_timezone
     _ensure_workspace_git_folder
     _export_environment_variables
     _create_home_directory
     _create_user
+    set-docker-client-version
     /usr/sbin/sshd -D
 }
 
 build_time() {
     echo -n "Build time: "
     date -d @$(cat /.build-time)
-}
-
-version() {
-    git --version
 }
 
 help() {
@@ -63,7 +59,7 @@ _export_environment_variables() {
 
 _create_home_directory() {
     if [ ! -f $HOME/.zshrc ];then
-        cp -rf /tmp/home-template/. $HOME/
+        cp -rn /tmp/home-template/. $HOME/
     fi
     rm -rf /tmp/home-template
 }
@@ -120,7 +116,7 @@ case $cmd in
         help
         ;;
     *)
-        $cmd $@
+        exec "$cmd $@"
         ;;
 esac
 
