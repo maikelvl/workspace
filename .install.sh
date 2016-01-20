@@ -356,7 +356,7 @@ _workspace_install_download_docker_machine() {
 	sudo curl \
  		--location \
 		--url $download_link \
-		--output $DOCKER_MACHINE_BINARY \
+		--output $DOCKER_MACHINE_BINARY
 }
 
 _workspace_install_download_vagrant() {
