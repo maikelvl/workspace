@@ -215,7 +215,7 @@ class Workspace(object):
                 self.save_config()
             f.close()
         except IOError:
-            self._config = {self.host.name: default_config}
+            self._config = default_config
             self.save_config()
         return self.config
 
@@ -397,5 +397,6 @@ class Workspace(object):
         self.command(cmd, stdout=False)
 
     def command(self, cmd, stdout=True):
+        print(cmd)
         utils.log(' '.join(cmd))
         return self.host.command(cmd, stdout=stdout)
