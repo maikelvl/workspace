@@ -147,7 +147,7 @@ _workspace_install_read_docker_machine() {
 		_workspace_install_read_docker_machine
 	else
 		echo ""
-		DEFAULT_DOCKER_MACHINE_VERSION="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')"
+		DEFAULT_DOCKER_MACHINE_VERSION="$(curl --url https://github.com/docker/machine/releases/latest | sed -En 's/.*tag\/v([^\"]*).*/\1/p')"
 		[ $YES_TO_ALL ] || read -p "Which Docker Machine version? [$DEFAULT_DOCKER_MACHINE_VERSION]: " DOCKER_MACHINE_VERSION
 		DOCKER_MACHINE_VERSION="${DOCKER_MACHINE_VERSION:-$DEFAULT_DOCKER_MACHINE_VERSION}"
 		INSTALL_DOCKER_MACHINE=1
@@ -461,8 +461,8 @@ _workspace_install_install_workspace() {
 
 _workspace_install_install_docker_machine() {
 	_workspace_install_info "Installing Docker Machine $DOCKER_MACHINE_VERSION..."
-	sudo mv $DOCKER_MACHINE_BINARY /usr/bin/docker-machine
-	sudo chmod +x /usr/bin/docker-machine
+	sudo mv $DOCKER_MACHINE_BINARY /usr/local/bin/docker-machine
+	sudo chmod +x /usr/local/bin/docker-machine
 }
 
 _workspace_install_install_vagrant() {
