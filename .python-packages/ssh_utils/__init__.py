@@ -60,7 +60,7 @@ def flat_ssh_config(ssh_config):
         HostName {host-name}
         User {user}
         Port {port}
-        IdentityFile {identity-file}
+        IdentityFile "{identity-file}"
         {options}
     ''').format(**ssh_config)
 

@@ -306,7 +306,7 @@ class Host(base_host.BaseHost):
             'host-name': re.findall(r"HostName\s(.+)", ssh_config_string)[0],
             'user': re.findall(r"User\s(.+)", ssh_config_string)[0],
             'port': re.findall(r"Port\s(.+)", ssh_config_string)[0],
-            'identity-file': re.findall(r"IdentityFile\s(.+)",
+            'identity-file': re.findall(r"IdentityFile\s\"(.+)\"",
                 ssh_config_string)[0].replace(os.environ.get('HOME'), '~'),
         }
         return ssh_config
