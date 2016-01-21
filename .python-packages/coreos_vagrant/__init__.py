@@ -246,7 +246,7 @@ class Host(base_host.BaseHost):
         if self.state == 'running':
             self.set_ssh_config()
         else:
-            self.remove()
+            self.remove_data()
         self.save()
 
     @property
@@ -306,7 +306,7 @@ class Host(base_host.BaseHost):
             'host-name': re.findall(r"HostName\s(.+)", ssh_config_string)[0],
             'user': re.findall(r"User\s(.+)", ssh_config_string)[0],
             'port': re.findall(r"Port\s(.+)", ssh_config_string)[0],
-            'identity-file': re.findall(r"IdentityFile\s\"(.+)\"",
+            'identity-file': re.findall(r"IdentityFile\s\"?(.+)\"?",
                 ssh_config_string)[0].replace(os.environ.get('HOME'), '~'),
         }
         return ssh_config
@@ -327,6 +327,11 @@ class Host(base_host.BaseHost):
             self.data[self.name] = {}
         if self.data[self.name].has_key(key):
             del self.data[self.name][key]
+        return self
+
+    def remove_data(self):
+        if self.data.has_key(self.name):
+            del self.data[self.name]
         return self
 
     @property
