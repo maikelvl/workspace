@@ -33,7 +33,7 @@ Now, to SSH into the workspace open a new terminal window and run the following:
     workspace ssh
 
 The following will happen:
-- Create a Docker machine named boot2docker-01
+- Create a Docker machine named 'default'
 - Building the workspace from the `./workspace-image/Dockerfile`
 - Running the build workspace image which main process is a SSH daemon.
 - SSH into the workspace

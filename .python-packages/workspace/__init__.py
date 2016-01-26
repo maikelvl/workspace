@@ -21,7 +21,7 @@ HOSTS_PATH = os.path.join(os.getcwd(), 'hosts')
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
-@click.option('--host', '-H', default='boot2docker-01', help='Specify host [docker-machine-01]')
+@click.option('--host', '-H', default='default', help='Specify host [default]')
 def cli(host):
     pass
 
