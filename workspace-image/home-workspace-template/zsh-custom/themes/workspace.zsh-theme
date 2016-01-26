@@ -1,1 +1,1 @@
-source $WORKSPACE/zsh/workspace.zsh-theme
+source $WORKSPACE/.zsh/themes/workspace.zsh-theme
