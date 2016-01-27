@@ -15,4 +15,4 @@ if [ "$docker_binary" == "" ];then
 fi
 
 export DOCKER_VERSION=${docker_binary:16}
-ln -sf docker-$DOCKER_VERSION /usr/bin/docker
+sudo ln -sf docker-$DOCKER_VERSION /usr/bin/docker

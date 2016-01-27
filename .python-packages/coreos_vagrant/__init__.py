@@ -22,7 +22,7 @@ def cli():
 
 
 @cli.command('up', short_help='Starts the machine (aka `vagrant up <instance>`)')
-@click.argument('instance', default='coreos-01', metavar='<instance>', type=click.INT)
+@click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def up(instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=os.path.join(HOSTS_PATH, name))
@@ -220,9 +220,10 @@ class Host(base_host.BaseHost):
     def up(self):
         try:
             utils.log('`Vagrant up {}`'.format(self.name))
-            self.vagrant.up(vm_name=self.name)
+            provider = self.env.get('provider', 'virtualbox').replace('-', '_')
+            self.vagrant.up(vm_name=self.name, provider=provider)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant up {}'.format(self.name))
+            raise Exception('vagrant up {} --provider={} ({})'.format(self.name, provider, e))
 
     def pause(self):
         try:
@@ -324,9 +325,10 @@ class Host(base_host.BaseHost):
             'host-name': re.findall(r"HostName\s(.+)", ssh_config_string)[0],
             'user': re.findall(r"User\s(.+)", ssh_config_string)[0],
             'port': re.findall(r"Port\s(.+)", ssh_config_string)[0],
-            'identity-file': re.findall(r"IdentityFile\s\"?(.+)\"?",
+            'identity-file': re.findall(r"IdentityFile\s\"?([^\"]+)\"?",
                 ssh_config_string)[0].replace(os.environ.get('HOME'), '~'),
         }
+        print(ssh_config['identity-file'])
         return ssh_config
 
     def get(self, key):

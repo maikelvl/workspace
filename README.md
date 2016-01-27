@@ -10,7 +10,12 @@ The usual development machine has all kinds of software installed on the main op
 
 - [Docker Machine](https://docs.docker.com/machine/install-machine/)
 - [Vagrant](https://www.vagrantup.com/downloads.html) (if you want to use CoreOS)
+    - The Vagrant triggers plugin: `vagrant plugin install vagrant-triggers`
 - [VirtualBox](https://www.virtualbox.org/wiki/Downloads) and/or VMware Fusion ([6.0.6](https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.6-2684343.dmg), [7.1.3](https://download3.vmware.com/software/fusion/file/VMware-Fusion-7.1.3-3204469.dmg), [8.0.2](https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dmg))
+
+If you want Vagrant combined with VMware Fusion you also need additional
+- The Vagrant VMware Fusion plugin: `vagrant plugin install vagrant-vmware-fusion`
+- The Vagrant VMware Fusion license: `vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic`
 
 ## Workspace installation
 

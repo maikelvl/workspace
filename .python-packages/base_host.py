@@ -36,8 +36,6 @@ class BaseHost(object):
         try:
             with open(self.env_file, 'r') as env:
                 self._env = json.load(env)
-                if self._env.get('provider') is not None:
-                    self._env['provider'] = self._env.get('provider').replace('-', '')
         except IOError as e:
             print(e)
         except ValueError as e:
