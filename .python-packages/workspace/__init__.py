@@ -99,14 +99,13 @@ def build(ctx, no_cache, force):
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace')
 @click.option('--rebuild', '-R', is_flag=True, help='Rebuild the workspace')
-def ssh(ctx, command, force, recreate, rebuild, host_type=None):
-    if host_type is None:
-        host_type = ctx.parent.params.get('host')
+def ssh(ctx, command, force, recreate, rebuild):
+    host_type = ctx.parent.params.get('host')
     host = get_host(host_type)
     workspace = Workspace(host)
     try:
         if rebuild:
-            ctx.invoke(build, force=force)
+            workspace.build()
             recreate = True
         if recreate:
             workspace.recreate()
@@ -178,7 +177,6 @@ def confirm_host_up(force, host):
 
 
 def get_host(host_dir):
-
     host_type = None
     host_dir = os.path.join(HOSTS_PATH, host_dir)
     env_file = os.path.join(host_dir, 'env.json')
