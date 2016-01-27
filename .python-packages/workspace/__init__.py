@@ -43,9 +43,8 @@ def up(ctx, recreate, rebuild, force):
             sleep(1)
         workspace.up()
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, name=host.name):
+        if not confirm_host_up(force=force, host=host):
             return
-        host.up()
         ctx.invoke(up, recreate=recreate, rebuild=rebuild, force=True)
     except ssh_utils.SshException as e:
         exit(e.returncode)
@@ -87,9 +86,8 @@ def build(ctx, no_cache, force):
     try:
         workspace.build(no_cache=no_cache)
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, name=host.name):
+        if not confirm_host_up(force=force, host=host):
             return
-        host.up()
     except WorkspaceDownException:
         workspace.up()
         ctx.invoke(build, no_cache=no_cache, force=True)
@@ -115,9 +113,8 @@ def ssh(ctx, command, force, recreate, rebuild, host_type=None):
         sleep(1)
         workspace.ssh(command=command)
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, name=host.name):
+        if not confirm_host_up(force=force, host=host):
             return
-        host.up()
         ctx.invoke(ssh, command=command, force=True, recreate=recreate, rebuild=rebuild, host_type=host_type)
     except WorkspaceDownException:
         workspace.up()
@@ -138,9 +135,8 @@ def ssh_config(ctx, force, recreate):
             workspace.recreate()
         click.echo(workspace.flat_ssh_config)
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, name=host.name):
+        if not confirm_host_up(force=force, host=host):
             return
-        host.up()
         ctx.invoke(ssh_config, force=True, recreate=recreate)
     except WorkspaceDownException:
         workspace.up()
@@ -160,19 +156,25 @@ def ssh_command(ctx, command, force, recreate):
             workspace.recreate()
         click.echo(' '.join(workspace.ssh_command(command)))
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, name=host.name):
+        if not confirm_host_up(force=force, host=host):
             return
-        host.up()
         ctx.invoke(ssh_command, command=command, force=True, recreate=recreate)
     except WorkspaceDownException:
         workspace.up()
         ctx.invoke(ssh_command, command=command, force=True, recreate=recreate)
 
 
-def confirm_host_up(force, name):
+def confirm_host_up(force, host):
     bring_up = force or click.confirm(
-        "Do you want to bring '{}' up?".format(name))
-    return bring_up
+        "Do you want to bring '{}' up?".format(host.name))
+    if not bring_up:
+        return False
+    try:
+        host.up()
+    except Exception as e:
+        click.echo('Could not {}'.format(e))
+        exit(1)
+    return True
 
 
 def get_host(host_dir):
