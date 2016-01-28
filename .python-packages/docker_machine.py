@@ -76,8 +76,8 @@ class Host(base_host.BaseHost):
             self.docker_machine.start(self.name)
         except subprocess.CalledProcessError:
             self.docker_machine.create(self.name,
-                provider=self.env.get('provider').replace('-', ''), cpu_count=self.env.get('cpus'),
-                disk_size=self.env.get('disk'), memory_size=self.env.get('memory'))
+                provider=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
+                disk_size=self.config.get('disk'), memory_size=self.config.get('memory'))
 
     @property
     def ip(self):
