@@ -1,0 +1,7 @@
+#cloud-config
+coreos:
+  update:
+    reboot-strategy: "off"
+  units:
+    - name: etcd2.service
+      command: start

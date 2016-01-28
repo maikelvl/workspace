@@ -4,7 +4,7 @@ require 'json'
 
 Vagrant.require_version '>= 1.7.4'
 VAGRANTFILE_API_VERSION = '2'
-$env = JSON.parse(File.read("env.json"))
+$config = JSON.parse(File.read("config.json"))
 
 # # Defaults for config options defined in CONFIG
 $instance = 1
@@ -23,13 +23,13 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     config.vbguest.auto_update = false
   end
   
-  $release_channel = $env['coreos-release-channel'] ? $env['coreos-release-channel'] : 'stable'
+  $release_channel = $config['coreos-release-channel'] ? $config['coreos-release-channel'] : 'stable'
 
   config.vm.box = 'coreos-%s' % $release_channel
   $box_version = 'current'
-  if $env['coreos-version'] then
-    config.vm.box_version = $env['coreos-version']
-    $box_version = $env['coreos-version']
+  if $config['coreos-version'] then
+    config.vm.box_version = $config['coreos-version']
+    $box_version = $config['coreos-version']
   end
   
   config.vm.box_url = "http://#{$release_channel}.release.core-os.net/amd64-usr/#{$box_version}/coreos_production_vagrant.json"
@@ -40,18 +40,18 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
   $vm_name = 'coreos-%02d' % $instance
   $mac_addr = false
-  if $env['mac-addr']
-    $mac_addr = $env['mac-addr']
+  if $config['mac-addr']
+    $mac_addr = $config['mac-addr']
   end
   
   config.vm.define $vm_name do |coreos|
 
     coreos.vm.hostname = 'coreos-%02d' % $instance
     
-    if $env['network'] == 'private'
+    if $config['network'] == 'private'
       coreos.vm.network :private_network, ip: "172.16.1.1%02d" % $instance
-    elsif $env['network-interface']
-      coreos.vm.network :public_network, bridge: $env['network-interface']
+    elsif $config['network-interface']
+      coreos.vm.network :public_network, bridge: $config['network-interface']
     else
       coreos.vm.network :public_network
     end
@@ -70,14 +70,14 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     coreos.vm.provider :vmware_fusion do |v|
       v.gui = $vb_gui
-      v.vmx['memsize'] = $env['memory']
-      v.vmx['numvcpus'] = $env['cpus']
+      v.vmx['memsize'] = $config['memory']
+      v.vmx['numvcpus'] = $config['cpus']
     end
     
     coreos.vm.provider :virtualbox do |v|
       v.gui = $vb_gui
-      v.memory = $env['memory']
-      v.cpus = $env['cpus']
+      v.memory = $config['memory']
+      v.cpus = $config['cpus']
     end
 
     if $enable_serial_logging
@@ -121,7 +121,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/', :privileged => true
     end
 
-    coreos.vm.provision :shell, :inline => 'timedatectl set-timezone "'+$env['timezone']+'"'
+    coreos.vm.provision :shell, :inline => 'timedatectl set-timezone "'+$config['timezone']+'"'
     coreos.vm.provision :shell, :inline => 'echo -e "COREOS_PUBLIC_IPV4=$(ifconfig ens34 | awk \'/\\<inet\\>/ { print $2}\')\nCOREOS_PRIVATE_IPV4=$(ifconfig ens33 | awk \'/\\<inet\\>/ { print $2}\')" > /etc/environment'
     coreos.vm.synced_folder ENV['HOME'], ENV['HOME'], :id => 'core', :type => 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
     coreos.vm.provision :shell, :inline => 'getent group docker | cut -d: -f3 > docker-group-id'
