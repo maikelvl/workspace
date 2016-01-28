@@ -13,11 +13,11 @@ import ssh_utils
 import utils
 
 VERSION = '2.0.0'
-
+DEFAULT_HOST = os.environ.get('WORKSPACE_DEFAULT_HOST', 'default')
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
-@click.option('--host', '-H', default='default', help='Specify host [default]')
+@click.option('--host', '-H', default=DEFAULT_HOST, help='Specify host [{}]'.format(DEFAULT_HOST))
 def cli(host):
     pass
 
