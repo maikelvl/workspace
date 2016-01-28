@@ -49,6 +49,8 @@ To run the workspace on the CoreOS host run the following:
 
     workspace -H coreos-01 ssh
 
+You can also set the environment variable WORKSPACE_DEFAULT_HOST: `export WORKSPACE_DEFAULT_HOST=coreos-01`
+
 
 ### Install extra software
 If you’ve got your own software you wish to have in your workspace, just modify the `./workspace-image/Dockerfile` and run the following in your Mac terminal:
