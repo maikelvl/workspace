@@ -1,4 +1,3 @@
-from collections import defaultdict
 import json
 import os
 import re
@@ -13,7 +12,6 @@ import vagrant
 
 VERSION = '2.0.0'
 
-HOSTS_PATH = os.path.join(os.getcwd(), 'hosts')
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
@@ -25,7 +23,8 @@ def cli():
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def up(instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.up()
 
 
@@ -34,7 +33,8 @@ def up(instance):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def pause(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.pause()
 
 
@@ -43,7 +43,8 @@ def pause(ctx, instance):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def stop(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.stop()
 
 
@@ -52,7 +53,8 @@ def stop(ctx, instance):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def restart(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.restart()
 
 
@@ -62,7 +64,8 @@ def restart(ctx, instance):
 @click.option('--force', '-f', help='Do not argue to remove the machine', is_flag=True)
 def remove(ctx, instance, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     remove = force or click.confirm("Are you sure you want to remove '{}'?".format(host.name))
     if not remove:
         return
@@ -75,7 +78,8 @@ def remove(ctx, instance, force):
 @click.option('--force', '-f', help='Do not argue to recreate the machine', is_flag=True)
 def recreate(ctx, instance, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     recreate = force or click.confirm("Are you sure you want to recreate '{}'?".format(host.name))
     if not recreate:
         return
@@ -87,7 +91,8 @@ def recreate(ctx, instance, force):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def state(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     click.echo(host.status.get('state'))
 
 
@@ -107,7 +112,8 @@ def status_all(ctx):
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 def ssh(ctx, instance, command, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     try:
         result = host.ssh(command, stdout=True)
         if result is not None:
@@ -125,7 +131,8 @@ def ssh(ctx, instance, command, force):
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 def ssh_config(ctx, instance, fetch, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.fetch = fetch
     try:
         click.echo(host.flat_ssh_config)
@@ -143,7 +150,8 @@ def ssh_config(ctx, instance, fetch, force):
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 def ssh_command(ctx, instance, fetch, command, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.fetch = fetch
     try:
         click.echo(' '.join(host.ssh_command(command)))
@@ -160,7 +168,8 @@ def ssh_command(ctx, instance, fetch, command, force):
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 def ip(ctx, instance, fetch, force):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.fetch = fetch
     try:
         click.echo(host.ip)
@@ -175,7 +184,8 @@ def ip(ctx, instance, fetch, force):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 def update_status(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
-    host = Host(root=os.path.join(HOSTS_PATH, name))
+    host = Host(root=base_host.host_path(name))
+    host.config = get_host_config(name)
     host.update_status()
 
 
@@ -192,9 +202,17 @@ def confirm_host_up(force, host):
     return True
 
 
+def get_host_config(host_dir):
+    host_type = None
+    try:
+        return base_host.config(host_dir)
+    except Exception as e:
+        click.echo(e, err=True)
+        exit(1)
+
+
 class Host(base_host.BaseHost):
     
-    _data = None
     _status = None
     _vagrant = None
     fetch = False
@@ -220,10 +238,21 @@ class Host(base_host.BaseHost):
     def up(self):
         try:
             utils.log('`Vagrant up {}`'.format(self.name))
-            provider = self.env.get('provider', 'virtualbox').replace('-', '_')
+            provider = self.config.get('provider', 'virtualbox').replace('-', '_')
             self.vagrant.up(vm_name=self.name, provider=provider)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant up {} --provider={} ({})'.format(self.name, provider, e))
+
+            suggestion = (
+                'Make sure you have installed the following installed:',
+                '  - vagrant plugin install vagrant-triggers',
+            )
+            if provider == 'vmware_fusion':
+                suggestion += (
+                    '  - vagrant plugin install vagrant-vmware-fusion',
+                    '  - vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic',
+                )
+            raise Exception('`vagrant up {} --provider={}`{}'.format(
+                self.name, provider, '\n\n'+'\n'.join(suggestion)+'\n'))
 
     def pause(self):
         try:
@@ -237,21 +266,21 @@ class Host(base_host.BaseHost):
             utils.log('`Vagrant halt {}`'.format(self.name))
             self.vagrant.halt(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant halt {}'.format(self.name))
+            raise Exception('`vagrant halt {}`'.format(self.name))
 
     def restart(self):
         try:
             utils.log('`Vagrant reload {}`'.format(self.name))
             self.vagrant.reload(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant reload {}'.format(self.name))
+            raise Exception('`vagrant reload {}`'.format(self.name))
 
     def remove(self):
         try:
             utils.log('`Vagrant destroy {}`'.format(self.name))
             self.vagrant.destroy(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant destroy {}'.format(self.name))
+            raise Exception('`vagrant destroy {}`'.format(self.name))
 
     def recreate(self):
         self.remove()
@@ -303,6 +332,7 @@ class Host(base_host.BaseHost):
         ssh_config['identity-file'] = ssh_config['identity-file']\
             .replace('~', os.environ.get('HOME'))
         ssh_config['host'] = self.name
+
         return ssh_config
 
     def fetch_ssh_config(self):
@@ -323,48 +353,11 @@ class Host(base_host.BaseHost):
             raise base_host.HostDownException
         ssh_config = {
             'host-name': re.findall(r"HostName\s(.+)", ssh_config_string)[0],
-            'user': re.findall(r"User\s(.+)", ssh_config_string)[0],
+            'user': 'core', #re.findall(r"User\s(.+)", ssh_config_string)[0],
             'port': re.findall(r"Port\s(.+)", ssh_config_string)[0],
-            'identity-file': re.findall(r"IdentityFile\s\"?([^\"]+)\"?",
+            'identity-file': re.findall(r"IdentityFile\s\"?([^\"\n]+)\"?",
                 ssh_config_string)[0].replace(os.environ.get('HOME'), '~'),
         }
-        print(ssh_config['identity-file'])
         return ssh_config
 
-    def get(self, key):
-        if self.data.has_key(key):
-            return self.data.get(key)
-        return None
 
-    def set(self, key, value):
-        self.data[key] = value
-        return self
-
-    def unset(self, key):
-        if self.datahas_key(key):
-            del self.data[key]
-        return self
-
-    def remove_data(self):
-        self._data = {}
-        return self
-
-    @property
-    def data(self):
-        if self._data is None:
-            self._data = self.state_file_content()
-        return self._data
-
-    def state_file_content(self):
-        utils.log('Reading state from file {}'.format(self.state_file))
-        try:
-            return json.load(open(self.state_file))
-        except IOError:
-            return defaultdict(dict)
-        except ValueError as e:
-            utils.log('There is a syntax error in {}: {}'.format(self.state_file, e))
-
-    def save(self):
-        utils.log('Saving state to file {}'.format(self.state_file))
-        with open(self.state_file, 'w') as f:
-            f.write(json.dumps(self.data, indent=4))

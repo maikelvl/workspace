@@ -16,9 +16,6 @@ import utils
 VERSION = '2.0.0'
 
 
-HOSTS_PATH = os.path.join(os.getcwd(), 'hosts')
-
-
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
 @click.option('--host', '-H', default='default', help='Specify host [default]')
@@ -178,20 +175,16 @@ def confirm_host_up(force, host):
 
 def get_host(host_dir):
     host_type = None
-    host_dir = os.path.join(HOSTS_PATH, host_dir)
-    env_file = os.path.join(host_dir, 'env.json')
     try:
-        with open(env_file, 'r') as f:
-            env = json.load(f)
-            host_type = env.get('host-type')
-    except IOError:
-        click.echo('Host file not found: {}'.format(
-            env_file.replace(os.environ.get('HOME'), '~')), err=True)
+        config = base_host.config(host_dir)
+    except Exception as e:
+        click.echo(e, err=True)
         exit(1)
 
+    host_type = config.get('host-type')
     if host_type == 'coreos-vagrant':
-        return coreos_vagrant.Host(root=host_dir)
-    return docker_machine.Host(root=host_dir)
+        return coreos_vagrant.Host(root=base_host.host_path(host_dir))
+    return docker_machine.Host(root=base_host.host_path(host_dir))
 
 
 class WorkspaceDownException(Exception):
@@ -214,7 +207,7 @@ class Workspace(object):
 
     @property
     def config_file(self):
-        return '{}/workspace.json'.format(self.host.root)
+        return '{}/.workspace.json'.format(self.host.root)
 
     @property
     def image_dir(self):
