@@ -1,8 +1,8 @@
 {
     "host-type": "docker-machine",
-	"timezone": "Europe/Amsterdam",
-	"provider": "virtualbox",
-	"memory": 1024,
-	"cpus": 2,
-	"disk": 30
+    "timezone": "Europe/Amsterdam",
+    "provider": "virtualbox",
+    "memory": 1024,
+    "cpus": 2,
+    "disk": 30
 }

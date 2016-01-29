@@ -1,11 +1,12 @@
 {
     "host-type": "coreos-vagrant",
-	"timezone": "Europe/Amsterdam",
-	"provider": "vmware-fusion",
-	"memory": 1024,
-	"cpus": 2,
-	"coreos-release-channel": "beta",
-	"mac-addr": "00:50:00:00:02:01",
-	"network-interface": "en0: Wi-Fi (Airport)",
-	"network": "public"
+    "instance": 1,
+    "timezone": "Europe/Amsterdam",
+    "provider": "vmware-fusion",
+    "memory": 1024,
+    "cpus": 2,
+    "coreos-release-channel": "beta",
+    "mac-addr": "00:50:00:00:02:01",
+    "network-interface": "en0: Wi-Fi (Airport)",
+    "network": "public"
 }

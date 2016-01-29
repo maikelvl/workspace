@@ -7,7 +7,6 @@ VAGRANTFILE_API_VERSION = '2'
 $config = JSON.parse(File.read("config.json"))
 
 # # Defaults for config options defined in CONFIG
-$instance = 1
 $enable_serial_logging = false
 $vb_gui = false
 
@@ -38,7 +37,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     override.vm.box_url = "http://#{$release_channel}.release.core-os.net/amd64-usr/#{$box_version}/coreos_production_vagrant_vmware_fusion.json"
   end
 
-  $vm_name = 'coreos-%02d' % $instance
+  $vm_name = 'coreos-%02d' % $config['instance']
   $mac_addr = false
   if $config['mac-addr']
     $mac_addr = $config['mac-addr']
@@ -46,10 +45,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   
   config.vm.define $vm_name do |coreos|
 
-    coreos.vm.hostname = 'coreos-%02d' % $instance
+    coreos.vm.hostname = 'coreos-%02d' % $config['instance']
     
     if $config['network'] == 'private'
-      coreos.vm.network :private_network, ip: "172.16.1.1%02d" % $instance
+      coreos.vm.network :private_network, ip: "172.16.1.1%02d" % $config['instance']
     elsif $config['network-interface']
       coreos.vm.network :public_network, bridge: $config['network-interface']
     else
@@ -101,15 +100,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     end
 
     coreos.trigger.after :up do
-      run "coreos update-status %d" % $instance
+      run "coreos update-status %d" % $config['instance']
     end
 
     coreos.trigger.after :halt do
-      run "coreos update-status %d" % $instance
+      run "coreos update-status %d" % $config['instance']
     end
 
     coreos.trigger.after :destroy do
-      run "coreos update-status %d" % $instance
+      run "coreos update-status %d" % $config['instance']
     end
     
     $cloud_config = "cloud-config.yml"
