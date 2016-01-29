@@ -251,36 +251,40 @@ class Host(base_host.BaseHost):
                     '  - vagrant plugin install vagrant-vmware-fusion',
                     '  - vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic',
                 )
-            raise Exception('`vagrant up {} --provider={}`{}'.format(
-                self.name, provider, '\n\n'+'\n'.join(suggestion)+'\n'))
+            raise Exception('`cd {} && vagrant up {} --provider={}`{}'.format(
+                self.root.replace(os.environ.get('HOME'), '~'), self.name, provider, '\n\n'+'\n'.join(suggestion)+'\n'))
 
     def pause(self):
         try:
             utils.log('`Vagrant suspend {}`'.format(self.name))
             self.vagrant.suspend(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('vagrant suspend {}'.format(self.name))
+            raise Exception('`cd {} && vagrant suspend {}`'.format(
+                self.root.replace(os.environ.get('HOME'), '~'), self.name))
 
     def stop(self):
         try:
             utils.log('`Vagrant halt {}`'.format(self.name))
             self.vagrant.halt(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('`vagrant halt {}`'.format(self.name))
+            raise Exception('`cd {} && vagrant halt {}`'.format(
+                self.root.replace(os.environ.get('HOME'), '~'), self.name))
 
     def restart(self):
         try:
             utils.log('`Vagrant reload {}`'.format(self.name))
             self.vagrant.reload(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('`vagrant reload {}`'.format(self.name))
+            raise Exception('`cd {} && vagrant reload {}`'.format(
+                self.root.replace(os.environ.get('HOME'), '~'), self.name))
 
     def remove(self):
         try:
             utils.log('`Vagrant destroy {}`'.format(self.name))
             self.vagrant.destroy(vm_name=self.name)
         except subprocess.CalledProcessError as e:
-            raise Exception('`vagrant destroy {}`'.format(self.name))
+            raise Exception('`cd {} && vagrant destroy {}`'.format(
+                self.root.replace(os.environ.get('HOME'), '~'), self.name))
 
     def recreate(self):
         self.remove()
