@@ -91,7 +91,7 @@ _create_user() {
         else
             adduser $USER -D -h $HOME -s /bin/zsh -u $uid
         fi
-        passwd $USER -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)"
+        echo "$USER:$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" | chpasswd
         echo "$USER ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
     fi
 
