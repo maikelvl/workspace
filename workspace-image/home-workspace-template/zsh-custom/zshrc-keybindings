@@ -1,0 +1,3 @@
+bindkey -e
+# bindkey '^[^[[C' emacs-forward-word
+# bindkey '^[^[[D' emacs-backward-word
