@@ -2,9 +2,20 @@
 # Git style from mortalscumbag.zsh-theme
 # Collapsed working directory from fishy.zsh-theme
 
+function toggle_git_prompt() {
+  if [ $DISABLE_GIT_IN_PROMPT ];then
+    DISABLE_GIT_IN_PROMPT=
+    echo "Git in prompt"
+  else
+    DISABLE_GIT_IN_PROMPT=1
+    echo "No git in prompt"
+  fi
+}
+
 function my_git_prompt() {
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
-  
+  [ $DISABLE_GIT_IN_PROMPT ] && return
+
   INDEX=$(git status --porcelain 2> /dev/null)
   STATUS=""
 
