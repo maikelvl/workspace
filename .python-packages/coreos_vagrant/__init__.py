@@ -110,9 +110,9 @@ def status_all(ctx):
 @click.argument('instance', default=1, metavar='<instance>', type=click.INT)
 @click.option('--command', '-c', default=None, help='Run a one-off commmand via SSH')
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
-@click.option('--reload', is_flag=True, help='Reload the instance')
+@click.option('--restart', is_flag=True, help='Reload the instance')
 @click.option('--recreate', is_flag=True, help='Recreate the instance')
-def ssh(ctx, instance, command, force, reload, recreate):
+def ssh(ctx, instance, command, force, restart, recreate):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
     host.config = get_host_config(name)
@@ -122,15 +122,15 @@ def ssh(ctx, instance, command, force, reload, recreate):
             if not recreate:
                 return
             host.recreate()
-        elif reload:
-            host.reload()
+        elif restart:
+            host.restart()
         result = host.ssh(command, stdout=True)
         if result is not None:
             click.echo(''.join(result))
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
             return
-        ctx.invoke(ssh, instance=instance, command=command, force=True, reload=reload, recreate=recreate)
+        ctx.invoke(ssh, instance=instance, command=command, force=True, restart=restart, recreate=recreate)
 
 
 @cli.command('ssh-config', short_help='Print the SSH config (aka `vagrant ssh-config <instance>`)')
