@@ -236,13 +236,18 @@ class Host(base_host.BaseHost):
         return self._vagrant;
 
     @property
+    def ip_list(self):
+        ip_list = self.ssh(command=r"ifconfig | sed -En 's/.*inet\s([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\s+netmask\s255\.255\.255\.0.*/\1/p'")
+        if ip_list:
+            return [ip.strip() for ip in ip_list]
+        return []
+
+    @property
     def ip(self):
         ip = self.ssh_config.get('host-name')
-        if ip != '127.0.0.1':
+        if ip and ip != '127.0.0.1':
             return ip
-        ip = self.ssh(command=r"ifconfig | sed -En 's/.*inet (172\.16\.[0-9]+\.[0-9]+).*/\1/p'")
-        if ip:
-            return ip[0].strip()
+        return super().ip
 
     def up(self):
         try:

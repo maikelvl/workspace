@@ -55,15 +55,24 @@ class BaseHost(object):
         self.name = path.basename(self.root)
 
     def ping(self):
-        ip = self.ip
-        utils.log('Pinging {} ({})'.format(self.name, ip))
-        response = subprocess.Popen(
-            ['ping', '-c1', '-W100', ip],
-            stdout=subprocess.PIPE).stdout.read()
-        if r'100.0% packet loss' not in response:
-            utils.log('Ping successful')
-            return
+        ip_list = self.ip_list
+        utils.log('IP-addresses: '+', '.join(ip_list))
+        for ip in ip_list:
+            utils.log('Pinging {} ({})'.format(self.name, ip))
+            response = subprocess.Popen(
+                ['ping', '-c1', '-W100', ip],
+                stdout=subprocess.PIPE).stdout.read()
+            if r'100.0% packet loss' not in response:
+                utils.log('Ping successful')
+                return
         raise HostDownException
+
+    @property
+    def ip(self):
+        ip_list = self.ip_list
+        if ip_list:
+            return ip_list[0]
+        raise base_host.HostDownException
 
     def command(self, command, stdout=False):
         self.ping()

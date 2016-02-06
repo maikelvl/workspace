@@ -44,11 +44,8 @@ class DockerMachine():
             return status_list[0].strip()
         raise base_host.HostDownException
 
-    def ip(self, name):
-        ip_list = self.execute(['ip', name], stdout=False)
-        if ip_list:
-            return ip_list[0].strip()
-        raise base_host.HostDownException
+    def ip_list(self, name):
+        return [ip.strip() for ip in self.execute(['ip', name], stdout=False)]
 
     def inspect(self, name):
         inspect_list = self.execute(['inspect', name], stdout=False)
@@ -78,10 +75,10 @@ class Host(base_host.BaseHost):
             self.docker_machine.create(self.name,
                 provider=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
                 disk_size=self.config.get('disk'), memory_size=self.config.get('memory'))
-
+    
     @property
-    def ip(self):
-        return self.docker_machine.ip(self.name)
+    def ip_list(self):
+        return self.docker_machine.ip_list(self.name)
 
     @property
     def ssh_config(self):
