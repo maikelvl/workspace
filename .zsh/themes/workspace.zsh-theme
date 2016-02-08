@@ -14,34 +14,38 @@ function toggle_git_prompt() {
 
 function my_git_prompt() {
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
-  [ $DISABLE_GIT_IN_PROMPT ] && return
 
-  INDEX=$(git status --porcelain 2> /dev/null)
-  STATUS=""
+  if [ $DISABLE_GIT_IN_PROMPT ];then
+    STATUS="-"
+  else
 
-  # is branch ahead?
-  if $(echo "$(git log origin/$(current_branch)..HEAD 2> /dev/null)" | grep '^commit' &> /dev/null); then
-    STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_AHEAD"
-  fi
+    INDEX=$(git status --porcelain 2> /dev/null)
+    STATUS=""
 
-  # is anything staged?
-  if $(echo "$INDEX" | grep -E -e '^(D[ M]|[MARC][ MD]) ' &> /dev/null); then
-    STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_STAGED"
-  fi
+    # is branch ahead?
+    if $(echo "$(git log origin/$(current_branch)..HEAD 2> /dev/null)" | grep '^commit' &> /dev/null); then
+      STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_AHEAD"
+    fi
 
-  # is anything unstaged?
-  if $(echo "$INDEX" | grep -E -e '^[ MARC][MD] ' &> /dev/null); then
-    STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNSTAGED"
-  fi
+    # is anything staged?
+    if $(echo "$INDEX" | grep -E -e '^(D[ M]|[MARC][ MD]) ' &> /dev/null); then
+      STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_STAGED"
+    fi
 
-  # is anything untracked?
-  if $(echo "$INDEX" | grep '^?? ' &> /dev/null); then
-    STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNTRACKED"
-  fi
+    # is anything unstaged?
+    if $(echo "$INDEX" | grep -E -e '^[ MARC][MD] ' &> /dev/null); then
+      STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNSTAGED"
+    fi
 
-  # is anything unmerged?
-  if $(echo "$INDEX" | grep -E -e '^(A[AU]|D[DU]|U[ADU]) ' &> /dev/null); then
-    STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNMERGED"
+    # is anything untracked?
+    if $(echo "$INDEX" | grep '^?? ' &> /dev/null); then
+      STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNTRACKED"
+    fi
+
+    # is anything unmerged?
+    if $(echo "$INDEX" | grep -E -e '^(A[AU]|D[DU]|U[ADU]) ' &> /dev/null); then
+      STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNMERGED"
+    fi
   fi
 
   if [[ -n $STATUS ]]; then
