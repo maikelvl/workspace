@@ -38,12 +38,13 @@ RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
 && cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm
 
 RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
- && echo $latest \
+ && echo "latest: $latest" \
  && curl \
  		--location \
-		--url https://github.com/docker/machine/releases/download/$latest/docker-machine_linux-amd64 \
+		--url https://github.com/docker/machine/releases/download/$latest/docker-machine-$(uname -s)-$(uname -m) \
 		--output /usr/bin/docker-machine \
- && chmod +x /usr/bin/docker-machine
+ && chmod +x /usr/bin/docker-machine \
+ && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
 COPY /install-docker /usr/bin/install-docker
 RUN install-docker 1.7.1
