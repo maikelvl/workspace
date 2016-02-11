@@ -57,6 +57,9 @@ _prepare_zsh() {
     echo "[ -f $WORKSPACE/home/.zshrc ] && source $WORKSPACE/home/.zshrc" > /etc/zsh/zshrc
     echo '' > /etc/zsh/zshenv
     env | while read env_var;do
+        if [ "${env_var:0:4}" == "PWD=" ];then
+            continue
+        fi
         echo "export $env_var" >> /etc/zsh/zshenv
     done
     touch $HOME/.zshrc
