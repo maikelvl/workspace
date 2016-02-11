@@ -4,11 +4,11 @@ import subprocess
 import base_host
 import ssh_utils
 import utils
-
+from os import environ
 
 class DockerMachine():
 
-    def create(self, name, provider, cpu_count=None, disk_size=None, memory_size=None):
+    def create(self, name, provider, cpu_count=None, disk_size=None, memory_size=None, nfs=None):
 
         flags = {
             'provider': provider,
@@ -34,6 +34,8 @@ class DockerMachine():
         if memory_size is not None:
             options.append('--{provider}-{memory}={memory-size}'.format(**flags))
         self.execute(['create'] + options + [name])
+        if nfs:
+            self.enable_nfs(name)
 
     def start(self, name):
         self.execute(['start', name])
@@ -57,6 +59,10 @@ class DockerMachine():
         command = ['docker-machine'] + command
         return utils.local_command(command, stdout=stdout)
 
+    def enable_nfs(self, name):
+        command = ['docker-machine-nfs', name, '--shared-folder={}'.format(environ.get('HOME')), '--force']
+        return utils.local_command(command, stdout=True)
+
 
 class Host(base_host.BaseHost):
     
@@ -74,7 +80,8 @@ class Host(base_host.BaseHost):
         except subprocess.CalledProcessError:
             self.docker_machine.create(self.name,
                 provider=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
-                disk_size=self.config.get('disk'), memory_size=self.config.get('memory'))
+                disk_size=self.config.get('disk'), memory_size=self.config.get('memory'),
+                nfs=self.config.get('nfs'))
     
     @property
     def ip_list(self):
