@@ -4,5 +4,6 @@
     "provider": "virtualbox",
     "memory": 1024,
     "cpus": 2,
-    "disk": 30
+    "disk": 30,
+    "nfs": true
 }

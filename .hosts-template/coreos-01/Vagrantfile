@@ -122,7 +122,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
     coreos.vm.provision :shell, :inline => 'timedatectl set-timezone "'+$config['timezone']+'"'
     coreos.vm.provision :shell, :inline => 'echo -e "COREOS_PUBLIC_IPV4=$(ifconfig ens34 | awk \'/\\<inet\\>/ { print $2}\')\nCOREOS_PRIVATE_IPV4=$(ifconfig ens33 | awk \'/\\<inet\\>/ { print $2}\')" > /etc/environment'
-    coreos.vm.synced_folder ENV['HOME'], ENV['HOME'], :id => 'core', :type => 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
+    if $config['nfs'] == true
+      coreos.vm.synced_folder ENV['HOME'], ENV['HOME'], :id => 'core', :type => 'nfs', :mount_options => ['actimeo=2,nolock,vers=3,udp']
+    else
+      coreos.vm.synced_folder ENV['HOME'], ENV['HOME'], :id => 'core'
+    end
     coreos.vm.provision :shell, :inline => 'getent group docker | cut -d: -f3 > docker-group-id'
   end
 end
