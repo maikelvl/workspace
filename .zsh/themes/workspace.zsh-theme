@@ -82,16 +82,14 @@ _fishy_collapsed_wd() {
  ")
  }
 
-_path_color() {
-  if [ "$DOCKER_HOST" = "" ];then
-    echo "$fg[cyan]"
-  else
-    echo "$fg[green]"
+_docker_host() {
+  if [ "$DOCKER_MACHINE_NAME" != "" ] && [ "$DOCKER_MACHINE_NAME" != "default" ];then
+    echo "${fg[green]}$DOCKER_MACHINE_NAME$reset_color "
   fi
 }
 
 print "$fg_bold[green]$(whoami)$reset_color @ $fg_bold[green]$(uname -n)$reset_color"
-PROMPT=$'%{$(_path_color)%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
+PROMPT=$'%{$(_docker_host)%}%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 
 #PROMPT=$'$(ssh_connection)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 

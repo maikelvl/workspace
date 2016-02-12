@@ -12,7 +12,11 @@ docker_connect() {
     unset DOCKER_CERT_PATH
     unset DOCKER_HOST
     export DOCKER_MACHINE_NAME=$1
+    if [ "$DOCKER_MACHINE_NAME" = "self" ];then
+        export DOCKER_MACHINE_NAME=${WORKSPACE_DEFAULT_HOST:-default}
+    fi
     if [ -d $HOME/.docker/machine/machines/$1 ];then
+        export DOCKER_MACHINE_NAME=
         eval $(docker-machine env $1)
     fi
     
