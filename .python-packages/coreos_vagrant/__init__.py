@@ -9,6 +9,7 @@ import ssh_utils
 from tabulate import tabulate
 import utils
 import vagrant
+from docker_machine import DockerMachine
 
 VERSION = '2.0.0'
 
@@ -307,10 +308,14 @@ class Host(base_host.BaseHost):
     def update_status(self):
         utils.log('Updating status')
         self.set('state', self.state)
+        docker_machine = DockerMachine()
         if self.state == 'running':
             self.set_ssh_config()
+            docker_machine.create(name=self.name, driver='generic', ssh_user=self.ssh_config['user'],
+                ip_address=self.ip, ssh_key=self.ssh_config['identity-file'], ssh_port=self.ssh_config['port'])
         else:
-            self.remove_data()
+            self.remove_data()            
+            docker_machine.remove(self.name)
         self.save()
         
     @property
