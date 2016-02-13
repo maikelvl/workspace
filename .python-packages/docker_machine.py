@@ -8,34 +8,40 @@ from os import environ
 
 class DockerMachine():
 
-    def create(self, name, provider, cpu_count=None, disk_size=None, memory_size=None, nfs=None):
+    def create(self, name, **kwargs):
 
-        flags = {
-            'provider': provider,
-            'cpu': 'cpu-count',
-            'disk': 'disk-size',
-            'memory': 'memory',
-            'cpu-count': cpu_count,
-            'memory-size': memory_size,
-            'disk-size': disk_size,
-        }
-
-        if provider == 'vmwarefusion':
-            flags['memory'] = 'memory-size'
+        if kwargs.get('disk_size') and kwargs.get('disk_size') < 500:
+            flags['disk-size'] = kwargs.get('disk_size') * 1000
 
         options = []
-        options.append('--driver={provider}'.format(**flags))
-        if cpu_count is not None:
-            options.append('--{provider}-{cpu}={cpu-count}'.format(**flags))
-        if disk_size is not None:
-            if disk_size < 500:
-                flags['disk-size'] = disk_size * 1000
-            options.append('--{provider}-{disk}={disk-size}'.format(**flags))
-        if memory_size is not None:
-            options.append('--{provider}-{memory}={memory-size}'.format(**flags))
+
+        options.append('--driver={driver}'.format(**kwargs))
+        if kwargs.get('driver') == 'vmwarefusion':
+            if kwargs.get('cpu_count'):
+                options.append('--vmwarefusion-cpu-count={cpu_count}'.format(**kwargs))
+            if kwargs.get('disk_size'):
+                options.append('--vmwarefusion-disk-size={disk_size}'.format(**kwargs))
+            if kwargs.get('memory_size'):
+                options.append('--vmwarefusion-memory-size={memory_size}'.format(**kwargs))
+        elif kwargs.get('driver') == 'virtualbox':
+            if kwargs.get('cpu_count'):
+                options.append('--virtualbox-cpu-count={cpu_count}'.format(**kwargs))
+            if kwargs.get('disk_size'):
+                options.append('--virtualbox-disk-size={disk_size}'.format(**kwargs))
+            if kwargs.get('memory_size'):
+                options.append('--virtualbox-memory={memory_size}'.format(**kwargs))
+        elif kwargs.get('driver') == 'generic':
+            options.append('--generic-ssh-user={ssh_user}'.format(**kwargs))
+            options.append('--generic-ip-address={ip_address}'.format(**kwargs))
+            options.append('--generic-ssh-port={ssh_port}'.format(**kwargs))
+            options.append('--generic-ssh-key={ssh_key}'.format(**kwargs))
+        print(options)
         self.execute(['create'] + options + [name])
-        if nfs:
+        if kwargs.get('nfs'):
             self.enable_nfs(name)
+
+    def remove(self, name):
+        self.execute(['rm', '--force', name])
 
     def start(self, name):
         self.execute(['start', name])
@@ -79,7 +85,7 @@ class Host(base_host.BaseHost):
             self.docker_machine.start(self.name)
         except subprocess.CalledProcessError:
             self.docker_machine.create(self.name,
-                provider=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
+                driver=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
                 disk_size=self.config.get('disk'), memory_size=self.config.get('memory'),
                 nfs=self.config.get('nfs'))
     
