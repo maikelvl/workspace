@@ -118,6 +118,7 @@ def ssh(ctx, instance, command, force, restart, recreate):
     host = Host(root=base_host.host_path(name))
     host.config = get_host_config(name)
     try:
+        host.ping()
         if recreate:
             recreate = force or click.confirm("Are you sure you want to recreate '{}'?".format(host.name))
             if not recreate:
@@ -145,6 +146,7 @@ def ssh_config(ctx, instance, fetch, force):
     host.config = get_host_config(name)
     host.fetch = fetch
     try:
+        host.ping()
         click.echo(host.flat_ssh_config)
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
@@ -164,6 +166,7 @@ def ssh_command(ctx, instance, fetch, command, force):
     host.config = get_host_config(name)
     host.fetch = fetch
     try:
+        host.ping()
         click.echo(' '.join(host.ssh_command(command)))
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
@@ -182,6 +185,7 @@ def ip(ctx, instance, fetch, force):
     host.config = get_host_config(name)
     host.fetch = fetch
     try:
+        host.ping()
         click.echo(host.ip)
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
@@ -311,8 +315,11 @@ class Host(base_host.BaseHost):
         docker_machine = DockerMachine()
         if self.state == 'running':
             self.set_ssh_config()
-            docker_machine.create(name=self.name, driver='generic', ssh_user=self.ssh_config['user'],
-                ip_address=self.ip, ssh_key=self.ssh_config['identity-file'], ssh_port=self.ssh_config['port'])
+            if not docker_machine.exists(self.name):
+                docker_machine.create(name=self.name, driver='generic',
+                    ssh_user=self.ssh_config['user'], ip_address=self.ip,
+                    ssh_port=self.ssh_config['port'],
+                    ssh_key=self.ssh_config['identity-file'])
         else:
             self.remove_data()            
             docker_machine.remove(self.name)

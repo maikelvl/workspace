@@ -40,6 +40,12 @@ class DockerMachine():
         if kwargs.get('nfs'):
             self.enable_nfs(name)
 
+    def list(self):
+        return self.execute(['ls', '-q'], stdout=False)
+
+    def exists(self, name):
+        return name in [m.strip() for m in self.list()]
+
     def remove(self, name):
         self.execute(['rm', '--force', name])
 
