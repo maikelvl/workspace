@@ -53,6 +53,8 @@ export _Z_DATA=$WORKSPACE/home/.z-data
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git docker extract z autoenv)
 
+AUTOENV_ENV_FILENAME=.autoenv
+
 # User configuration
 
 export PATH=$HOME/bin:/usr/local/bin:$PATH
