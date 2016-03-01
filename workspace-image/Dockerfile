@@ -8,6 +8,7 @@ RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/reposito
 
 RUN apk add --update \
 		bash \
+		bind-tools \
 		curl \
 		git \
 		grep \
