@@ -7,8 +7,10 @@ RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/reposito
  && echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
 
 RUN apk add --update \
+		bash \
 		curl \
 		git \
+		grep \
 		jq \
 		less \
 		nodejs \
