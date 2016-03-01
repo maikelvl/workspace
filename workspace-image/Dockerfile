@@ -81,6 +81,7 @@ COPY home-template /tmp/home-template
 COPY home-workspace-template /tmp/home-workspace-template
 COPY /get-docker-server-version /usr/bin/get-docker-server-version
 COPY /set-docker-client-version /usr/bin/set-docker-client-version
+COPY /autoenv-activate.sh /usr/local/opt/autoenv/activate.sh
 COPY entrypoint.sh /
 
 RUN date +%s > /.build-time
