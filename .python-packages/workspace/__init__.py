@@ -343,9 +343,10 @@ class Workspace(object):
     def state(self):
         cmd = ['docker', 'inspect', '--format="{{json .State}}"', 'workspace']
         response = self.command(cmd, stdout=False)
-        if not response:
+        try:
+            states = json.loads(response[0])
+        except:
             return 'not-created'
-        states = json.loads(response[0])
         if states is None:
             return 'stopped'
         if states.get('Running'):
