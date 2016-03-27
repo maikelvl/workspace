@@ -53,6 +53,7 @@ COPY /install-docker /usr/bin/install-docker
 RUN install-docker 1.7.1
 RUN install-docker 1.8.3
 RUN install-docker 1.9.1
+RUN install-docker 1.10.3
 
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
