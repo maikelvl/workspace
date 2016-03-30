@@ -10,9 +10,8 @@ class DockerMachine():
 
     def create(self, name, **kwargs):
 
-        flags = {}
         if kwargs.get('disk_size') and kwargs.get('disk_size') < 500:
-            flags['disk-size'] = kwargs.get('disk_size') * 1000
+            kwargs['disk-size'] = kwargs.get('disk_size') * 1000
 
         options = []
 
