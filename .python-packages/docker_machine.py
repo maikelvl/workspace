@@ -11,7 +11,7 @@ class DockerMachine():
     def create(self, name, **kwargs):
 
         if kwargs.get('disk_size') and kwargs.get('disk_size') < 500:
-            kwargs['disk-size'] = kwargs.get('disk_size') * 1000
+            kwargs['disk_size'] = kwargs.get('disk_size') * 1000
 
         options = []
 
@@ -35,7 +35,7 @@ class DockerMachine():
             options.append('--generic-ip-address={ip_address}'.format(**kwargs))
             options.append('--generic-ssh-port={ssh_port}'.format(**kwargs))
             options.append('--generic-ssh-key={ssh_key}'.format(**kwargs))
-        print(options)
+        
         self.execute(['create'] + options + [name])
         if kwargs.get('nfs'):
             self.enable_nfs(name)
