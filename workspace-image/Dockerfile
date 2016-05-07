@@ -2,14 +2,9 @@ FROM alpine:3.3
 
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
-RUN echo '@edge http://nl.alpinelinux.org/alpine/edge/main' >> /etc/apk/repositories \
- && echo '@community http://nl.alpinelinux.org/alpine/edge/community' >> /etc/apk/repositories \
- && echo '@testing http://nl.alpinelinux.org/alpine/edge/testing' >> /etc/apk/repositories
-
 RUN apk add --update \
 		bash \
 		bind-tools \
-		curl \
 		git \
 		grep \
 		jq \
@@ -29,16 +24,44 @@ RUN apk add --update \
 
 ENV PATH /usr/local/node/bin:$PATH
 
+ENV NGHTTP2_VERSION="1.10.0" \
+	CURL_VERSION="7.48.0"
+
+RUN build_pkgs="autoconf automake build-base file libtool openssl-dev" \
+ && apk add --update ${build_pkgs} \
+ && cd /tmp \
+ && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
+ && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
+ && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
+ && autoreconf -i \
+ && automake \
+ && autoconf \
+ && ./configure \
+ && make \
+ && make install \
+ && cd /tmp \
+ && wget http://curl.haxx.se/download/curl-${CURL_VERSION}.tar.bz2 \
+ && tar -xvjf curl-${CURL_VERSION}.tar.bz2 \
+ && cd /tmp/curl-${CURL_VERSION} \
+ && ./configure \
+  		--with-nghttp2=/usr/local \
+		--with-ssl \
+ && make \
+ && make install \
+ && apk del ${build_pkgs} \
+ && rm -rf /var/cache/apk/* /tmp/*
+
 RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
+ && cd /tmp \
  && curl \
-    --location \
-    --url https://github.com/git/git/archive/v$git_version.zip \
-    --output /tmp/git.zip \
-&& unzip -d /tmp/git /tmp/git.zip \
-&& mkdir -p /usr/share/perl5/site_perl \
-&& mv /tmp/git/$(ls /tmp/git)/perl/* /usr/share/perl5/site_perl/ \
-&& rm -rf /tmp/git /tmp/git.zip /usr/share/perl5/site_perl/Makefile* \
-&& cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm
+		--location \
+		--url https://github.com/git/git/archive/v$git_version.zip \
+		--output git.zip \
+ && unzip -d git git.zip \
+ && mkdir -p /usr/share/perl5/site_perl \
+ && mv git/$(ls git)/perl/* /usr/share/perl5/site_perl/ \
+ && rm -rf git git.zip /usr/share/perl5/site_perl/Makefile* \
+ && cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm
 
 RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
  && echo "latest: $latest" \
