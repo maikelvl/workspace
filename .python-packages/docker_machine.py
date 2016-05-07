@@ -72,7 +72,7 @@ class DockerMachine():
         return utils.local_command(command, stdout=stdout)
 
     def enable_nfs(self, name):
-        command = ['docker-machine-nfs', name, '--shared-folder={}'.format(environ.get('HOME')), '--force']
+        command = ['docker-machine-nfs', name, '--shared-folder={}'.format(environ.get('HOME')), '--force', '--mount-opts=noacl,async,nolock,vers=3,udp,noatime,actimeo=2']
         return utils.local_command(command, stdout=True)
 
 
