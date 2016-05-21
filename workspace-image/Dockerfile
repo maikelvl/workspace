@@ -26,12 +26,13 @@ RUN apk add --update \
 ENV PATH /usr/local/node/bin:$PATH
 
 ENV NGHTTP2_VERSION="1.10.0" \
-	CURL_VERSION="7.48.0"
+	CURL_VERSION="7.49.0"
 
-RUN build_pkgs="autoconf automake build-base file libtool openssl-dev" \
- && apk add --update ${build_pkgs} \
- && cd /tmp \
+RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
+ && wget https://dl.uxnr.de/mirror/curl/curl-${CURL_VERSION}.tar.bz2 \
+ && build_pkgs="autoconf automake build-base file libtool openssl-dev" \
+ && apk add --update ${build_pkgs} \
  && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
  && autoreconf -i \
@@ -41,7 +42,6 @@ RUN build_pkgs="autoconf automake build-base file libtool openssl-dev" \
  && make \
  && make install \
  && cd /tmp \
- && wget http://curl.haxx.se/download/curl-${CURL_VERSION}.tar.bz2 \
  && tar -xvjf curl-${CURL_VERSION}.tar.bz2 \
  && cd /tmp/curl-${CURL_VERSION} \
  && ./configure \
