@@ -336,7 +336,7 @@ class Workspace(object):
     def tag(self, origin, new_tag):
         if origin == new_tag:
             return
-        cmd = ['docker', 'tag', '--force', origin, new_tag]
+        cmd = ['docker', 'tag', origin, new_tag]
         self.command(cmd)
 
     @property
