@@ -18,6 +18,7 @@ RUN apk add --update \
 		tzdata \
 		unzip \
 		vim \
+		zip \
 		zsh \
  && rm -rf /var/cache/apk/* \
  && ln -sf python3 /usr/bin/python
