@@ -1,10 +1,8 @@
-/.data
-/.docker-images
-/.uninstall.sh
-/.vagrant
-/.vagrant.d
-/home
-/hosts
+/.data/
+/.docker-images/
+/home/
+/hosts/
+/settings.env
 *.log
 *.nfs*
 *.pyc

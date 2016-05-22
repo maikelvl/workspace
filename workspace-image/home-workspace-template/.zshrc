@@ -1,4 +1,4 @@
-/entrypoint.sh build-time
+build-time
 source $WORKSPACE/.zsh/zshrc-oh-my-zsh
 source $WORKSPACE/.zsh/zshrc-extra
 ZSH_CUSTOM=$WORKSPACE/home/zsh-custom

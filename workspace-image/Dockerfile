@@ -73,7 +73,7 @@ RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed
  && chmod +x /usr/bin/docker-machine \
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
-COPY /install-docker /usr/bin/install-docker
+COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 1.7.1
 RUN install-docker 1.8.3
 RUN install-docker 1.9.1
@@ -99,20 +99,19 @@ RUN rm /etc/motd \
  && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme
 
-ENV USER=user \
-	EDITOR=vim \
-	TIMEZONE=UTC \
-	SSH_KEY=.ssh/workspace_rsa
+ENV USER="user" \
+	EDITOR="vim" \
+	TIMEZONE="UTC"
 
 EXPOSE 22
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["start"]
 
 COPY home-template /tmp/home-template
 COPY home-workspace-template /tmp/home-workspace-template
-COPY /get-docker-server-version /usr/bin/get-docker-server-version
-COPY /set-docker-client-version /usr/bin/set-docker-client-version
-COPY /autoenv-activate.sh /usr/local/opt/autoenv/activate.sh
+COPY autoenv-activate.sh /usr/local/opt/autoenv/activate.sh
+COPY bin/* /usr/local/bin/
 COPY entrypoint.sh /
 
 RUN date +%s > /.build-time
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["start"]
