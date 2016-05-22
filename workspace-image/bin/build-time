@@ -1,0 +1,3 @@
+#!/bin/sh
+echo -n "Build time: "
+date -d @$(cat /.build-time)

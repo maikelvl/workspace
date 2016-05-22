@@ -1,11 +1,14 @@
 #!/bin/ash
 set -e
-if [ $DEBUG ]; then
-    set -x
-fi
+[ $DEBUG ] && set -x
 
-WORKSPACE=${WORKSPACE:$HOME/workspace}
+set -o allexport
+source $WORKSPACE_SETTINGS_FILE
+set +o allexport
+
 HOME=${HOME:-/Users/$USER}
+[ ! -d "$WORKSPACE" ] && echo 'Please set a valid WORKSPACE env' && exit 1
+[ "$WORKSPACE_SSH_KEY" == "" ] && echo 'Please set env WORKSPACE_SSH_KEY' && exit 1
 
 start() {
     _set_timezone
@@ -15,18 +18,6 @@ start() {
     _create_user
     set-docker-client-version
     /usr/sbin/sshd -D
-}
-
-build_time() {
-    echo -n "Build time: "
-    date -d @$(cat /.build-time)
-}
-
-help() {
-    echo "Workspace container commands"
-    echo "  start             Starts the SSH daemon"
-    echo "  version [args]    Show version info for given program or all"
-    echo "  help              Show this help"
 }
 
 _set_timezone() {
@@ -108,37 +99,17 @@ _create_user() {
     fi
 
     cd $HOME
-    ssh_dir="$(dirname $SSH_KEY)"
+    ssh_dir="$(dirname $WORKSPACE_SSH_KEY)"
     if [ ! -d "$ssh_dir" ];then
         mkdir -p -m 700 "$ssh_dir"
         chown $USER "$ssh_dir"
     fi
 
-    # Create a key to log in
-    if [ ! -f "$SSH_KEY" ];then
-        ssh-keygen -f "$SSH_KEY" -N '' -t rsa
-        cat "$SSH_KEY.pub" >> $HOME/.ssh/authorized_keys
-    fi
+    # Create a key to log in if not existing
+    [ ! -f "$WORKSPACE_SSH_KEY" ] && ssh-keygen -f "$WORKSPACE_SSH_KEY" -N '' -t rsa -C "$USER@workspace-host $(date)"
+
+    # Add the ssh key to the authorized keys if not present
+    grep -Fxq "$(cat $WORKSPACE_SSH_KEY.pub)" $HOME/.ssh/authorized_keys || cat $WORKSPACE_SSH_KEY.pub >> $HOME/.ssh/authorized_keys
 }
 
-cmd=${1}
-shift
-case $cmd in
-    start)
-        start
-        ;;
-    build-time)
-        build_time
-        ;;
-    version)
-        version
-        ;;
-    help)
-        help
-        ;;
-    *)
-        exec "$cmd $@"
-        ;;
-esac
-
-exit 0
+$@

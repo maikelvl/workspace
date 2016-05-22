@@ -2,6 +2,7 @@ from datetime import datetime
 import json
 import os
 import re
+import socket
 import subprocess
 from time import sleep
 
@@ -12,12 +13,29 @@ import docker_machine
 import ssh_utils
 import utils
 
+
 VERSION = '2.0.0'
-DEFAULT_HOST = os.environ.get('WORKSPACE_DEFAULT_HOST', 'default')
+
+SETTINGS = {
+    'WORKSPACE_HOST_NAME': 'default',
+    'WORKSPACE_HOST_SSH_PORT': 22,
+    'WORKSPACE_SSH_KEY': '{}/.ssh/workspace_rsa'.format(os.environ.get('HOME')),
+}
+
+SETTINGS_FILE = '{}/settings.env'.format(os.getcwd())
+WORKSPACE_IMAGE_DIR = '{}/workspace-image'.format(os.getcwd())
+
+try:
+    SETTINGS.update(utils.get_env_file_vars(SETTINGS_FILE))
+except IOError:
+    from shutil import copyfile
+    copyfile('{}/settings.env.example'.format(WORKSPACE_IMAGE_DIR), SETTINGS_FILE)
+    SETTINGS.update(utils.get_env_file_vars(SETTINGS_FILE))
+
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(version=VERSION, message='%(prog)s %(version)s')
-@click.option('--host', '-H', default=DEFAULT_HOST, help='Specify host [{}]'.format(DEFAULT_HOST))
+@click.option('--host', '-H', default=SETTINGS.get('WORKSPACE_HOST_NAME'), help='Specify host [{}]'.format(SETTINGS.get('WORKSPACE_HOST_NAME')))
 def cli(host):
     pass
 
@@ -218,16 +236,21 @@ class Workspace(object):
     def __init__(self, host):
         self.host = host
 
+    @property
     def identity_file(self):
-        return '{}/.ssh/workspace_rsa'.format(os.environ.get('HOME'))
+        return SETTINGS.get('WORKSPACE_SSH_KEY')
+
+    @property
+    def host_addr(self):
+        return socket.gethostbyname(socket.gethostname())
+
+    @property
+    def host_ssh_port(self):
+        return 22
 
     @property
     def config_file(self):
         return '{}/.workspace.json'.format(self.host.root)
-
-    @property
-    def image_dir(self):
-        return '{}/workspace-image'.format(self.cwd)
 
     @property
     def config(self):
@@ -314,7 +337,7 @@ class Workspace(object):
             'host-name': self.host.ip,
             'user': self.user,
             'port': str(self.ssh_port),
-            'identity-file': self.identity_file(),
+            'identity-file': self.identity_file,
         }
         return ssh_config
 
@@ -323,7 +346,7 @@ class Workspace(object):
         cmd = ['docker', 'build',
                 '--tag={}'.format(new_tag),
                 '--no-cache={}'.format(str(no_cache).lower()),
-                self.image_dir]
+                WORKSPACE_IMAGE_DIR]
         self.command(cmd)
         self.config['current-image-tag'] = new_tag
         self.tag_as_latest(new_tag)
@@ -394,12 +417,18 @@ class Workspace(object):
                 '--volume={0}:{0}'.format(os.environ.get('HOME')),
                 '--volume=/var/run/docker.sock:/var/run/docker.sock',
                 '--publish={}:22'.format(self.ssh_port),
+                '--env=DEBUG={}'.format(os.environ.get('DEBUG', '')),
                 '--env=USER={}'.format(self.user),
                 '--env=HOME={}'.format(os.environ.get('HOME')),
                 '--env=WORKSPACE={}'.format(self.cwd),
                 '--env=TIMEZONE={}'.format(self.timezone),
-                '--env=SSH_KEY={}'.format(self.identity_file()),
-                self.image_tag]
+                '--env=WORKSPACE_HOST_ADDR={}'.format(self.host_addr),
+                '--env=WORKSPACE_SETTINGS_FILE={}'.format(SETTINGS_FILE),
+              ] + [
+                '--env={}={}'.format(k, v) for k, v in SETTINGS.items()
+              ] + [
+                self.image_tag,
+              ]
         self.command(cmd)
 
     def remove(self):

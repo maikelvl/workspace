@@ -1,0 +1,22 @@
+#!/bin/sh
+set -e
+
+do_exit=
+[ "$WORKSPACE_SSH_KEY" == "" ] && echo "Please set env WORKSPACE_SSH_KEY" && do_exit=1
+[ "$WORKSPACE_HOST_SSH_PORT" == "" ] && echo "Please set env WORKSPACE_HOST_SSH_PORT" && do_exit=1
+[ "$USER" == "" ] && echo "Please set env USER" && do_exit=1
+[ "$WORKSPACE_HOST_ADDR" == "" ] && echo "Please set env WORKSPACE_HOST_ADDR" && do_exit=1
+[ "$1" == "" ] && echo "Please provide arguments" && do_exit=1
+[ $do_exit ] && exit 1
+
+ssh \
+    -i $WORKSPACE_SSH_KEY \
+    -o UserKnownHostsFile=/dev/null \
+    -o StrictHostKeyChecking=no \
+    -o PasswordAuthentication=no \
+    -o IdentitiesOnly=yes \
+    -o ConnectTimeout=1 \
+    -o LogLevel=FATAL \
+    -p $WORKSPACE_HOST_SSH_PORT \
+    $USER@$WORKSPACE_HOST_ADDR \
+    -C "cd $PWD && $@"
