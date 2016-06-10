@@ -11,6 +11,7 @@ $RECYCLE.BIN/
 .AppleDouble
 .DS_Store
 .idea/
+.svn/
 .LSOverride
 .nfs000*
 .Spotlight-V100
