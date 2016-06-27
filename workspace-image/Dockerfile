@@ -1,16 +1,18 @@
-FROM alpine:3.3
+FROM alpine:3.4
 
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
-RUN apk add --update \
+RUN apk --no-cache add \
 		bash \
 		bind-tools \
+		file \
 		git \
 		grep \
 		jq \
 		less \
 		nodejs \
 		openssh \
+		openssl \
 		perl \
 		python3-dev \
 		sudo \
@@ -20,7 +22,6 @@ RUN apk add --update \
 		vim \
 		zip \
 		zsh \
- && rm -rf /var/cache/apk/* \
  && ln -sf python3 /usr/bin/python
 
 ENV PATH /usr/local/node/bin:$PATH
@@ -31,8 +32,13 @@ ENV NGHTTP2_VERSION="1.10.0" \
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && wget https://dl.uxnr.de/mirror/curl/curl-${CURL_VERSION}.tar.bz2 \
- && build_pkgs="autoconf automake build-base file libtool openssl-dev" \
- && apk add --update ${build_pkgs} \
+ && apk add --no-cache --virtual build-packages \
+ 		autoconf \
+ 		automake \
+ 		build-base \
+ 		file \
+ 		libtool \
+ 		openssl-dev \
  && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
  && autoreconf -i \
@@ -49,8 +55,8 @@ RUN cd /tmp \
 		--with-ssl \
  && make \
  && make install \
- && apk del ${build_pkgs} \
- && rm -rf /var/cache/apk/* /tmp/*
+ && apk del build-packages \
+ && rm -rf /tmp/*
 
 RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
  && cd /tmp \
@@ -78,7 +84,7 @@ RUN install-docker 1.7.1
 RUN install-docker 1.8.3
 RUN install-docker 1.9.1
 RUN install-docker 1.10.3
-RUN install-docker 1.11.1
+RUN install-docker 1.11.2
 
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
