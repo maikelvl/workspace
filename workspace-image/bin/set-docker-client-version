@@ -1,11 +1,12 @@
 #!/bin/sh
+set -e
 [ $DEBUG ] && set -x
 docker_version="$1"
 if [ "$docker_version" == "" ];then
     docker_version="$(get-docker-server-version)"
 fi
 
-for binary in $(ls /usr/bin/docker-$docker_version* 2>/dev/null);do
+for binary in $(ls /usr/lib/docker-bins/docker-$docker_version* 2>/dev/null);do
     docker_binary="$binary"
 done
 
@@ -14,5 +15,5 @@ if [ "$docker_binary" == "" ];then
     exit 1
 fi
 
-export DOCKER_VERSION=${docker_binary:16}
-sudo ln -sf docker-$DOCKER_VERSION /usr/bin/docker
+export DOCKER_VERSION=${docker_binary:28}
+sudo ln -sf ../lib/docker-bins/docker-$DOCKER_VERSION /usr/bin/docker

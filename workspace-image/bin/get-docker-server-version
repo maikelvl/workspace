@@ -14,4 +14,4 @@ if [ "$response" == "" ];then
     exit 1
 fi
 
-echo $response | jq ".Version" -r
+echo "$response" | jq ".Version" -r
