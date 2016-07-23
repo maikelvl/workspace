@@ -3,6 +3,7 @@ FROM alpine:3.4
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
 RUN apk --no-cache add \
+		apache2-utils \
 		bash \
 		bind-tools \
 		file \
@@ -10,6 +11,7 @@ RUN apk --no-cache add \
 		grep \
 		jq \
 		less \
+		make \
 		nodejs \
 		openssh \
 		openssl \

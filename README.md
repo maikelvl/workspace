@@ -30,7 +30,7 @@ Add the new bin directory to your PATH by adding the following to your `~/.bash_
     export PATH="$HOME/workspace/bin:$PATH"
 
 The hosts are defined in `./hosts/`. You can create as many hosts as you want.
-Match each host to your preferences by editing its `env.json`.
+Match each host to your preferences by editing its `config.json`.
 
 ### Run the workspace
 Now, to SSH into the workspace open a new terminal window and run the following:
