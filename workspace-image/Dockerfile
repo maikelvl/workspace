@@ -81,6 +81,19 @@ RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed
  && chmod +x /usr/bin/docker-machine \
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
+ENV ETCD_VERSION="2.3.7"
+RUN cd /tmp \
+ && curl \
+ 		--location \
+		--url https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
+		--output etcd.tar.gz \
+ && tar xvzf etcd.tar.gz \
+ && mv etcd-v${ETCD_VERSION}-linux-amd64/etcd /usr/bin/ \
+ && mv etcd-v${ETCD_VERSION}-linux-amd64/etcdctl /usr/bin/ \
+ && rm -rf /tmp/* \
+ && ( [ $(stat -c %s /usr/bin/etcd) -gt 500 ] || exit 1 ) \
+ && ( [ $(stat -c %s /usr/bin/etcdctl) -gt 500 ] || exit 1 )
+
 COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 1.7.1
 RUN install-docker 1.8.3
