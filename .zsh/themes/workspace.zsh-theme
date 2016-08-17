@@ -15,9 +15,7 @@ function toggle_git_prompt() {
 function my_git_prompt() {
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
 
-  if [ $DISABLE_GIT_IN_PROMPT ];then
-    STATUS="-"
-  else
+  if [ ! $DISABLE_GIT_IN_PROMPT ];then
 
     INDEX=$(git status --porcelain 2> /dev/null)
     STATUS=""
@@ -51,8 +49,11 @@ function my_git_prompt() {
   if [[ -n $STATUS ]]; then
     STATUS=" $STATUS"
   fi
-
-  echo "$ZSH_THEME_GIT_PROMPT_PREFIX$(my_current_branch)$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
+  git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
+  if [ $DISABLE_GIT_IN_PROMPT ];then
+    git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED"
+  fi
+  echo "$git_prompt_prefix$(my_current_branch)$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
 
 function my_current_branch() {
@@ -69,7 +70,11 @@ function ssh_connection() {
 git_custom_status() {
   local cb=$(current_branch)
   if [ -n "$cb" ]; then
-    echo "$(parse_git_dirty)%{$fg_bold[yellow]%}$(work_in_progress)%{$reset_color%}$ZSH_THEME_GIT_PROMPT_PREFIX$(current_branch)$ZSH_THEME_GIT_PROMPT_SUFFIX"
+    git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
+    if [ $DISABLE_GIT_IN_PROMPT ];then
+      git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED"
+    fi
+    echo "$(parse_git_dirty)%{$fg_bold[red]%}$(work_in_progress)%{$reset_color%}$git_prompt_prefix$(current_branch)$ZSH_THEME_GIT_PROMPT_SUFFIX"
   fi
 }
 
@@ -95,6 +100,7 @@ PROMPT=$'$(_docker_host)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.
 
 ZSH_THEME_PROMPT_RETURNCODE_PREFIX="%{$fg_bold[red]%}"
 ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg_bold[yellow]%}"
+ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED=" %{$fg_bold[white]%}"
 ZSH_THEME_GIT_PROMPT_AHEAD="%{$fg_bold[magenta]%}↑"
 ZSH_THEME_GIT_PROMPT_STAGED="%{$fg_bold[green]%}●"
 ZSH_THEME_GIT_PROMPT_UNSTAGED="%{$fg_bold[blue]%}●"
