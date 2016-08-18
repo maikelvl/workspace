@@ -15,7 +15,8 @@ function toggle_git_prompt() {
 function my_git_prompt() {
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
 
-  if [ ! $DISABLE_GIT_IN_PROMPT ];then
+  git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
+  if [ ! $DISABLE_GIT_IN_PROMPT ] && [ ! -e $PWD/.disable-git-prompt ];then
 
     INDEX=$(git status --porcelain 2> /dev/null)
     STATUS=""
@@ -44,15 +45,14 @@ function my_git_prompt() {
     if $(echo "$INDEX" | grep -E -e '^(A[AU]|D[DU]|U[ADU]) ' &> /dev/null); then
       STATUS="$STATUS$ZSH_THEME_GIT_PROMPT_UNMERGED"
     fi
+  else
+    git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED"
   fi
 
   if [[ -n $STATUS ]]; then
     STATUS=" $STATUS"
   fi
-  git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
-  if [ $DISABLE_GIT_IN_PROMPT ];then
-    git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED"
-  fi
+
   echo "$git_prompt_prefix$(my_current_branch)$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
 
@@ -71,7 +71,7 @@ git_custom_status() {
   local cb=$(current_branch)
   if [ -n "$cb" ]; then
     git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
-    if [ $DISABLE_GIT_IN_PROMPT ];then
+    if [ $DISABLE_GIT_IN_PROMT ] || [ -e $PWD/.disable-git-prompt ];then
       git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX_DISABLED"
     fi
     echo "$(parse_git_dirty)%{$fg_bold[red]%}$(work_in_progress)%{$reset_color%}$git_prompt_prefix$(current_branch)$ZSH_THEME_GIT_PROMPT_SUFFIX"
