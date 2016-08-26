@@ -139,6 +139,18 @@ RUN latest="$(curl --silent --url https://github.com/kubernetes/kubernetes/relea
  && chmod +x /usr/bin/kubectl \
  && ( [ $(stat -c %s /usr/bin/kubectl) -gt 500 ] || exit 1 )
 
+RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
+ && echo "latest: $latest" \
+ && cd /tmp \
+ && curl \
+                --location \
+		--url https://github.com/digitalocean/doctl/releases/download/v$latest/doctl-$latest-linux-amd64.tar.gz \
+		--output doctl.tar.gz \
+ && tar xvzf doctl.tar.gz \
+ && mv doctl /usr/bin/ \
+ && rm -rf /tmp/* \
+ && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
+
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
  && ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N "" -t rsa \
