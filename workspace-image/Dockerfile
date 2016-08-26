@@ -107,6 +107,19 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  		cookiecutter \
  		docker-compose
 
+RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
+ && echo "latest: $latest" \
+ && apk --no-cache add --virtual build-deps \
+        go \
+ && git clone https://github.com/digitalocean/doctl.git /go/src/github.com/digitalocean/doctl \
+ && git --git-dir /go/src/github.com/digitalocean/doctl/.git checkout v${latest} \
+ && export GOPATH="/go" \
+ && go install github.com/digitalocean/doctl/cmd/doctl \
+ && mv /go/bin/doctl /usr/bin/ \
+ && apk del build-deps \
+ && rm -rf /go \
+ && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
+
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
  && ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N "" -t rsa \
