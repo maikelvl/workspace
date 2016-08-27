@@ -120,6 +120,14 @@ RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases
  && rm -rf /go \
  && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
 
+RUN latest="$(curl --silent --url https://github.com/kubernetes/kubernetes/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
+ && echo "latest: $latest" \
+ && curl \
+        --url https://storage.googleapis.com/kubernetes-release/release/v${latest}/bin/linux/amd64/kubectl \
+        --output /usr/bin/kubectl \
+ && chmod +x /usr/bin/kubectl \
+ && ( [ $(stat -c %s /usr/bin/kubectl) -gt 500 ] || exit 1 )
+
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
  && ssh-keygen -f /etc/ssh/ssh_host_rsa_key -N "" -t rsa \
