@@ -3,44 +3,43 @@ FROM alpine:3.4
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
 RUN apk --no-cache add \
-		apache2-utils \
-		bash \
-		bind-tools \
-		file \
-		git \
-		grep \
-		jq \
-		less \
-		make \
-		nodejs \
-		openssh \
-		openssl \
-		perl \
-		python3-dev \
-		sudo \
-		tree \
-		tzdata \
-		unzip \
-		vim \
-		zip \
-		zsh \
+        apache2-utils \
+        bash \
+        bind-tools \
+        file \
+        git \
+        grep \
+        jq \
+        less \
+        make \
+        nodejs \
+        openssh \
+        openssl \
+        perl \
+        python3-dev \
+        sudo \
+        tree \
+        tzdata \
+        unzip \
+        vim \
+        zip \
+        zsh \
  && ln -sf python3 /usr/bin/python
 
-ENV PATH /usr/local/node/bin:$PATH
-
-ENV NGHTTP2_VERSION="1.10.0" \
-	CURL_VERSION="7.49.0"
+ENV PATH="/usr/local/node/bin:$PATH" \
+    NGHTTP2_VERSION="1.10.0" \
+    CURL_VERSION="7.49.0"
 
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && wget https://dl.uxnr.de/mirror/curl/curl-${CURL_VERSION}.tar.bz2 \
  && apk add --no-cache --virtual build-packages \
- 		autoconf \
- 		automake \
- 		build-base \
- 		file \
- 		libtool \
- 		openssl-dev \
+        autoconf \
+        automake \
+        build-base \
+        file \
+        libtool \
+        openssl-dev \
  && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
  && autoreconf -i \
@@ -53,8 +52,8 @@ RUN cd /tmp \
  && tar -xvjf curl-${CURL_VERSION}.tar.bz2 \
  && cd /tmp/curl-${CURL_VERSION} \
  && ./configure \
-  		--with-nghttp2=/usr/local \
-		--with-ssl \
+        --with-nghttp2=/usr/local \
+        --with-ssl \
  && make \
  && make install \
  && apk del build-packages \
@@ -63,9 +62,9 @@ RUN cd /tmp \
 RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
  && cd /tmp \
  && curl \
-		--location \
-		--url https://github.com/git/git/archive/v$git_version.zip \
-		--output git.zip \
+        --location \
+        --url https://github.com/git/git/archive/v$git_version.zip \
+        --output git.zip \
  && unzip -d git git.zip \
  && mkdir -p /usr/share/perl5/site_perl \
  && mv git/$(ls git)/perl/* /usr/share/perl5/site_perl/ \
@@ -75,18 +74,18 @@ RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
 RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
  && echo "latest: $latest" \
  && curl \
- 		--location \
-		--url https://github.com/docker/machine/releases/download/$latest/docker-machine-$(uname -s)-$(uname -m) \
-		--output /usr/bin/docker-machine \
+        --location \
+        --url https://github.com/docker/machine/releases/download/$latest/docker-machine-$(uname -s)-$(uname -m) \
+        --output /usr/bin/docker-machine \
  && chmod +x /usr/bin/docker-machine \
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
 ENV ETCD_VERSION="2.3.7"
 RUN cd /tmp \
  && curl \
- 		--location \
-		--url https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
-		--output etcd.tar.gz \
+        --location \
+        --url https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
+        --output etcd.tar.gz \
  && tar xvzf etcd.tar.gz \
  && mv etcd-v${ETCD_VERSION}-linux-amd64/etcd /usr/bin/ \
  && mv etcd-v${ETCD_VERSION}-linux-amd64/etcdctl /usr/bin/ \
@@ -103,9 +102,9 @@ RUN install-docker 1.12.0
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
  && pip install --no-cache-dir \
- 		awscli \
- 		cookiecutter \
- 		docker-compose
+        awscli \
+        cookiecutter \
+        docker-compose
 
 RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
  && echo "latest: $latest" \
@@ -141,8 +140,8 @@ RUN rm /etc/motd \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme
 
 ENV USER="user" \
-	EDITOR="vim" \
-	TIMEZONE="UTC"
+    EDITOR="vim" \
+    TIMEZONE="UTC"
 
 EXPOSE 22
 
