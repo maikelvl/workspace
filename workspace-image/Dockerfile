@@ -119,12 +119,14 @@ RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases
  && rm -rf /go \
  && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
 
-RUN latest="$(curl --silent --url https://github.com/hashicorp/terraform/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
- && echo "latest: $latest" \
+ENV TERRAFORM_VERSION="0.7.7"
+RUN latest="$(curl --silent --url https://github.com/hashicorp/terraform/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
+ && echo "TERRAFORM_VERSION: $TERRAFORM_VERSION" \
+ && echo "LATEST: $latest" \
  && cd /tmp \
  && curl \
         --location \
-        --url https://releases.hashicorp.com/terraform/${latest}/terraform_${latest}_linux_amd64.zip \
+        --url https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
         --output terraform.zip \
  && unzip terraform.zip \
  && mv terraform /usr/bin/ \
