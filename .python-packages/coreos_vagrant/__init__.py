@@ -226,12 +226,12 @@ def get_host_config(host_dir):
 
 
 class Host(base_host.BaseHost):
-    
+
     _status = None
     _vagrant = None
     fetch = False
     yes_to_all = False
-    
+
     version = VERSION
 
     @property
@@ -252,7 +252,7 @@ class Host(base_host.BaseHost):
         ip = self.ssh_config.get('host-name')
         if ip and ip != '127.0.0.1':
             return ip
-        return super().ip
+        return super(Host, self).ip
 
     def up(self):
         try:
@@ -321,10 +321,10 @@ class Host(base_host.BaseHost):
                     ssh_port=self.ssh_config['port'],
                     ssh_key=self.ssh_config['identity-file'])
         else:
-            self.remove_data()            
+            self.remove_data()
             docker_machine.remove(self.name)
         self.save()
-        
+
     @property
     def state(self):
         return self.status.get('state')

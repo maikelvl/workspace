@@ -19,7 +19,7 @@ docker_connect() {
         export DOCKER_MACHINE_NAME=
         eval $(docker-machine env $1)
     fi
-    
+
     if [ $2 ];then
         export DOCKER_HOST=tcp://$2
     fi
