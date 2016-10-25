@@ -94,10 +94,9 @@ RUN cd /tmp \
  && ( [ $(stat -c %s /usr/bin/etcdctl) -gt 500 ] || exit 1 )
 
 COPY bin/install-docker /usr/local/bin/install-docker
-RUN install-docker 1.9.1
 RUN install-docker 1.10.3
 RUN install-docker 1.11.2
-RUN install-docker 1.12.1
+RUN install-docker 1.12.2
 
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
@@ -145,9 +144,9 @@ RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases
  && echo "latest: $latest" \
  && cd /tmp \
  && curl \
-                --location \
-		--url https://github.com/digitalocean/doctl/releases/download/v$latest/doctl-$latest-linux-amd64.tar.gz \
-		--output doctl.tar.gz \
+        --location \
+        --url https://github.com/digitalocean/doctl/releases/download/v$latest/doctl-$latest-linux-amd64.tar.gz \
+        --output doctl.tar.gz \
  && tar xvzf doctl.tar.gz \
  && mv doctl /usr/bin/ \
  && rm -rf /tmp/* \
