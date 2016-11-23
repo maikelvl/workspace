@@ -1,4 +1,4 @@
-#/bin/ash
+#!/bin/sh
 set -e
 
 if [ ! $1 ];then
@@ -18,11 +18,12 @@ fi
 tar -zxf ./docker-$1.tgz
 rm docker-$1.tgz
 mkdir -p /usr/lib/docker-bins
+version=$(echo "$1" | sed -E 's/(\d+\.\d+).*/\1/')
 if [ -f ./docker/docker ];then
-    mv ./docker/docker /usr/lib/docker-bins/docker-$1
+    mv ./docker/docker /usr/lib/docker-bins/docker-$version
 else
-    mv -f usr/local/bin/docker /usr/lib/docker-bins/docker-$1
+    mv -f usr/local/bin/docker /usr/lib/docker-bins/docker-$version
     rm -rf usr
 fi
-chmod +x /usr/lib/docker-bins/docker-$1
-/usr/lib/docker-bins/docker-$1 --version
+chmod +x /usr/lib/docker-bins/docker-$version
+/usr/lib/docker-bins/docker-$version --version

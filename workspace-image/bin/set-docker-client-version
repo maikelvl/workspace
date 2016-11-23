@@ -4,6 +4,10 @@ set -e
 docker_version="$1"
 if [ "$docker_version" == "" ];then
     docker_version="$(get-docker-server-version)"
+    if [ "$docker_version" == "" ] || [ "$docker_version" == "null" ];then
+        echo "Could not fetch Docker server version."
+        exit 1
+    fi
 fi
 
 for binary in $(ls /usr/lib/docker-bins/docker-$docker_version* 2>/dev/null);do
