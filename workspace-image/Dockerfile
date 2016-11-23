@@ -140,6 +140,18 @@ RUN latest="$(curl --silent --url https://github.com/kubernetes/kubernetes/relea
  && chmod +x /usr/bin/kubectl \
  && ( [ $(stat -c %s /usr/bin/kubectl) -gt 500 ] || exit 1 )
 
+ENV KUBE_AWS_VERSION="0.9.1-rc.5"
+RUN curl \
+        --location \
+        --url https://github.com/coreos/kube-aws/releases/download/v${KUBE_AWS_VERSION}/kube-aws-linux-amd64.tar.gz \
+        --output /tmp/kube-aws-linux-amd64.tar.gz \
+ && tar xvzf /tmp/kube-aws-linux-amd64.tar.gz \
+ && mv linux-amd64/kube-aws /usr/bin/ \
+ && rm -rf \
+    /tmp/kube-aws-linux-amd64.tar.gz \
+    ./kube-aws-linux-amd64 \
+ && ( [ $(stat -c %s /usr/bin/kube-aws) -gt 500 ] || exit 1 )
+
 RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
  && echo "latest: $latest" \
  && cd /tmp \
