@@ -39,6 +39,13 @@ def config(host_dir):
     return _config
 
 
+def ping(ip):
+    response = subprocess.Popen(
+        ['ping', '-c1', '-W100', ip],
+        stdout=subprocess.PIPE).stdout.read()
+    return r'100.0% packet loss' not in response
+
+
 class HostDownException(Exception):
     pass
 
@@ -59,20 +66,15 @@ class BaseHost(object):
         utils.log('IP-addresses: '+', '.join(ip_list))
         for ip in ip_list:
             utils.log('Pinging {} ({})'.format(self.name, ip))
-            response = subprocess.Popen(
-                ['ping', '-c1', '-W100', ip],
-                stdout=subprocess.PIPE).stdout.read()
-            if r'100.0% packet loss' not in response:
+            if ping(ip):
                 utils.log('Ping successful')
-                return
+                return ip
+            utils.log('Ping unsuccessful')
         raise HostDownException
 
     @property
     def ip(self):
-        ip_list = self.ip_list
-        if ip_list:
-            return ip_list[0]
-        raise base_host.HostDownException
+        return self.ping()
 
     def command(self, command, stdout=False):
         self.ping()

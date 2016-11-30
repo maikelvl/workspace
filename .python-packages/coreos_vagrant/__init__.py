@@ -185,7 +185,6 @@ def ip(ctx, instance, fetch, force):
     host.config = get_host_config(name)
     host.fetch = fetch
     try:
-        host.ping()
         click.echo(host.ip)
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
