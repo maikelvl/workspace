@@ -140,7 +140,7 @@ RUN latest="$(curl --silent --url https://github.com/kubernetes/kubernetes/relea
  && chmod +x /usr/bin/kubectl \
  && ( [ $(stat -c %s /usr/bin/kubectl) -gt 500 ] || exit 1 )
 
-ENV KUBE_AWS_VERSION="0.9.1-rc.5"
+ENV KUBE_AWS_VERSION="0.9.1"
 RUN curl \
         --location \
         --url https://github.com/coreos/kube-aws/releases/download/v${KUBE_AWS_VERSION}/kube-aws-linux-amd64.tar.gz \
