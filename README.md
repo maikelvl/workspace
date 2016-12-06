@@ -51,22 +51,22 @@ Now, to SSH into the workspace open a new terminal window and run the following:
     workspace ssh
 
 The following will happen:
-- A Docker machine named 'default' will be created
-- The workspace image will be build using `./workspace-image/Dockerfile`
-- The workspace container will be started running a SSH daemon.
-- You will be logged in to the container
+- Create a Docker machine named 'default'
+- Building the workspace from the `./workspace-image/Dockerfile`
+- Running the build workspace image which main process is a SSH daemon.
+- SSH into the workspace
 
-Now you will see your fresh workspace with a lot of developer tools.
+Now you will see your fresh workspace which is configured.
 
 To run the workspace on the CoreOS host run the following:
 
     workspace -H coreos-01 ssh
 
-You can also set the default host by setting the environment variable WORKSPACE_DEFAULT_HOST: `export WORKSPACE_DEFAULT_HOST=coreos-01`
+You can also set the environment variable WORKSPACE_DEFAULT_HOST: `export WORKSPACE_DEFAULT_HOST=coreos-01`
 
 
 ### Install extra software
-If you’ve got your own software you wish to have in your workspace, just modify the `./workspace-image/Dockerfile` and run the following:
+If you’ve got your own software you wish to have in your workspace, just modify the `./workspace-image/Dockerfile` and run the following in your Mac terminal:
 
 	workspace ssh -R
 

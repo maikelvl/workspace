@@ -11,6 +11,7 @@ import click
 import ssh_utils
 import utils
 
+
 VERSION = '2.0.0'
 
 host_name = 'docker-machine-01'
