@@ -35,7 +35,7 @@ class DockerMachine():
             options.append('--generic-ip-address={ip_address}'.format(**kwargs))
             options.append('--generic-ssh-port={ssh_port}'.format(**kwargs))
             options.append('--generic-ssh-key={ssh_key}'.format(**kwargs))
-        
+
         self.execute(['create'] + options + [name])
         if kwargs.get('nfs'):
             self.enable_nfs(name)
@@ -77,7 +77,7 @@ class DockerMachine():
 
 
 class Host(base_host.BaseHost):
-    
+
     _docker_machine = None
 
     @property
@@ -94,7 +94,7 @@ class Host(base_host.BaseHost):
                 driver=self.config.get('provider').replace('-', ''), cpu_count=self.config.get('cpus'),
                 disk_size=self.config.get('disk'), memory_size=self.config.get('memory'),
                 nfs=self.config.get('nfs'))
-    
+
     @property
     def ip_list(self):
         return self.docker_machine.ip_list(self.name)

@@ -1,0 +1,10 @@
+{
+    "host-type": "corectl",
+    "timezone": "Europe/Amsterdam",
+    "coreos-release-channel": "beta",
+    "coreos-version": "latest",
+    "memory": 2048,
+    "cpus": 2,
+    "disk": 40,
+    "shared-homedir": true
+}

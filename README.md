@@ -8,14 +8,27 @@ The usual development machine has all kinds of software installed on the main op
 
 ### Prerequisites
 
-- [Docker Machine](https://docs.docker.com/machine/install-machine/)
-- [Vagrant](https://www.vagrantup.com/downloads.html) (if you want to use CoreOS)
-    - The Vagrant triggers plugin: `vagrant plugin install vagrant-triggers`
-- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) and/or VMware Fusion ([6.0.6](https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.6-2684343.dmg), [7.1.3](https://download3.vmware.com/software/fusion/file/VMware-Fusion-7.1.3-3204469.dmg), [8.0.2](https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dmg))
+|                    | CoreOS         | Boot2Docker         |
+| ------------------ | :-------------:|:-------------------:|
+| [xhyve][1]         | [corectl][2]   | *not yet supported* |
+| [Virtualbox][4]    | [Vagrant][3]*  | [Docker Machine][5] |
+| [VMware Fusion][6] | [Vagrant][3]** | [Docker Machine][5] |
 
-If you want Vagrant combined with VMware Fusion you also need additional
-- The Vagrant VMware Fusion plugin: `vagrant plugin install vagrant-vmware-fusion`
-- The Vagrant VMware Fusion license: `vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic`
+[1]: https://github.com/mist64/xhyve
+[2]: https://github.com/TheNewNormal/corectl.app
+[3]: https://www.vagrantup.com/downloads.html
+[4]: https://www.virtualbox.org/wiki/Downloads
+[5]: https://docs.docker.com/machine/install-machine/
+[6]: https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dmg
+
+\* Also install the Vagrant triggers plugin:
+
+    vagrant plugin install vagrant-triggers
+
+\** If you want Vagrant combined with VMware Fusion you also need the VMware plugin and a Vagrant VMware Fusion license:
+   
+    vagrant plugin install vagrant-vmware-fusion
+    vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic
 
 ## Workspace installation
 
@@ -38,22 +51,22 @@ Now, to SSH into the workspace open a new terminal window and run the following:
     workspace ssh
 
 The following will happen:
-- Create a Docker machine named 'default'
-- Building the workspace from the `./workspace-image/Dockerfile`
-- Running the build workspace image which main process is a SSH daemon.
-- SSH into the workspace
+- A Docker machine named 'default' will be created
+- The workspace image will be build using `./workspace-image/Dockerfile`
+- The workspace container will be started running a SSH daemon.
+- You will be logged in to the container
 
-Now you will see your fresh workspace which is configured.
+Now you will see your fresh workspace with a lot of developer tools.
 
 To run the workspace on the CoreOS host run the following:
 
     workspace -H coreos-01 ssh
 
-You can also set the environment variable WORKSPACE_DEFAULT_HOST: `export WORKSPACE_DEFAULT_HOST=coreos-01`
+You can also set the default host by setting the environment variable WORKSPACE_DEFAULT_HOST: `export WORKSPACE_DEFAULT_HOST=coreos-01`
 
 
 ### Install extra software
-If you’ve got your own software you wish to have in your workspace, just modify the `./workspace-image/Dockerfile` and run the following in your Mac terminal:
+If you’ve got your own software you wish to have in your workspace, just modify the `./workspace-image/Dockerfile` and run the following:
 
 	workspace ssh -R
 
