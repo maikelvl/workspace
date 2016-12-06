@@ -59,6 +59,7 @@ _prepare_zsh() {
 _create_home_directory() {
     if [ ! -d $WORKSPACE/home/ ];then
         cp -r /tmp/home-workspace-template $WORKSPACE/home
+        chown -R $USER $WORKSPACE/home
     fi
 
     for file in `find /tmp/home-template/`;do
