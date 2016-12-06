@@ -78,7 +78,6 @@ _create_home_directory() {
 
 _create_user() {
     if ! id -u "$USER" >/dev/null 2>&1; then
-        
         uid=$(ls $WORKSPACE -ld | awk '{print $3}')
         if [ "$uid" == "root" ];then
             adduser $USER -D -h $HOME -s /bin/zsh
@@ -106,7 +105,7 @@ _create_user() {
     fi
 
     # Create a key to log in if not existing
-    [ ! -f "$WORKSPACE_SSH_KEY" ] && ssh-keygen -f "$WORKSPACE_SSH_KEY" -N '' -t rsa -C "$USER@workspace-host $(date)"
+    [ ! -f "$WORKSPACE_SSH_KEY" ] && su -c "ssh-keygen -f '$WORKSPACE_SSH_KEY' -N '' -t rsa -C '$USER@workspace-host $(date)'" $USER
 
     # Add the ssh key to the authorized keys if not present
     grep -Fxq "$(cat $WORKSPACE_SSH_KEY.pub)" $HOME/.ssh/authorized_keys || cat $WORKSPACE_SSH_KEY.pub >> $HOME/.ssh/authorized_keys
