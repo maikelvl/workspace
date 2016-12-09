@@ -176,6 +176,13 @@ RUN rm /etc/motd \
  && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme
 
+RUN git clone https://github.com/tj/git-extras.git -b 4.2.0 \
+ && cd git-extras \
+ && make install \
+ && cp -f man/git-*.1 /usr/local/share/man/man1 \
+ && cp -f etc/git-extras-completion.zsh /var/lib/oh-my-zsh/plugins/git-extras/git-extras.plugin.zsh \
+ && rm -rf ../git-extras
+
 ENV USER="user" \
     EDITOR="vim" \
     TIMEZONE="UTC"

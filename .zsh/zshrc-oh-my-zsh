@@ -51,7 +51,7 @@ export _Z_DATA=$WORKSPACE/home/.z-data
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker extract z autoenv)
+plugins=(git git-extras docker extract z autoenv)
 
 AUTOENV_ENV_FILENAME=.autoenv
 
