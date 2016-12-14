@@ -24,7 +24,10 @@ RUN apk --no-cache add \
         vim \
         zip \
         zsh \
- && ln -sf python3 /usr/bin/python
+ && ln -sf python3 /usr/bin/python \
+ && rm -rf \
+        /usr/lib/**/*.pyc \
+        /usr/lib/**/__pycache__
 
 ENV PATH="/usr/local/node/bin:$PATH" \
     NGHTTP2_VERSION="1.10.0" \
