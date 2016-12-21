@@ -119,11 +119,12 @@ def build(ctx, no_cache, force, context=None):
 
 @cli.command('ssh', short_help='SSH into the workspace container')
 @click.pass_context
-@click.option('--command', '-c', default=None, help='Run a one-off commmand via SSH')
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace')
 @click.option('--rebuild', '-R', is_flag=True, help='Rebuild the workspace')
-def ssh(ctx, command, force, recreate, rebuild, context=None):
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def ssh(ctx, force, recreate, rebuild, command=False, cmd=None, context=None):
     if context is None:
         context = ctx
     host = get_host(context.parent.params.get('host'))
@@ -134,8 +135,8 @@ def ssh(ctx, command, force, recreate, rebuild, context=None):
             recreate = True
         if recreate:
             workspace.recreate()
-        sleep(1)
-        workspace.ssh(command=command)
+            sleep(1)
+        workspace.ssh(command=cmd)
         return
     except base_host.HostDownException:
         if not confirm_host_up(force=force, host=host):
@@ -144,7 +145,7 @@ def ssh(ctx, command, force, recreate, rebuild, context=None):
         workspace.up()
     except ssh_utils.SshException as e:
         exit(e.returncode)
-    ctx.invoke(ssh, command=command, force=force, recreate=recreate, rebuild=rebuild, context=context)
+    ctx.invoke(ssh, force=force, recreate=recreate, rebuild=rebuild, command=command, cmd=cmd, context=context)
 
 
 @cli.command('ssh-config', short_help='Print the SSH config (equivalent of `vagrant ssh-config`)')

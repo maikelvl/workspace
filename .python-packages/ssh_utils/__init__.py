@@ -80,8 +80,8 @@ def ssh_command(ssh_config, command=None):
     ssh_command.append('{user}@{host-name}'.format(**ssh_config))
 
     if command is not None:
-        ssh_command.append('-C')
-        ssh_command.append(command)
+        ssh_command.append('-t')
+        ssh_command += command
 
     return ssh_command
 

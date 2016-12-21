@@ -78,7 +78,7 @@ class BaseHost(object):
 
     def command(self, command, stdout=False):
         self.ping()
-        return self.ssh(command=' '.join(command), stdout=stdout)
+        return self.ssh(command=command, stdout=stdout)
 
     def ssh(self, command=None, stdout=False):
         ssh_config = self.ssh_config
