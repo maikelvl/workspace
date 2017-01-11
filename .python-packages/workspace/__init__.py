@@ -175,10 +175,11 @@ def ssh_config(ctx, force, recreate, context=None):
 
 @cli.command('ssh-command', short_help='Print the SSH command to the workspace container')
 @click.pass_context
-@click.option('--command', '-c', default=None, help='Run a one-off commmand via ssh')
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
-def ssh_command(ctx, command, force, recreate, context=None):
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def ssh_command(ctx, command, force, recreate, cmd=None, context=None):
     if context is None:
         context = ctx
     host = utils.get_host(context.parent.params.get('host'))
@@ -186,14 +187,14 @@ def ssh_command(ctx, command, force, recreate, context=None):
     try:
         if recreate:
             workspace.recreate()
-        click.echo(' '.join(workspace.ssh_command(command)))
+        click.echo(' '.join(workspace.ssh_command(cmd)))
         return
     except base_host.HostDownException:
         if not utils.confirm_host_up(force=force, host=host):
             return
     except WorkspaceDownException:
         workspace.up()
-    ctx.invoke(ssh, command=command, force=force, recreate=recreate, context=context)
+    ctx.invoke(ssh, command=command, force=force, recreate=recreate, cmd=cmd, context=context)
 
 
 @cli.group('host')
@@ -203,11 +204,12 @@ def host():
 
 @host.command('ssh', short_help='SSH into the workspace\'s host')
 @click.pass_context
-@click.option('--command', '-c', default=None, help='Run a one-off commmand via SSH')
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
 @click.option('--restart', is_flag=True, help='Reload the instance')
 @click.option('--recreate', is_flag=True, help='Recreate the instance')
-def host_ssh(ctx, command, force, restart, recreate, context=None):
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def host_ssh(ctx, command, force, restart, recreate, cmd=None, context=None):
     if context is None:
         context = ctx
     host_name = context.parent.parent.params.get('host')
@@ -222,13 +224,51 @@ def host_ssh(ctx, command, force, restart, recreate, context=None):
             host.recreate()
         elif restart:
             host.restart()
-        result = host.ssh(command, stdout=True)
+        result = host.ssh(command=cmd, stdout=True)
         if result is not None:
             click.echo(''.join(result))
     except base_host.HostDownException:
         if not utils.confirm_host_up(force=force, host=host):
             return
-        ctx.invoke(host_ssh, command=command, force=True, restart=restart, recreate=recreate, context=context)
+        ctx.invoke(host_ssh, command=command, force=True, restart=restart, recreate=recreate, cmd=cmd, context=context)
+
+
+@host.command('ssh-command', short_help='Print the SSH command to the host')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not argue')
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def ssh_command(ctx, command, force, cmd=None, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        click.echo(' '.join(host.ssh_command(command=cmd)))
+        return
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(ssh, command=command, force=force, cmd=cmd, context=context)
+
+
+@host.command('ssh-config', short_help='Print the SSH config')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not argue')
+def ssh_config(ctx, force, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        click.echo(host.flat_ssh_config)
+        return
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(ssh_config, force=force, context=context)
 
 
 @host.command('env', short_help='Fetch the Docker engine variables from the workspace\'s host. usage: eval $(workspace host docker-env)')
@@ -389,8 +429,6 @@ class Workspace(object):
                 raise e
 
     def ssh_command(self, command=None):
-        if command is not None:
-            utils.log('SSH: ' + command)
         return ssh_utils.ssh_command(ssh_config=self.ssh_config,
             command=command)
 

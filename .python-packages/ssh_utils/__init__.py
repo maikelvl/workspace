@@ -4,7 +4,7 @@ import os
 import subprocess
 import sys
 
-from utils import local_command
+from utils import local_command, log
 
 
 @contextmanager
@@ -85,14 +85,19 @@ def ssh_command(ssh_config, command=None):
 
     ssh_command.append('{user}@{host-name}'.format(**ssh_config))
 
-    if command is not None:
+    if command:
         ssh_command.append('-t')
         ssh_command += command
 
     return ssh_command
 
 def ssh(ssh_config, command=None, stdout=False):
+
     os.environ['TERM_PWD'] = os.environ.get('PWD')
+    if command:
+        log('SSH {}:{} -> {}'.format(ssh_config['user'], ssh_config['host'], ' '.join(command)))
+    else:
+        log('SSH {}:{}'.format(ssh_config['user'], ssh_config['host']))
     cmd = ssh_command(ssh_config, command)
     try:
         if command is None:

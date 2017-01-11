@@ -77,12 +77,20 @@ class BaseHost(object):
         self.ping()
         return self.ssh(command=command, stdout=stdout)
 
+    @property
+    def flat_ssh_config(self):
+        return ssh_utils.flat_ssh_config(ssh_config=self.ssh_config)
+
     def ssh(self, command=None, stdout=False):
         ssh_config = self.ssh_config
         try:
             return ssh_utils.ssh(ssh_config=ssh_config, command=command, stdout=stdout)
         except ssh_utils.SshException as e:
             exit()
+
+    def ssh_command(self, command=None):
+        return ssh_utils.ssh_command(ssh_config=self.ssh_config,
+            command=command)
 
     def scp_from(self, from_file, to_file):
         return ssh_utils.scp(ssh_config=self.ssh_config, from_file=from_file, to_file=to_file, from_remote=True)
