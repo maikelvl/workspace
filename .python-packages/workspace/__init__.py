@@ -198,6 +198,7 @@ def ssh_command(ctx, command, force, recreate, cmd=None, context=None):
 
 
 @cli.group('host')
+@click.version_option(version=VERSION, message='%(prog)s %(version)s')
 def host():
     pass
 

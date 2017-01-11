@@ -107,6 +107,7 @@ class Host(base_host.BaseHost):
     state_file = '.state.toml'
     disk_path = 'data.img'
     cloud_config_file = 'cloud-config.yml'
+    version = VERSION
 
     @property
     def corectl(self):
