@@ -13,8 +13,8 @@ HOME=${HOME:-/Users/$USER}
 start() {
     _set_timezone
     _ensure_workspace_git_folder
-    _prepare_zsh
     _create_home_directory
+    _prepare_zsh
     _create_user
     set-docker-client-version
     /usr/sbin/sshd -D
@@ -45,7 +45,6 @@ _ensure_workspace_git_folder() {
 }
 
 _prepare_zsh() {
-    echo "[ -f $WORKSPACE/home/.zshrc ] && source $WORKSPACE/home/.zshrc" > /etc/zsh/zshrc
     echo '' > /etc/zsh/zshenv
     env | while read env_var;do
         if [ "${env_var:0:4}" == "PWD=" ];then
@@ -53,7 +52,7 @@ _prepare_zsh() {
         fi
         echo "export $env_var" >> /etc/zsh/zshenv
     done
-    touch $HOME/.zshrc
+    echo '[ -e $WORKSPACE/.zsh/zshenv ] && source $WORKSPACE/.zsh/zshenv' >> /etc/zsh/zshenv
 }
 
 _create_home_directory() {
@@ -75,6 +74,11 @@ _create_home_directory() {
             fi
         fi
     done
+
+    ln -sfn ${WORKSPACE/$HOME\//}/home/.zshrc $HOME/.zshrc
+
+    mkdir -p $HOME/.autoenv
+    ln -sfn ${WORKSPACE/$HOME\//}/workspace-image/autoenv-activate.sh $HOME/.autoenv/activate.sh
 }
 
 _create_user() {

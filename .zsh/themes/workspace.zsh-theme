@@ -16,8 +16,11 @@ function my_git_prompt() {
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
 
   git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
-  if [ ! $DISABLE_GIT_IN_PROMPT ] && [ ! -e $PWD/.disable-git-prompt ];then
+  if [ "$HOSTNAME" = "workspace" ] && [ -e $PWD/.disable-git-prompt ];then
+    export DISABLE_GIT_IN_PROMPT=true
+  fi
 
+  if [ ! $DISABLE_GIT_IN_PROMPT ];then
     INDEX=$(git status --porcelain 2> /dev/null)
     STATUS=""
 
@@ -94,7 +97,13 @@ _docker_host() {
 }
 
 print "$fg_bold[green]$(whoami)$reset_color @ $fg_bold[green]$(uname -n)$reset_color"
-PROMPT=$'$(_docker_host)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
+
+path_color=blue
+if [ "$HOSTNAME" = "workspace" ];then
+  path_color=cyan
+fi
+
+PROMPT=$'$(_docker_host)%{$fg[$path_color]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 
 #PROMPT=$'$(ssh_connection)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 

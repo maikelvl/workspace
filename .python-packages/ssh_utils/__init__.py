@@ -89,6 +89,7 @@ def ssh_command(ssh_config, command=None):
     return ssh_command
 
 def ssh(ssh_config, command=None, stdout=False):
+    os.environ['TERM_PWD'] = os.environ.get('PWD')
     cmd = ssh_command(ssh_config, command)
     try:
         if command is None:

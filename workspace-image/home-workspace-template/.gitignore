@@ -2,3 +2,4 @@
 /.z-data
 /.zcompdump*
 /zsh-custom/zshrc-local
+/zsh-custom/zshenv-local

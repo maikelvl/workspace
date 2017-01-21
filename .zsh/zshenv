@@ -1,0 +1,6 @@
+export ENVIRONMENT="development"
+export PATH="/usr/local/node/bin:$PATH"
+export PATH="$WORKSPACE/home/bin:$PATH"
+export PYTHONPATH="$WORKSPACE/.python-packages"
+[ -e $WORKSPACE/home/zsh-custom/zshenv ] && source $WORKSPACE/home/zsh-custom/zshenv
+[ -e $WORKSPACE/home/zsh-custom/zshenv-local ] && source $WORKSPACE/home/zsh-custom/zshenv-local
