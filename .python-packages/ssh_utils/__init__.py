@@ -43,19 +43,22 @@ class SshException(Exception):
         return "Command '{}' failed".format(self.command)
 
 
-SSH_OPTIONS = {
-    'UserKnownHostsFile': '/dev/null',
-    'StrictHostKeyChecking': 'no',
-    'PasswordAuthentication': 'no',
-    'IdentitiesOnly': 'yes',
-    'ConnectTimeout': 1,
-    'LogLevel': 'FATAL',
-}
+SSH_OPTIONS = (
+    ('UserKnownHostsFile', '/dev/null'),
+    ('StrictHostKeyChecking', 'no'),
+    ('PasswordAuthentication', 'no'),
+    ('IdentitiesOnly', 'yes'),
+    ('ConnectTimeout', 1),
+    ('LogLevel', 'FATAL'),
+    ('SendEnv', 'TERM_PROGRAM'),
+    ('SendEnv', 'TERM_PROGRAM_VERSION'),
+    ('SendEnv', 'TERM_SESSION_ID'),
+)
 
 def flat_ssh_config(ssh_config):
     ssh_config.update({
-        'options': '\n    '.join(['{} {}'.format(k, v)
-            for k, v in SSH_OPTIONS.iteritems()])
+        'options': '\n    '.join(['{} {}'.format(option[0], option[1])
+            for option in SSH_OPTIONS])
     })
     ssh_config['identity-file'] = ssh_config['identity-file'].replace(os.environ.get('HOME'), '~')
     ssh_config_string = dedent('''\
@@ -76,9 +79,9 @@ def ssh_command(ssh_config, command=None):
         '-i', ssh_config.get('identity-file'),
     ]
 
-    for k, v in SSH_OPTIONS.iteritems():
+    for option in SSH_OPTIONS:
         ssh_command.append('-o')
-        ssh_command.append('{}={}'.format(k,v))
+        ssh_command.append('{}={}'.format(option[0], option[1]))
 
     ssh_command.append('{user}@{host-name}'.format(**ssh_config))
 
@@ -117,9 +120,9 @@ def scp(ssh_config, from_file, to_file, from_remote=False, to_remote=False, stdo
 
     scp_command = ['scp', '-r', '-P', str(ssh_config.get('port')), '-i', ssh_config.get('identity-file')]
 
-    for k, v in SSH_OPTIONS.iteritems():
+    for options in SSH_OPTIONS:
         scp_command.append('-o')
-        scp_command.append('{}={}'.format(k,v))
+        scp_command.append('{}={}'.format(option[0], option[1]))
 
     return local_command(scp_command + [from_file, to_file], stdout=stdout)
 

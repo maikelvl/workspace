@@ -96,7 +96,7 @@ _docker_host() {
   fi
 }
 
-print "$fg_bold[green]$(whoami)$reset_color @ $fg_bold[green]$(uname -n)$reset_color"
+# print "$fg_bold[green]$(whoami)$reset_color @ $fg_bold[green]$(uname -n)$reset_color"
 
 path_color=blue
 if [ "$HOSTNAME" = "workspace" ];then
