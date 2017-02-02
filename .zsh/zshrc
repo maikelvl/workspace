@@ -1,8 +1,6 @@
 if [ "$HOSTNAME" != "workspace" ];then
     export WORKSPACE="$HOME/workspace"
     export PATH="$HOME/.bin:$PATH"
-    alias dm="docker-machine"
-    export WORKSPACE_HOST_NAME="default"
     alias ws="workspace ssh -f 2>/dev/null"
     export ZSH="$WORKSPACE/.oh-my-zsh"
 else
@@ -13,7 +11,7 @@ fi
 
 source $WORKSPACE/.zsh/zshrc-oh-my-zsh
 source $WORKSPACE/.zsh/zshrc-extra
-ZSH_CUSTOM=$WORKSPACE/home/zsh-custom
+export ZSH_CUSTOM=${ZSH_CUSTOM:-$WORKSPACE/home/zsh-custom}
 source $ZSH_CUSTOM/zshrc-oh-my-zsh
 source $ZSH_CUSTOM/zshrc-extra
 [ -e $ZSH_CUSTOM/zshrc-local ] || touch $ZSH_CUSTOM/zshrc-local

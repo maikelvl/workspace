@@ -45,6 +45,12 @@ _ensure_workspace_git_folder() {
 }
 
 _prepare_zsh() {
+    if [ ! -d  $WORKSPACE/.oh-my-zsh ];then
+        cp -r /var/lib/oh-my-zsh $WORKSPACE/.oh-my-zsh
+    fi
+
+    echo "[ -f $WORKSPACE/home/.zshrc ] && source $WORKSPACE/home/.zshrc" > /etc/zsh/zshrc
+
     echo '' > /etc/zsh/zshenv
     env | while read env_var;do
         if [ "${env_var:0:4}" == "PWD=" ];then
@@ -75,7 +81,11 @@ _create_home_directory() {
         fi
     done
 
-    ln -sfn ${WORKSPACE/$HOME\//}/home/.zshrc $HOME/.zshrc
+    if [ -f $HOME/.zshrc ] && [ ! -L $HOME/.zshrc ];then
+        cat $HOME/.zshrc >> $WORKSPACE/home/zsh-custom/zshrc-legacy
+        echo '[ -e $WORKSPACE/home/zsh-custom/zshrc-legacy ] && source $WORKSPACE/home/zsh-custom/zshrc-legacy' >> $WORKSPACE/home/zsh-custom/zshrc-local
+    fi
+    ln -sf $WORKSPACE/.zsh/zshrc $HOME/.zshrc
 
     mkdir -p $HOME/.autoenv
     ln -sfn ${WORKSPACE/$HOME\//}/workspace-image/autoenv-activate.sh $HOME/.autoenv/activate.sh
