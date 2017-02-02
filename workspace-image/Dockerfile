@@ -83,19 +83,6 @@ RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed
  && chmod +x /usr/bin/docker-machine \
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
-ENV ETCD_VERSION="2.3.7"
-RUN cd /tmp \
- && curl \
-        --location \
-        --url https://github.com/coreos/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz \
-        --output etcd.tar.gz \
- && tar xvzf etcd.tar.gz \
- && mv etcd-v${ETCD_VERSION}-linux-amd64/etcd /usr/bin/ \
- && mv etcd-v${ETCD_VERSION}-linux-amd64/etcdctl /usr/bin/ \
- && rm -rf /tmp/* \
- && ( [ $(stat -c %s /usr/bin/etcd) -gt 500 ] || exit 1 ) \
- && ( [ $(stat -c %s /usr/bin/etcdctl) -gt 500 ] || exit 1 )
-
 COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 1.11.2
 RUN install-docker 1.12.3
@@ -106,65 +93,6 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
         awscli \
         cookiecutter \
         docker-compose
-
-RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
- && echo "latest: $latest" \
- && apk --no-cache add --virtual build-deps \
-        go \
- && git clone https://github.com/digitalocean/doctl.git /go/src/github.com/digitalocean/doctl \
- && git --git-dir /go/src/github.com/digitalocean/doctl/.git checkout v${latest} \
- && export GOPATH="/go" \
- && go install github.com/digitalocean/doctl/cmd/doctl \
- && mv /go/bin/doctl /usr/bin/ \
- && apk del build-deps \
- && rm -rf /go \
- && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
-
-ENV TERRAFORM_VERSION="0.7.7"
-RUN latest="$(curl --silent --url https://github.com/hashicorp/terraform/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
- && echo "TERRAFORM_VERSION: $TERRAFORM_VERSION" \
- && echo "LATEST: $latest" \
- && cd /tmp \
- && curl \
-        --location \
-        --url https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip \
-        --output terraform.zip \
- && unzip terraform.zip \
- && mv terraform /usr/bin/ \
- && rm -rf /tmp/* \
- && ( [ $(stat -c %s /usr/bin/terraform) -gt 500 ] || exit 1 )
-
-RUN latest="$(curl --silent --url https://github.com/kubernetes/kubernetes/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
- && echo "latest: $latest" \
- && curl \
-        --url https://storage.googleapis.com/kubernetes-release/release/v${latest}/bin/linux/amd64/kubectl \
-        --output /usr/bin/kubectl \
- && chmod +x /usr/bin/kubectl \
- && ( [ $(stat -c %s /usr/bin/kubectl) -gt 500 ] || exit 1 )
-
-ENV KUBE_AWS_VERSION="0.9.1"
-RUN curl \
-        --location \
-        --url https://github.com/coreos/kube-aws/releases/download/v${KUBE_AWS_VERSION}/kube-aws-linux-amd64.tar.gz \
-        --output /tmp/kube-aws-linux-amd64.tar.gz \
- && tar xvzf /tmp/kube-aws-linux-amd64.tar.gz \
- && mv linux-amd64/kube-aws /usr/bin/ \
- && rm -rf \
-    /tmp/kube-aws-linux-amd64.tar.gz \
-    ./kube-aws-linux-amd64 \
- && ( [ $(stat -c %s /usr/bin/kube-aws) -gt 500 ] || exit 1 )
-
-RUN latest="$(curl --silent --url https://github.com/digitalocean/doctl/releases/latest | sed -rn 's/.*tag\/v([^\"]*).*/\1/p')" \
- && echo "latest: $latest" \
- && cd /tmp \
- && curl \
-        --location \
-        --url https://github.com/digitalocean/doctl/releases/download/v$latest/doctl-$latest-linux-amd64.tar.gz \
-        --output doctl.tar.gz \
- && tar xvzf doctl.tar.gz \
- && mv doctl /usr/bin/ \
- && rm -rf /tmp/* \
- && ( [ $(stat -c %s /usr/bin/doctl) -gt 500 ] || exit 1 )
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
