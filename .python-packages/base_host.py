@@ -51,12 +51,14 @@ class BaseHost(object):
 
     _data = None
     root = None
-    name = None
     config = None
 
     def __init__(self, root):
         self.root = root
-        self.name = path.basename(self.root)
+
+    @property
+    def name(self):
+        return self.config.get('host-name', path.basename(self.root))
 
     def ping(self):
         ip_list = self.ip_list

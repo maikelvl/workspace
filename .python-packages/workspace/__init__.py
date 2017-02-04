@@ -15,7 +15,7 @@ import utils
 VERSION = '2.0.0'
 
 host_name = 'docker-machine-01'
-if not os.environ.get('WORKSPACE_HOST_NAME', None) and os.path.isdir('{}/default'.format(base_host.HOSTS_PATH)):
+if not os.environ.get('WORKSPACE_HOST_NAME', None) and os.path.isdir('{}/default'.format(base_host.HOSTS_PATH)) and not os.path.isdir('{}/{}'.format(base_host.HOSTS_PATH, host_name)):
     click.echo('DEPRECATED IN 3.0: \'default\' host. Set your WORKSPACE_HOST_NAME to \'default\' or rename {0}/default to {0}/{1}'.format(base_host.HOSTS_PATH, host_name))
     host_name = 'default'
 
