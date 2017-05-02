@@ -93,10 +93,10 @@ RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
 COPY bin/install-docker /usr/local/bin/install-docker
-RUN install-docker 1.11.2
 RUN install-docker 1.12.6
 RUN install-docker 1.13.1
-RUN install-docker 17.03.0-ce
+RUN install-docker 17.03.1-ce
+RUN install-docker 17.04.0-ce
 
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
