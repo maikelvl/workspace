@@ -203,6 +203,20 @@ def host():
     pass
 
 
+@host.command('up', short_help='Bring workspace\'s host up')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not prompt')
+@click.option('--restart', is_flag=True, help='Reload the instance')
+@click.option('--recreate', is_flag=True, help='Recreate the instance')
+def host_up(ctx, force, restart, recreate, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    host.up()
+
+
 @host.command('ssh', short_help='SSH into the workspace\'s host')
 @click.pass_context
 @click.option('--force', '-f', is_flag=True, help='Do not prompt')
@@ -273,18 +287,19 @@ def ssh_config(ctx, force, context=None):
 
 
 @host.command('env', short_help='Fetch the Docker engine variables from the workspace\'s host. usage: eval $(workspace host docker-env)')
+@click.option('--shell', help='Only supports bash.', default='bash')
+@click.argument('host-name', nargs=1, required=False)
 @click.pass_context
-def host_docker_env(ctx):
-    host_name = ctx.parent.parent.params.get('host')
+def host_docker_env(ctx, shell, host_name):
+    if host_name is None:
+        host_name = ctx.parent.parent.params.get('host')
     host = utils.get_host(host_name)
     host.config = utils.get_host_config(host_name)
     try:
         host.ping()
         output = [
-            'export DOCKER_HOST=tcp://{}:2376'.format(host.ip),
-            'export DOCKER_CERT_PATH={}/certs'.format(host.root),
-            'export DOCKER_TLS_VERIFY=1',
-            'export DOCKER_MACHINE_NAME={}'.format(host_name),
+            'export DOCKER_HOST="tcp://{}:2375"'.format(host.ip),
+            'export DOCKER_MACHINE_NAME="{}"'.format(host_name),
         ]
         click.echo('\n'.join(output))
     except base_host.HostDownException:
@@ -292,15 +307,18 @@ def host_docker_env(ctx):
 
 
 @host.command('ls', short_help='Fetch the name of the workspace\'s host.')
+@click.option('--quiet', '-q', is_flag=True, help='Silent mode')
 @click.pass_context
-def host_ls(ctx):
+def host_ls(ctx, quiet):
     click.echo(ctx.parent.parent.params.get('host'))
 
 
 @host.command('status', short_help='Fetch the status from the workspace\'s host.')
+@click.argument('host-name', nargs=1, required=False)
 @click.pass_context
-def host_docker_env(ctx):
-    host_name = ctx.parent.parent.params.get('host')
+def host_docker_env(ctx, host_name):
+    if host_name is None:
+        host_name = ctx.parent.parent.params.get('host')
     host = utils.get_host(host_name)
     host.config = utils.get_host_config(host_name)
     try:

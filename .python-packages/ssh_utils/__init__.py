@@ -125,7 +125,7 @@ def scp(ssh_config, from_file, to_file, from_remote=False, to_remote=False, stdo
 
     scp_command = ['scp', '-r', '-P', str(ssh_config.get('port')), '-i', ssh_config.get('identity-file')]
 
-    for options in SSH_OPTIONS:
+    for option in SSH_OPTIONS:
         scp_command.append('-o')
         scp_command.append('{}={}'.format(option[0], option[1]))
 

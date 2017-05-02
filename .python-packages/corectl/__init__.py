@@ -49,6 +49,8 @@ class Corectl():
             options.append('--shared-homedir')
         if kwargs.get('sshkey'):
             options.append('--sshkey={}'.format(kwargs.get('sshkey')))
+        if kwargs.get('uuid'):
+            options.append('--uuid={}'.format(kwargs.get('uuid')))
         if kwargs.get('version'):
             options.append('--version={version}'.format(**kwargs))
         if kwargs.get('disk_size'):
@@ -69,6 +71,8 @@ class Corectl():
     def ps(self, fetch=False):
         if not self._ps_cache or fetch:
             resp = self.execute(['ps', '--json'], stdout=False)
+            if not resp:
+                return {}
             self._ps_cache = json.loads(''.join(resp))
         return self._ps_cache
 
@@ -118,7 +122,6 @@ class Host(base_host.BaseHost):
     def up(self):
         try:
             self.corectl.inspect(self.name)
-            exit()
         except base_host.HostDownException:
 
             if os.path.isfile('{}/{}'.format(self.root, self.state_file)):
@@ -155,23 +158,6 @@ class Host(base_host.BaseHost):
 
             with open('{}/{}'.format(self.root, self.state_file), 'w') as f:
                 f.write('\n'.join(state_content))
-
-            certs_path = '{}/certs'.format(self.root)
-            if os.path.isdir(certs_path):
-                shutil.rmtree(certs_path)
-            while True:
-                try:
-                    self.corectl.ps(fetch=True)
-                    while not self.command(['ls', '/home/core/.docker'], stdout=False):
-                        utils.log('Waiting for {}:{}...'.format(self.name, '/home/core/.docker'))
-                        sleep(3)
-                except base_host.HostDownException:
-                    utils.log('Waiting for {}...'.format(self.name))
-                    sleep(3)
-                else:
-                    break
-
-            self.scp_from('/home/core/.docker', certs_path)
 
     @property
     def ip_list(self):
