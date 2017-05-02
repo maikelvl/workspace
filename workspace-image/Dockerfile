@@ -9,7 +9,6 @@ RUN apk --no-cache add \
         file \
         git \
         grep \
-        jq \
         less \
         make \
         nodejs \
@@ -27,7 +26,13 @@ RUN apk --no-cache add \
  && ln -sf python3 /usr/bin/python \
  && rm -rf \
         /usr/lib/**/*.pyc \
-        /usr/lib/**/__pycache__
+        /usr/lib/**/__pycache__ \
+ && wget -O /usr/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+ && chmod +x /usr/bin/jq \
+ && wget -O j2y.zip https://github.com/y13i/j2y/releases/download/v0.0.7/j2y-linux_amd64.zip \
+ && unzip j2y.zip \
+ && rm j2y.zip \
+ && mv j2y /usr/bin/j2y
 
 ENV PATH="/usr/local/node/bin:$PATH" \
     NGHTTP2_VERSION="1.10.0" \
