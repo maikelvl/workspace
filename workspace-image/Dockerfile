@@ -2,7 +2,7 @@ FROM alpine:3.4
 
 MAINTAINER Maikel Vlasman <open-source@userex.nl>
 
-RUN apk --no-cache add \
+RUN apk add --no-cache \
         apache2-utils \
         bash \
         bind-tools \
@@ -48,6 +48,7 @@ RUN cd /tmp \
         file \
         libtool \
         openssl-dev \
+        util-linux \
  && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
  && autoreconf -i \
@@ -65,6 +66,9 @@ RUN cd /tmp \
  && make \
  && make install \
  && apk del build-packages \
+ && curl \
+        --location \
+        --url https://github.com/gliderlabs/sigil/releases/download/v0.4.0/sigil_0.4.0_Linux_x86_64.tgz | tar -zxC /usr/local/bin \
  && rm -rf /tmp/*
 
 RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
