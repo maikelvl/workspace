@@ -83,6 +83,18 @@ RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
  && rm -rf git git.zip /usr/share/perl5/site_perl/Makefile* \
  && cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm
 
+RUN latest="$(curl --url https://github.com/git-lfs/git-lfs/releases/latest -I -s | grep -i 'location:' | head -n 1 | sed -En 's|.*tag/v([0-9\.]+).*|\1|p')" \
+ && echo "latest: $latest" \
+ && cd /tmp \
+ && curl \
+        --location \
+        --url "https://github.com/git-lfs/git-lfs/releases/download/v${latest}/git-lfs-linux-amd64-${latest}.tar.gz" \
+        --output git-lfs.tar.gz \
+ && tar -zxf git-lfs.tar.gz \
+ && mv /tmp/git-lfs-${latest}/git-lfs /usr/local/bin/git-lfs \
+ && rm -rf /tmp/* \
+ && [ $(stat -c %s /usr/local/bin/git-lfs) -gt 500 ] || exit 1
+
 RUN wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O /usr/bin/cfssl \
  && wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O /usr/bin/cfssljson \
  && chmod +x /usr/bin/cfssl*
