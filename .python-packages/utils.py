@@ -4,17 +4,78 @@ from os import environ, path
 import subprocess
 
 import click
+import base_host
+
+
+def get_host(host_dir):
+    host_type = None
+    try:
+        config = base_host.config(host_dir)
+    except Exception as e:
+        click.echo(e, err=True)
+        exit(1)
+    if config.get('host-type') == 'corectl':
+        import corectl
+        host = corectl.Host(root=base_host.host_path(host_dir))
+    elif config.get('host-type') == 'coreos-vagrant':
+        import coreos_vagrant
+        host = coreos_vagrant.Host(root=base_host.host_path(host_dir))
+    else:
+        import docker_machine
+        host = docker_machine.Host(root=base_host.host_path(host_dir))
+    host.config = config
+    return host
+
+
+def confirm_host_up(force, host):
+    bring_up = force or click.confirm(
+        "Do you want to bring '{}' up?".format(host.name))
+    if not bring_up:
+        return False
+    try:
+        host.up()
+    except Exception as e:
+        click.echo('Could not {}'.format(e))
+        exit(1)
+    return True
+
+
+def get_host_config(host_dir):
+    host_type = None
+    try:
+        return base_host.config(host_dir)
+    except Exception as e:
+        click.echo(e, err=True)
+        exit(1)
+
+
+def ping(ip):
+    response = subprocess.Popen(
+        ['ping', '-c1', '-W100', ip],
+        stdout=subprocess.PIPE).stdout.read()
+    return r'100.0% packet loss' not in response
+
 
 def local_command(cmd, stdout=False):
     log('local command: ' + ' '.join(cmd))
-    if stdout:
-        with none_cm() as out_fh, none_cm() as err_fh:
-            subprocess.check_call(cmd, stdout=out_fh, stderr=err_fh)
-    else:
-        ssh_process = subprocess.Popen(cmd, shell=False,
-                       stdout=subprocess.PIPE,
-                       stderr=subprocess.PIPE)
-        return ssh_process.stdout.readlines()
+    try:
+        if stdout:
+            with none_cm() as out_fh, none_cm() as err_fh:
+                subprocess.check_call(cmd, stdout=out_fh, stderr=err_fh)
+        else:
+            ssh_process = subprocess.Popen(cmd, shell=False,
+                           stdout=subprocess.PIPE,
+                           stderr=subprocess.PIPE)
+            return ssh_process.stdout.readlines()
+    except OSError as e:
+        from distutils.spawn import find_executable
+        if not find_executable(cmd[0]):
+            raise UnknownCommandException('Command \'{}\' not in path or not installed.'.format(cmd[0]))
+        raise e
+
+
+class UnknownCommandException(Exception):
+    pass
 
 
 @contextmanager

@@ -1,5 +1,6 @@
 {
     "host-type": "docker-machine",
+    "host-name": "default",
     "timezone": "Europe/Amsterdam",
     "provider": "virtualbox",
     "memory": 1024,

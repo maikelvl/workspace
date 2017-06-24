@@ -1,5 +1,5 @@
 # Path to your oh-my-zsh installation.
-export ZSH="/var/lib/oh-my-zsh"
+export ZSH="${ZSH:-/var/lib/oh-my-zsh}"
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
@@ -51,7 +51,7 @@ export _Z_DATA=$WORKSPACE/home/.z-data
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker extract z autoenv)
+plugins=(git git-extras docker extract web-search z autoenv termsession)
 
 AUTOENV_ENV_FILENAME=.autoenv
 

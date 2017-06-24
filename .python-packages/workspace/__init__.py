@@ -8,16 +8,19 @@ from time import sleep
 
 import base_host
 import click
-import coreos_vagrant
-import docker_machine
 import ssh_utils
 import utils
 
 
 VERSION = '2.0.0'
 
+host_name = 'docker-machine-01'
+if not os.environ.get('WORKSPACE_HOST_NAME', None) and os.path.isdir('{}/default'.format(base_host.HOSTS_PATH)) and not os.path.isdir('{}/{}'.format(base_host.HOSTS_PATH, host_name)):
+    click.echo('DEPRECATED IN 3.0: \'default\' host. Set your WORKSPACE_HOST_NAME to \'default\' or rename {0}/default to {0}/{1}'.format(base_host.HOSTS_PATH, host_name))
+    host_name = 'default'
+
 SETTINGS = {
-    'WORKSPACE_HOST_NAME': 'default',
+    'WORKSPACE_HOST_NAME': os.environ.get('WORKSPACE_HOST_NAME', host_name),
     'WORKSPACE_HOST_SSH_PORT': 22,
     'WORKSPACE_SSH_KEY': '{}/.ssh/workspace_rsa'.format(os.environ.get('HOME')),
 }
@@ -48,7 +51,7 @@ def cli(host):
 def up(ctx, recreate, rebuild, force, context=None):
     if context is None:
         context = ctx
-    host = get_host(context.parent.params.get('host'))
+    host = utils.get_host(context.parent.params.get('host'))
     try:
         if rebuild:
             workspace.build()
@@ -60,7 +63,7 @@ def up(ctx, recreate, rebuild, force, context=None):
         workspace.up()
         return
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
     except ssh_utils.SshException as e:
         exit(e.returncode)
@@ -73,7 +76,7 @@ def up(ctx, recreate, rebuild, force, context=None):
 @cli.command('remove', short_help='Destroys the workspace container')
 @click.pass_context
 def remove(ctx):
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
+    workspace = Workspace(utils.get_host(ctx.parent.params.get('host')))
     try:
         workspace.remove()
         return
@@ -85,7 +88,7 @@ def remove(ctx):
 @cli.command('state', short_help='Status of the workspace container')
 @click.pass_context
 def state(ctx):
-    workspace = Workspace(get_host(ctx.parent.params.get('host')))
+    workspace = Workspace(utils.get_host(ctx.parent.params.get('host')))
     state = None
     try:
         state = workspace.state
@@ -104,13 +107,13 @@ def state(ctx):
 def build(ctx, no_cache, force, context=None):
     if context is None:
         context = ctx
-    host = get_host(context.parent.params.get('host'))
+    host = utils.get_host(context.parent.params.get('host'))
     workspace = Workspace(host)
     try:
         workspace.build(no_cache=no_cache)
         return
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
     except WorkspaceDownException:
         workspace.up()
@@ -127,7 +130,7 @@ def build(ctx, no_cache, force, context=None):
 def ssh(ctx, force, recreate, rebuild, command=False, cmd=None, context=None):
     if context is None:
         context = ctx
-    host = get_host(context.parent.params.get('host'))
+    host = utils.get_host(context.parent.params.get('host'))
     workspace = Workspace(host)
     try:
         if rebuild:
@@ -139,7 +142,7 @@ def ssh(ctx, force, recreate, rebuild, command=False, cmd=None, context=None):
         workspace.ssh(command=cmd)
         return
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
     except WorkspaceDownException:
         workspace.up()
@@ -148,14 +151,14 @@ def ssh(ctx, force, recreate, rebuild, command=False, cmd=None, context=None):
     ctx.invoke(ssh, force=force, recreate=recreate, rebuild=rebuild, command=command, cmd=cmd, context=context)
 
 
-@cli.command('ssh-config', short_help='Print the SSH config (equivalent of `vagrant ssh-config`)')
+@cli.command('ssh-config', short_help='Print the SSH config')
 @click.pass_context
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
 def ssh_config(ctx, force, recreate, context=None):
     if context is None:
         context = ctx
-    host = get_host(context.parent.params.get('host'))
+    host = utils.get_host(context.parent.params.get('host'))
     workspace = Workspace(host)
     try:
         if recreate:
@@ -163,7 +166,7 @@ def ssh_config(ctx, force, recreate, context=None):
         click.echo(workspace.flat_ssh_config)
         return
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
     except WorkspaceDownException:
         workspace.up()
@@ -172,54 +175,184 @@ def ssh_config(ctx, force, recreate, context=None):
 
 @cli.command('ssh-command', short_help='Print the SSH command to the workspace container')
 @click.pass_context
-@click.option('--command', '-c', default=None, help='Run a one-off commmand via ssh')
 @click.option('--force', '-f', is_flag=True, help='Do not argue')
 @click.option('--recreate', '-r', is_flag=True, help='Recreate the workspace first')
-def ssh_command(ctx, command, force, recreate, context=None):
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def ssh_command(ctx, command, force, recreate, cmd=None, context=None):
     if context is None:
         context = ctx
-    host = get_host(context.parent.params.get('host'))
+    host = utils.get_host(context.parent.params.get('host'))
     workspace = Workspace(host)
     try:
         if recreate:
             workspace.recreate()
-        click.echo(' '.join(workspace.ssh_command(command)))
+        click.echo(' '.join(workspace.ssh_command(cmd)))
         return
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
     except WorkspaceDownException:
         workspace.up()
-    ctx.invoke(ssh, command=command, force=force, recreate=recreate, context=context)
+    ctx.invoke(ssh, command=command, force=force, recreate=recreate, cmd=cmd, context=context)
 
 
-def confirm_host_up(force, host):
-    bring_up = force or click.confirm(
-        "Do you want to bring '{}' up?".format(host.name))
-    if not bring_up:
-        return False
+@cli.group('host')
+@click.version_option(version=VERSION, message='%(prog)s %(version)s')
+def host():
+    pass
+
+
+@host.command('up', short_help='Bring workspace\'s host up')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not prompt')
+@click.option('--restart', is_flag=True, help='Reload the instance')
+@click.option('--recreate', is_flag=True, help='Recreate the instance')
+def host_up(ctx, force, restart, recreate, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    host.up()
+
+
+@host.command('ssh', short_help='SSH into the workspace\'s host')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not prompt')
+@click.option('--restart', is_flag=True, help='Reload the instance')
+@click.option('--recreate', is_flag=True, help='Recreate the instance')
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def host_ssh(ctx, command, force, restart, recreate, cmd=None, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
     try:
-        host.up()
-    except Exception as e:
-        click.echo('Could not {}'.format(e))
-        exit(1)
-    return True
+        host.ping()
+        if recreate:
+            recreate = force or click.confirm("Are you sure you want to recreate '{}'?".format(host.name))
+            if not recreate:
+                return
+            host.recreate()
+        elif restart:
+            host.restart()
+        result = host.ssh(command=cmd, stdout=True)
+        if result is not None:
+            click.echo(''.join(result))
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(host_ssh, command=command, force=True, restart=restart, recreate=recreate, cmd=cmd, context=context)
 
 
-def get_host(host_dir):
-    host_type = None
+@host.command('ssh-command', short_help='Print the SSH command to the host')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not argue')
+@click.option('--command', '-c', is_flag=True, help='Run a one-off commmand via SSH')
+@click.argument('cmd', nargs=-1)
+def ssh_command(ctx, command, force, cmd=None, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
     try:
-        config = base_host.config(host_dir)
-    except Exception as e:
-        click.echo(e, err=True)
-        exit(1)
+        click.echo(' '.join(host.ssh_command(command=cmd)))
+        return
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(ssh, command=command, force=force, cmd=cmd, context=context)
 
-    if config.get('host-type') == 'coreos-vagrant':
-        host = coreos_vagrant.Host(root=base_host.host_path(host_dir))
-    else:
-        host = docker_machine.Host(root=base_host.host_path(host_dir))
-    host.config = config
-    return host
+
+@host.command('ssh-config', short_help='Print the SSH config')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not argue')
+def ssh_config(ctx, force, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        click.echo(host.flat_ssh_config)
+        return
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(ssh_config, force=force, context=context)
+
+
+@host.command('env', short_help='Fetch the Docker engine variables from the workspace\'s host. usage: eval $(workspace host docker-env)')
+@click.option('--shell', help='Only supports bash.', default='bash')
+@click.argument('host-name', nargs=1, required=False)
+@click.pass_context
+def host_docker_env(ctx, shell, host_name):
+    if host_name is None:
+        host_name = ctx.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        host.ping()
+        output = [
+            'export DOCKER_HOST="tcp://{}:2375"'.format(host.ip),
+            'export DOCKER_MACHINE_NAME="{}"'.format(host_name),
+        ]
+        click.echo('\n'.join(output))
+    except base_host.HostDownException:
+        click.echo("echo 'Host is down!'")
+
+
+@host.command('ls', short_help='Fetch the name of the workspace\'s host.')
+@click.option('--quiet', '-q', is_flag=True, help='Silent mode')
+@click.pass_context
+def host_ls(ctx, quiet):
+    click.echo(ctx.parent.parent.params.get('host'))
+
+
+@host.command('status', short_help='Fetch the status from the workspace\'s host.')
+@click.argument('host-name', nargs=1, required=False)
+@click.pass_context
+def host_docker_env(ctx, host_name):
+    if host_name is None:
+        host_name = ctx.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        host.ping()
+        click.echo('Running')
+    except base_host.HostDownException:
+        click.echo("Stopped'")
+
+
+@host.command('ip', short_help='Fetch the workspace\'s host IP address')
+@click.pass_context
+@click.option('--force', '-f', is_flag=True, help='Do not prompt')
+@click.option('--restart', is_flag=True, help='Reload the instance')
+@click.option('--recreate', is_flag=True, help='Recreate the instance')
+def host_ip(ctx, force, restart, recreate, context=None):
+    if context is None:
+        context = ctx
+    host_name = context.parent.parent.params.get('host')
+    host = utils.get_host(host_name)
+    host.config = utils.get_host_config(host_name)
+    try:
+        ip = host.ip
+        if recreate:
+            recreate = force or click.confirm("Are you sure you want to recreate '{}'?".format(host.name))
+            if not recreate:
+                return
+            host.recreate()
+        elif restart:
+            host.restart()
+        click.echo(ip)
+    except base_host.HostDownException:
+        if not utils.confirm_host_up(force=force, host=host):
+            return
+        ctx.invoke(host_ip, force=True, restart=restart, recreate=recreate, context=context)
 
 
 class WorkspaceDownException(Exception):
@@ -315,8 +448,6 @@ class Workspace(object):
                 raise e
 
     def ssh_command(self, command=None):
-        if command is not None:
-            utils.log('SSH: ' + command)
         return ssh_utils.ssh_command(ssh_config=self.ssh_config,
             command=command)
 
@@ -348,6 +479,10 @@ class Workspace(object):
                 '--tag={}'.format(new_tag),
                 '--no-cache={}'.format(str(no_cache).lower()),
                 WORKSPACE_IMAGE_DIR]
+
+        while not self.command(['ls', WORKSPACE_IMAGE_DIR], stdout=False):
+            utils.log('Waiting for {}...'.format(WORKSPACE_IMAGE_DIR))
+            sleep(5)
         self.command(cmd)
         self.config['current-image-tag'] = new_tag
         self.tag_as_latest(new_tag)

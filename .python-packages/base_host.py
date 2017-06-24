@@ -39,14 +39,11 @@ def config(host_dir):
     return _config
 
 
-def ping(ip):
-    response = subprocess.Popen(
-        ['ping', '-c1', '-W100', ip],
-        stdout=subprocess.PIPE).stdout.read()
-    return r'100.0% packet loss' not in response
-
-
 class HostDownException(Exception):
+    pass
+
+
+class HostconfigFileNotFound(Exception):
     pass
 
 
@@ -54,19 +51,21 @@ class BaseHost(object):
 
     _data = None
     root = None
-    name = None
     config = None
 
     def __init__(self, root):
         self.root = root
-        self.name = path.basename(self.root)
+
+    @property
+    def name(self):
+        return self.config.get('host-name', path.basename(self.root))
 
     def ping(self):
         ip_list = self.ip_list
         utils.log('IP-addresses: '+', '.join(ip_list))
         for ip in ip_list:
             utils.log('Pinging {} ({})'.format(self.name, ip))
-            if ping(ip):
+            if utils.ping(ip):
                 utils.log('Ping successful')
                 return ip
             utils.log('Ping unsuccessful')
@@ -80,12 +79,26 @@ class BaseHost(object):
         self.ping()
         return self.ssh(command=command, stdout=stdout)
 
+    @property
+    def flat_ssh_config(self):
+        return ssh_utils.flat_ssh_config(ssh_config=self.ssh_config)
+
     def ssh(self, command=None, stdout=False):
         ssh_config = self.ssh_config
         try:
             return ssh_utils.ssh(ssh_config=ssh_config, command=command, stdout=stdout)
         except ssh_utils.SshException as e:
             exit()
+
+    def ssh_command(self, command=None):
+        return ssh_utils.ssh_command(ssh_config=self.ssh_config,
+            command=command)
+
+    def scp_from(self, from_file, to_file):
+        return ssh_utils.scp(ssh_config=self.ssh_config, from_file=from_file, to_file=to_file, from_remote=True)
+
+    def scp_to(self, from_file, to_file):
+        return ssh_utils.scp(ssh_config=self.ssh_config, from_file=from_file, to_file=to_file, to_remote=True)
 
     def get(self, key):
         if self.data.has_key(key):

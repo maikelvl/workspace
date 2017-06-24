@@ -8,14 +8,27 @@ The usual development machine has all kinds of software installed on the main op
 
 ### Prerequisites
 
-- [Docker Machine](https://docs.docker.com/machine/install-machine/)
-- [Vagrant](https://www.vagrantup.com/downloads.html) (if you want to use CoreOS)
-    - The Vagrant triggers plugin: `vagrant plugin install vagrant-triggers`
-- [VirtualBox](https://www.virtualbox.org/wiki/Downloads) and/or VMware Fusion ([6.0.6](https://download3.vmware.com/software/fusion/file/VMware-Fusion-6.0.6-2684343.dmg), [7.1.3](https://download3.vmware.com/software/fusion/file/VMware-Fusion-7.1.3-3204469.dmg), [8.0.2](https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dmg))
+|                    | CoreOS         | Boot2Docker         |
+| ------------------ | :-------------:|:-------------------:|
+| [xhyve][1]         | [corectl][2]   | *not yet supported* |
+| [Virtualbox][4]    | [Vagrant][3]*  | [Docker Machine][5] |
+| [VMware Fusion][6] | [Vagrant][3]** | [Docker Machine][5] |
 
-If you want Vagrant combined with VMware Fusion you also need additional
-- The Vagrant VMware Fusion plugin: `vagrant plugin install vagrant-vmware-fusion`
-- The Vagrant VMware Fusion license: `vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic`
+[1]: https://github.com/mist64/xhyve
+[2]: https://github.com/TheNewNormal/corectl.app
+[3]: https://www.vagrantup.com/downloads.html
+[4]: https://www.virtualbox.org/wiki/Downloads
+[5]: https://docs.docker.com/machine/install-machine/
+[6]: https://download3.vmware.com/software/fusion/file/VMware-Fusion-8.0.2-3164312.dmg
+
+\* Also install the Vagrant triggers plugin:
+
+    vagrant plugin install vagrant-triggers
+
+\** If you want Vagrant combined with VMware Fusion you also need the VMware plugin and a Vagrant VMware Fusion license:
+   
+    vagrant plugin install vagrant-vmware-fusion
+    vagrant plugin license vagrant-vmware-fusion /path/to/your/license-vagrant-vmware-fusion.lic
 
 ## Workspace installation
 

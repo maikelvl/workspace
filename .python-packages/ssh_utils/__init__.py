@@ -4,6 +4,9 @@ import os
 import subprocess
 import sys
 
+from utils import local_command, log
+
+
 @contextmanager
 def stdout_cm():
     ''' Redirect the stdout or stderr of the child process to sys.stdout. '''
@@ -40,19 +43,22 @@ class SshException(Exception):
         return "Command '{}' failed".format(self.command)
 
 
-ssh_options = {
-    'UserKnownHostsFile': '/dev/null',
-    'StrictHostKeyChecking': 'no',
-    'PasswordAuthentication': 'no',
-    'IdentitiesOnly': 'yes',
-    'ConnectTimeout': 1,
-    'LogLevel': 'FATAL',
-}
+SSH_OPTIONS = (
+    ('UserKnownHostsFile', '/dev/null'),
+    ('StrictHostKeyChecking', 'no'),
+    ('PasswordAuthentication', 'no'),
+    ('IdentitiesOnly', 'yes'),
+    ('ConnectTimeout', 1),
+    ('LogLevel', 'FATAL'),
+    ('SendEnv', 'TERM_PROGRAM'),
+    ('SendEnv', 'TERM_PROGRAM_VERSION'),
+    ('SendEnv', 'TERM_SESSION_ID'),
+)
 
 def flat_ssh_config(ssh_config):
     ssh_config.update({
-        'options': '\n    '.join(['{} {}'.format(k, v)
-            for k, v in ssh_options.iteritems()])
+        'options': '\n    '.join(['{} {}'.format(option[0], option[1])
+            for option in SSH_OPTIONS])
     })
     ssh_config['identity-file'] = ssh_config['identity-file'].replace(os.environ.get('HOME'), '~')
     ssh_config_string = dedent('''\
@@ -69,23 +75,29 @@ def flat_ssh_config(ssh_config):
 def ssh_command(ssh_config, command=None):
     ssh_command = [
         'ssh',
-        '-p', ssh_config['port'],
-        '-i', ssh_config['identity-file'],
+        '-p', ssh_config.get('port'),
+        '-i', ssh_config.get('identity-file'),
     ]
 
-    for k, v in ssh_options.iteritems():
+    for option in SSH_OPTIONS:
         ssh_command.append('-o')
-        ssh_command.append('{}={}'.format(k,v))
+        ssh_command.append('{}={}'.format(option[0], option[1]))
 
     ssh_command.append('{user}@{host-name}'.format(**ssh_config))
 
-    if command is not None:
+    if command:
         ssh_command.append('-t')
         ssh_command += command
 
     return ssh_command
 
 def ssh(ssh_config, command=None, stdout=False):
+
+    os.environ['TERM_PWD'] = os.environ.get('PWD')
+    if command:
+        log('SSH {}:{} -> {}'.format(ssh_config['user'], ssh_config['host'], ' '.join(command)))
+    else:
+        log('SSH {}:{}'.format(ssh_config['user'], ssh_config['host']))
     cmd = ssh_command(ssh_config, command)
     try:
         if command is None:
@@ -96,7 +108,6 @@ def ssh(ssh_config, command=None, stdout=False):
                 subprocess.check_call(cmd, stdout=out_fh,
                     stderr=err_fh)
         else:
-            
             ssh_process = subprocess.Popen(cmd, shell=False,
                            stdout=subprocess.PIPE,
                            stderr=subprocess.PIPE)
@@ -104,3 +115,22 @@ def ssh(ssh_config, command=None, stdout=False):
     except subprocess.CalledProcessError as e:
         raise SshException(e, command=command)
 
+
+def scp(ssh_config, from_file, to_file, from_remote=False, to_remote=False, stdout=True):
+    remote = '{user}@{host}'.format(**ssh_config)
+    if from_remote:
+        from_file = '{}:{}'.format(remote, from_file)
+    if to_remote:
+        to_file = '{}:{}'.format(remote, to_file)
+
+    scp_command = ['scp', '-r', '-P', str(ssh_config.get('port')), '-i', ssh_config.get('identity-file')]
+
+    for option in SSH_OPTIONS:
+        scp_command.append('-o')
+        scp_command.append('{}={}'.format(option[0], option[1]))
+
+    return local_command(scp_command + [from_file, to_file], stdout=stdout)
+
+
+def ssh_key_gen(path, comment=None):
+    local_command(['ssh-keygen', '-f', path, '-N', '', '-t', 'rsa', '-C', comment])

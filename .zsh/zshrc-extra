@@ -1,8 +1,3 @@
-export ENVIRONMENT="development"
-export PATH="/usr/local/node/bin:$PATH"
-export PATH="$WORKSPACE/home/bin:$PATH"
-export PYTHONPATH="$WORKSPACE/.python-packages"
-
 docker_connect() {
     if [ ! $1 ];then
         echo "docker-connect <name> [host:port]"

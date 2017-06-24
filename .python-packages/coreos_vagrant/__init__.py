@@ -25,7 +25,7 @@ def cli():
 def up(instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.up()
 
 
@@ -35,7 +35,7 @@ def up(instance):
 def pause(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.pause()
 
 
@@ -45,7 +45,7 @@ def pause(ctx, instance):
 def stop(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.stop()
 
 
@@ -55,7 +55,7 @@ def stop(ctx, instance):
 def restart(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.restart()
 
 
@@ -66,7 +66,7 @@ def restart(ctx, instance):
 def remove(ctx, instance, force):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     remove = force or click.confirm("Are you sure you want to remove '{}'?".format(host.name))
     if not remove:
         return
@@ -80,7 +80,7 @@ def remove(ctx, instance, force):
 def recreate(ctx, instance, force):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     recreate = force or click.confirm("Are you sure you want to recreate '{}'?".format(host.name))
     if not recreate:
         return
@@ -93,7 +93,7 @@ def recreate(ctx, instance, force):
 def state(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     click.echo(host.status.get('state'))
 
 
@@ -116,7 +116,7 @@ def status_all(ctx):
 def ssh(ctx, instance, command, force, restart, recreate):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     try:
         host.ping()
         if recreate:
@@ -130,7 +130,7 @@ def ssh(ctx, instance, command, force, restart, recreate):
         if result is not None:
             click.echo(''.join(result))
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
         ctx.invoke(ssh, instance=instance, command=command, force=True, restart=restart, recreate=recreate)
 
@@ -143,13 +143,13 @@ def ssh(ctx, instance, command, force, restart, recreate):
 def ssh_config(ctx, instance, fetch, force):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.fetch = fetch
     try:
         host.ping()
         click.echo(host.flat_ssh_config)
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
         ctx.invoke(ssh_config, instance=instance, fetch=fetch, force=True)
 
@@ -163,13 +163,13 @@ def ssh_config(ctx, instance, fetch, force):
 def ssh_command(ctx, instance, fetch, command, force):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.fetch = fetch
     try:
         host.ping()
         click.echo(' '.join(host.ssh_command(command)))
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
         ctx.invoke(ssh_command, instance=instance, fetch=fetch, command=command, force=True)
 
@@ -182,12 +182,12 @@ def ssh_command(ctx, instance, fetch, command, force):
 def ip(ctx, instance, fetch, force):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.fetch = fetch
     try:
         click.echo(host.ip)
     except base_host.HostDownException:
-        if not confirm_host_up(force=force, host=host):
+        if not utils.confirm_host_up(force=force, host=host):
             return
         ctx.invoke(ssh_command, instance=instance, fetch=fetch, force=True)
 
@@ -198,30 +198,8 @@ def ip(ctx, instance, fetch, force):
 def update_status(ctx, instance):
     name = 'coreos-{:02d}'.format(instance)
     host = Host(root=base_host.host_path(name))
-    host.config = get_host_config(name)
+    host.config = base_host.get_host_config(name)
     host.update_status()
-
-
-def confirm_host_up(force, host):
-    bring_up = force or click.confirm(
-        "Do you want to bring '{}' up?".format(host.name))
-    if not bring_up:
-        return False
-    try:
-        host.up()
-    except Exception as e:
-        click.echo('Could not {}'.format(e))
-        exit(1)
-    return True
-
-
-def get_host_config(host_dir):
-    host_type = None
-    try:
-        return base_host.config(host_dir)
-    except Exception as e:
-        click.echo(e, err=True)
-        exit(1)
 
 
 class Host(base_host.BaseHost):
@@ -361,7 +339,6 @@ class Host(base_host.BaseHost):
         ssh_config['identity-file'] = ssh_config['identity-file']\
             .replace('~', os.environ.get('HOME'))
         ssh_config['host'] = self.name
-
         return ssh_config
 
     def fetch_ssh_config(self):
@@ -388,5 +365,3 @@ class Host(base_host.BaseHost):
                 ssh_config_string)[0].replace(os.environ.get('HOME'), '~'),
         }
         return ssh_config
-
-
