@@ -96,6 +96,26 @@ _docker_host() {
   fi
 }
 
+_kubectl_prompt() {
+  if [ "$HOSTNAME" != "workspace" ];then
+    return
+  fi
+  kubeconfig_file="${KUBECONFIG:-$HOME/.kube/config}"
+  if [ ! -e "$kubeconfig_file" ];then
+    echo "[missing ${kubeconfig_file/$HOME/~}] "
+    return
+  fi
+  kubeconfig="$(j2y -r "$kubeconfig_file" 2>/dev/null)"
+  current_context_name="$(echo "$kubeconfig" | jq -r '.["current-context"]')"
+  current_cluster_name="$(echo "$kubeconfig" | jq -r ".contexts | map(select(.name == \"$current_context_name\"))[0].context.cluster")"
+  current_namespace="$(echo "$kubeconfig" | jq -r ".contexts | map(select(.name == \"$current_context_name\"))[0].context.namespace")"
+  if [ "$current_namespace" = "default" ];then
+    echo "$current_cluster_name "
+  else
+    echo "$current_cluster_name/$current_namespace "
+  fi
+}
+
 # print "$fg_bold[green]$(whoami)$reset_color @ $fg_bold[green]$(uname -n)$reset_color"
 
 path_color=blue
@@ -103,7 +123,7 @@ if [ "$HOSTNAME" = "workspace" ];then
   path_color=cyan
 fi
 
-PROMPT=$'$(_docker_host)%{$fg[$path_color]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
+PROMPT=$'%{$fg[green]%}$(_kubectl_prompt)%{$fg[$path_color]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 
 #PROMPT=$'$(ssh_connection)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 
