@@ -73,7 +73,10 @@ class Corectl():
             resp = self.execute(['ps', '--json'], stdout=False)
             if not resp:
                 return {}
-            self._ps_cache = json.loads(''.join(resp))
+            try:
+                self._ps_cache = json.loads(''.join(resp))
+            except ValueError:
+                return {}
         return self._ps_cache
 
     def inspect(self, uuid_or_name=None):
@@ -111,6 +114,7 @@ class Host(base_host.BaseHost):
     state_file = '.state.toml'
     disk_path = 'data.img'
     cloud_config_file = 'cloud-config.yml'
+    ssh_user = 'core'
     version = VERSION
 
     @property
@@ -170,7 +174,7 @@ class Host(base_host.BaseHost):
         ssh_config = {
             'host': str(inspect.get('Name')),
             'host-name': inspect.get('PublicIP'),
-            'user': 'core',
+            'user': self.ssh_user,
             'port': '22',
             'identity-file': self.ssh_key_path,
         }
@@ -187,5 +191,5 @@ class Host(base_host.BaseHost):
     def ssh_key_path(self):
         path = self.config.get('ssh-key', '{}/id_rsa'.format(self.root))
         if not os.path.isfile(path):
-            ssh_utils.ssh_key_gen(path, comment='{}@{}'.format(self.ssh_config.get('user'), self.name))
+            ssh_utils.ssh_key_gen(path, comment='{}@{}'.format(self.ssh_user, self.name))
         return path
