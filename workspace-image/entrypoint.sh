@@ -17,7 +17,7 @@ start() {
     _prepare_zsh
     _create_user
     set-docker-client-version
-    /usr/sbin/sshd -D
+    /usr/sbin/sshd -p $SSH_PORT -D
 }
 
 _set_timezone() {
