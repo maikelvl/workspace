@@ -1,0 +1,13 @@
+#!/usr/bin/env python
+
+import socket, struct
+
+with open("/proc/net/route") as fh:
+    for line in fh:
+        fields = line.strip().split()
+        if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+            continue
+        print(socket.inet_ntoa(struct.pack("<L", int(fields[2], 16))))
+        exit()
+
+exit(1)
