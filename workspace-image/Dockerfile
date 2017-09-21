@@ -141,6 +141,10 @@ RUN git clone https://github.com/tj/git-extras.git -b 4.2.0 \
  && cp -f etc/git-extras-completion.zsh /var/lib/oh-my-zsh/plugins/git-extras/git-extras.plugin.zsh \
  && rm -rf ../git-extras
 
+RUN wget https://dl.minio.io/client/mc/release/linux-amd64/mc -O /usr/bin/mc \
+ && chmod +x /usr/bin/mc \
+ && mc version
+
 RUN echo 'AcceptEnv TERM_PROGRAM' >> /etc/ssh/sshd_config \
  && echo 'AcceptEnv TERM_PROGRAM_VERSION' >> /etc/ssh/sshd_config \
  && echo 'AcceptEnv TERM_SESSION_ID' >> /etc/ssh/sshd_config
