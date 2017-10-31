@@ -5,16 +5,26 @@ if [ ! $1 ];then
     echo "Please specify a Docker version"
     exit 1
 fi
+
 cd /tmp
 curl \
     --location \
-    --url https://get.docker.com/builds/Linux/x86_64/docker-$1.tgz \
+    --url https://download.docker.com/linux/static/stable/x86_64/docker-$1.tgz \
     --output docker-$1.tgz
+
+if [ "$(file --mime-type docker-$1.tgz)" != "docker-$1.tgz: application/x-gzip" ];then
+    rm -rf docker-$1.tgz
+    curl \
+        --location \
+        --url https://get.docker.com/builds/Linux/x86_64/docker-$1.tgz \
+        --output docker-$1.tgz
+fi
 
 if [ "$(file --mime-type docker-$1.tgz)" != "docker-$1.tgz: application/x-gzip" ];then
     echo "Invalid docker version: $1"
     exit 1
 fi
+
 tar -zxf ./docker-$1.tgz
 rm docker-$1.tgz
 mkdir -p /usr/lib/docker-bins
