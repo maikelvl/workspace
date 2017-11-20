@@ -1,7 +1,9 @@
 #!/bin/sh
 
 if [ "${1:0:7}" == "http://" ] || [ "${1:0:8}" == "https://" ];then
-   args="-a 'Google Chrome.app' $args"
+    if [ "$WORKSPACE_DEFAULT_BROWSER" != "" ];then
+        args="-a "$WORKSPACE_DEFAULT_BROWSER" $args"
+    fi
 fi
 
 while [ "$1" ];do
