@@ -60,7 +60,8 @@ class Corectl():
             if os.path.isfile(disk_path):
                 os.remove(disk_path)
             utils.local_command(['qcow-tool', 'create', '--size={disk_size}GiB'.format(**kwargs), disk_path])
-            options.append('--volume={}'.format(disk_path))
+            options.append('--root={}'.format(disk_path))
+            options.append('--format-root')
 
         if os.environ.get('DEBUG', None):
             options.append('--debug')
@@ -112,7 +113,7 @@ class Host(base_host.BaseHost):
 
     _corectl = None
     state_file = '.state.toml'
-    disk_path = 'data.img'
+    disk_path = 'root.img'
     cloud_config_file = 'cloud-config.yml'
     ssh_user = 'core'
     version = VERSION
@@ -150,7 +151,7 @@ class Host(base_host.BaseHost):
                 '[{}]'.format(self.name),
                 'uuid = "{}"'.format(self.corectl.uuid(self.name)),
                 'channel = "{}"'.format(self.config.get('coreos-release-channel')),
-                'volume = "{}"'.format(self.disk_path),
+                'root = "{}"'.format(self.disk_path),
                 'cloud_config = "{}"'.format(self.cloud_config_file),
                 'cpus = {}'.format(self.config.get('cpus')),
                 'memory = "{}"'.format(self.config.get('memory')),
