@@ -157,7 +157,7 @@ class Host(base_host.BaseHost):
                 'memory = "{}"'.format(self.config.get('memory')),
                 'local = "true"',
                 'offline = "true"',
-                'shared-homedir = "true"',
+                'shared-homedir = "{}"'.format('true' if self.config.get('shared-homedir') else 'false'),
                 'sshkey = "{}"'.format(sshkey),
             ]
 
