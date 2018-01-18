@@ -41,8 +41,8 @@ class Corectl():
             options.append('--channel={channel}'.format(**kwargs))
         if kwargs.get('cloud_config'):
             options.append('--cloud_config={cloud_config}'.format(**kwargs))
-        if kwargs.get('cpus'):
-            options.append('--cpus={cpus}'.format(**kwargs))
+        if kwargs.get('cpu_count'):
+            options.append('--cpus={cpu_count}'.format(**kwargs))
         if kwargs.get('memory'):
             options.append('--memory={memory}'.format(**kwargs))
         if kwargs.get('shared_homedir'):
