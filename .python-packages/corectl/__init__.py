@@ -57,11 +57,12 @@ class Corectl():
             disk_path = kwargs.get('disk_path')
             if not disk_path:
                 raise Exception('Missing disk_path')
-            if os.path.isfile(disk_path):
-                os.remove(disk_path)
-            utils.local_command(['qcow-tool', 'create', '--size={disk_size}GiB'.format(**kwargs), disk_path])
+            # if os.path.isfile(disk_path):
+            #    os.remove(disk_path)
+            if not os.path.isfile(disk_path):
+                utils.local_command(['qcow-tool', 'create', '--size={disk_size}GiB'.format(**kwargs), disk_path])
+                options.append('--format-root')
             options.append('--root={}'.format(disk_path))
-            options.append('--format-root')
 
         if os.environ.get('DEBUG', None):
             options.append('--debug')
