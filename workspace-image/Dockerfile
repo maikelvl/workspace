@@ -1,6 +1,4 @@
-FROM alpine:3.4
-
-MAINTAINER Maikel Vlasman <open-source@userex.nl>
+FROM alpine:3.7
 
 RUN apk add --no-cache \
         apache2-utils \
@@ -35,8 +33,8 @@ RUN apk add --no-cache \
  && mv j2y /usr/bin/j2y
 
 ENV PATH="/usr/local/node/bin:$PATH" \
-    NGHTTP2_VERSION="1.10.0" \
-    CURL_VERSION="7.49.0"
+    NGHTTP2_VERSION="1.32.0" \
+    CURL_VERSION="7.49.1"
 
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
@@ -83,15 +81,16 @@ RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
  && rm -rf git git.zip /usr/share/perl5/site_perl/Makefile* \
  && cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm
 
-RUN latest="$(curl --url https://github.com/git-lfs/git-lfs/releases/latest -I -s | grep -i 'location:' | head -n 1 | sed -En 's|.*tag/v([0-9\.]+).*|\1|p')" \
- && echo "latest: $latest" \
+# RUN version="$(curl --url https://github.com/git-lfs/git-lfs/releases/latest -I -s | grep -i 'location:' | head -n 1 | sed -En 's|.*tag/v([0-9\.]+).*|\1|p')" \
+RUN version=2.4.2 \
+ && echo "git-lfs version: $version" \
  && cd /tmp \
  && curl \
         --location \
-        --url "https://github.com/git-lfs/git-lfs/releases/download/v${latest}/git-lfs-linux-amd64-${latest}.tar.gz" \
+        --url https://github.com/git-lfs/git-lfs/releases/download/v${version}/git-lfs-linux-amd64-${version}.tar.gz \
         --output git-lfs.tar.gz \
  && tar -zxf git-lfs.tar.gz \
- && mv /tmp/git-lfs-${latest}/git-lfs /usr/local/bin/git-lfs \
+ && mv /tmp/git-lfs-${version}/git-lfs /usr/local/bin/git-lfs \
  && rm -rf /tmp/* \
  && [ $(stat -c %s /usr/local/bin/git-lfs) -gt 500 ] || exit 1
 
@@ -99,25 +98,27 @@ RUN wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O /usr/bin/cfssl \
  && wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O /usr/bin/cfssljson \
  && chmod +x /usr/bin/cfssl*
 
-RUN latest="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
- && echo "latest: $latest" \
+# RUN version="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
+RUN version=0.15.0 \
+ && echo "docker-machine version: $version" \
  && curl \
         --location \
-        --url https://github.com/docker/machine/releases/download/$latest/docker-machine-$(uname -s)-$(uname -m) \
+        --url https://github.com/docker/machine/releases/download/v${version}/docker-machine-$(uname -s)-$(uname -m) \
         --output /usr/bin/docker-machine \
  && chmod +x /usr/bin/docker-machine \
  && [ $(stat -c %s /usr/bin/docker-machine) -gt 500 ] || exit 1
 
 COPY bin/install-docker /usr/local/bin/install-docker
-RUN install-docker 1.12.6
-RUN install-docker 17.09.0-ce
+RUN install-docker 17.09.1-ce
+RUN install-docker 17.12.1-ce
+RUN install-docker 18.03.1-ce
 
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
  && pip install --no-cache-dir \
-        awscli \
-        cookiecutter \
-        docker-compose
+        awscli==1.15.49 \
+        cookiecutter==1.6.0 \
+        docker-compose==1.21.2
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
@@ -131,7 +132,7 @@ RUN rm /etc/motd \
  && mv /var/lib/oh-my-zsh* /var/lib/oh-my-zsh \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme
 
-RUN git clone https://github.com/tj/git-extras.git -b 4.2.0 \
+RUN git clone https://github.com/tj/git-extras.git -b 4.5.0 \
  && cd git-extras \
  && make install \
  && cp -f man/git-*.1 /usr/local/share/man/man1 \
