@@ -97,9 +97,6 @@ _docker_host() {
 }
 
 _kubectl_prompt() {
-  if [ "$HOSTNAME" != "workspace" ];then
-    return
-  fi
   kubeconfig_file="${KUBECONFIG:-$HOME/.kube/config}"
   if [ ! -e "$kubeconfig_file" ];then
     echo "[missing ${kubeconfig_file/$HOME/~}] "
