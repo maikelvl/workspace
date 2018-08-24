@@ -118,7 +118,8 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir \
         awscli==1.15.49 \
         cookiecutter==1.6.0 \
-        docker-compose==1.21.2
+        docker-compose==1.21.2 \
+        prompt==0.4.1
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
