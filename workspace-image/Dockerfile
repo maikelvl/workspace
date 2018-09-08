@@ -22,6 +22,7 @@ RUN apk add --no-cache \
         zip \
         zsh \
  && ln -sf python3 /usr/bin/python \
+ && ln -sf $(ls /usr/lib | grep ^python | head -n 1) /usr/lib/python \
  && rm -rf \
         /usr/lib/**/*.pyc \
         /usr/lib/**/__pycache__ \
@@ -113,6 +114,7 @@ RUN install-docker 17.09.1-ce
 RUN install-docker 17.12.1-ce
 RUN install-docker 18.03.1-ce
 
+COPY compose.patch /tmp/compose.patch
 RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
  && pip install --no-cache-dir \
@@ -120,7 +122,10 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
         cookiecutter==1.6.0 \
         docker-compose==1.22.0 \
         prompt==0.4.1 \
-        ipdb==0.11
+        ipdb==0.11 \
+ && cd /usr/lib/python/site-packages/compose \
+ && git apply /tmp/compose.patch \
+ && docker-compose --version
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \

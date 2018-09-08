@@ -1,0 +1,58 @@
+--- /cli/main.py
++++ /cli/main.py
+@@ -812,7 +812,10 @@
+             -l, --label KEY=VAL   Add or override a label (can be used multiple times)
+             -u, --user=""         Run as specified username or uid
+             --no-deps             Don't start linked services.
++            --no-build            Don't build an image, even if it's missing.
++            --build               Build image before starting container.
+             --rm                  Remove container after run. Ignored in detached mode.
++            --keep                Keep container after run.
+             -p, --publish=[]      Publish a container's port(s) to the host
+             --service-ports       Run command with the service's ports enabled and mapped
+                                   to the host.
+@@ -824,7 +827,11 @@
+             -w, --workdir=""      Working directory inside the container
+         """
+         service = self.project.get_service(options['SERVICE'])
++
+         detach = options.get('--detach')
++        # if options['--rm']:
++        #     print('WARNING: --rm is true by default')
++        options['--rm'] = not options['--keep']
+ 
+         if options['--publish'] and options['--service-ports']:
+             raise UserError(
+@@ -1290,10 +1297,10 @@
+             )
+ 
+     project.initialize()
+-
+     container = service.create_container(
+         quiet=True,
+         one_off=True,
++        do_build=build_action_from_opts(options),
+         **container_options)
+ 
+     use_network_aliases = options['--use-aliases']
+--- /service.py
++++ /service.py
+@@ -306,6 +306,7 @@
+                          previous_container=None,
+                          number=None,
+                          quiet=False,
++                         do_build=False,
+                          **override_options):
+         """
+         Create a container for this service. If the image doesn't exist, attempt to pull
+@@ -313,8 +314,9 @@
+         """
+         # This is only necessary for `scale` and `volumes_from`
+         # auto-creating containers to satisfy the dependency.
+-        self.ensure_image_exists()
++        self.ensure_image_exists(do_build=do_build)
+ 
++        one_off = False
+         container_options = self._get_container_create_options(
+             override_options,
+             number or self._next_container_number(one_off=one_off),
