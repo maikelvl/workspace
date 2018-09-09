@@ -1,7 +1,9 @@
 if [ "$HOSTNAME" != "workspace" ];then
     export WORKSPACE="$HOME/workspace"
-    export PATH="$HOME/.bin:$PATH"
-    alias ws="workspace ssh -f 2>/dev/null"
+    source $WORKSPACE/home/zsh-custom/zshrc-local
+    export PATH="$HOME/bin:$HOME/.bin:$PATH"
+    $WORKSPACE/bin/workspace ssh
+    alias ws="$WORKSPACE/bin/workspace ssh"
     export ZSH="$WORKSPACE/.oh-my-zsh"
 else
     # build-time 2>/dev/null || echo -n ''
