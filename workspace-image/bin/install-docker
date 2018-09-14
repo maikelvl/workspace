@@ -37,3 +37,4 @@ else
 fi
 chmod +x /usr/lib/docker-bins/docker-$version
 /usr/lib/docker-bins/docker-$version --version
+rm -rf /tmp/*
