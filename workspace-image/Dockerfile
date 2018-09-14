@@ -73,6 +73,9 @@ RUN cd /tmp \
  && go build \
  && mv ./jsonnet /usr/local/bin/jsonnet \
  && jsonnet --version \
+ && go get github.com/kubernetes/kompose \
+ && mv $GOPATH/bin/kompose /usr/local/bin/kompose \
+ && kompose version \
  && rm -rf /tmp/go-workspace \
  && apk del build-packages \
  && curl \
