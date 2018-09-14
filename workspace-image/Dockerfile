@@ -122,8 +122,6 @@ RUN version=0.15.0 \
  && [ $(stat -c %s /usr/local/bin/docker-machine) -gt 500 ] || exit 1
 
 COPY bin/install-docker /usr/local/bin/install-docker
-RUN install-docker 17.09.1-ce
-RUN install-docker 17.12.1-ce
 RUN install-docker 18.03.1-ce
 
 COPY compose.patch /tmp/compose.patch
