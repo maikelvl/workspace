@@ -6,6 +6,7 @@ RUN apk add --no-cache \
         bind-tools \
         file \
         git \
+        go \
         grep \
         less \
         make \
@@ -64,6 +65,15 @@ RUN cd /tmp \
         --with-ssl \
  && make \
  && make install \
+ && export GOPATH=/tmp/go-workspace \
+ && mkdir -pv $GOPATH \
+ && go get github.com/fatih/color \
+ && go get github.com/google/go-jsonnet \
+ && cd $GOPATH/src/github.com/google/go-jsonnet/jsonnet \
+ && go build \
+ && mv ./jsonnet /usr/local/bin/jsonnet \
+ && jsonnet --version \
+ && rm -rf /tmp/go-workspace \
  && apk del build-packages \
  && curl \
         --location \
@@ -126,6 +136,18 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
  && rm -rf /tmp/*
+
+RUN version=0.12.0 \
+ && cd /tmp \
+ && curl \
+        --location \
+        --url https://github.com/ksonnet/ksonnet/releases/download/v${version}/ks_${version}_linux_amd64.tar.gz \
+        --output ks.tar.gz \
+ && tar -zxf ks.tar.gz \
+ && mv ks_${version}_linux_amd64/ks /usr/local/bin/ks \
+ && rm -rf /tmp/* \
+ && ks version \
+ && [ $(stat -c %s /usr/local/bin/ks) -gt 500 ] || exit 1
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
