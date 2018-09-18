@@ -32,7 +32,10 @@ RUN apk add --no-cache \
  && wget -O j2y.zip https://github.com/y13i/j2y/releases/download/v0.0.7/j2y-linux_amd64.zip \
  && unzip j2y.zip \
  && rm j2y.zip \
- && mv j2y /usr/local/bin/j2y
+ && mv j2y /usr/local/bin/j2y \
+ && version=1.2 \
+ && wget -O /usr/bin/yaml2json https://github.com/bronze1man/yaml2json/releases/download/v${version}/yaml2json_linux_amd64 \
+ && chmod +x /usr/bin/yaml2json
 
 ENV PATH="/usr/local/node/bin:$PATH" \
     NGHTTP2_VERSION="1.32.0" \
