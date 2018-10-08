@@ -56,7 +56,17 @@ function my_git_prompt() {
     STATUS=" $STATUS"
   fi
 
-  echo "$git_prompt_prefix$(my_current_branch)$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
+  local ref
+  ref=$(command git symbolic-ref --quiet HEAD 2> /dev/null)
+  local ret=$?
+  sha=$(command git rev-parse --short=8 HEAD 2> /dev/null) || return
+  if [[ $ret != 0 ]]; then
+    [[ $ret == 128 ]] && return  # no git repo.
+    echo "$git_prompt_prefix%{$fg_no_bold[yellow]%}${sha#refs/heads/}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
+    return
+  fi
+
+  echo "$git_prompt_prefix%{$fg_no_bold[yellow]%}${sha#refs/heads/}$git_prompt_prefix${ref#refs/heads/}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
 
 function my_current_branch() {
