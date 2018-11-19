@@ -5,14 +5,29 @@ docker_version="$1"
 if [ "$docker_version" == "" ];then
     docker_version="$(get-docker-server-version)"
     if [ "$docker_version" == "" ] || [ "$docker_version" == "null" ];then
-        echo "Could not fetch Docker server version."
-        exit 1
+        echo "[WARNING] Could not fetch Docker server version."
     fi
 fi
 
+# Search for closest minor version
 for binary in $(ls /usr/lib/docker-bins/docker-$docker_version* 2>/dev/null);do
     docker_binary="$binary"
 done
+
+# Search for closest major version
+if [ "$docker_binary" == "" ] && [ "$docker_version" != "" ];then
+    docker_main_version="$(echo ${docker_version} | sed -E 's|([0-9]+)\.[0-9]+|\1|g')"
+    for binary in $(ls /usr/lib/docker-bins/docker-${docker_main_version}* 2>/dev/null);do
+        docker_binary="${binary}"
+    done
+fi
+
+# Search for latest version
+if [ "$docker_binary" == "" ] && [ "$docker_version" != "" ];then
+    for binary in $(ls /usr/lib/docker-bins/docker-* 2>/dev/null);do
+        docker_binary="${binary}"
+    done
+fi
 
 if [ "$docker_binary" == "" ];then
     echo "Docker version $DOCKER_VERSION not installed. Exiting."
