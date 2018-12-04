@@ -130,7 +130,7 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && docker-compose --version \
  && rm -rf /tmp/*
 
-RUN version=0.12.0 \
+RUN version=0.13.1 \
  && cd /tmp \
  && curl \
         --location \
