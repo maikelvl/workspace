@@ -9,7 +9,7 @@ if [ "$DOCKER_HOST" != "" ];then
     fi
     response="$(curl --silent --url ${proto}://${DOCKER_HOST:6}/version $curl_args)"
 elif [ -e /var/run/docker.sock ];then
-    response="$(curl --silent --unix-socket /var/run/docker.sock http:/version)"
+    response="$(curl --silent --unix-socket /var/run/docker.sock http://localhost/version)"
 fi
 
 if [ "$response" == "" ];then

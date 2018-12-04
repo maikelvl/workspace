@@ -38,8 +38,8 @@ RUN apk add --no-cache \
  && chmod +x /usr/bin/yaml2json
 
 ENV PATH="/usr/local/node/bin:$PATH" \
-    NGHTTP2_VERSION="1.32.0" \
-    CURL_VERSION="7.49.1"
+    NGHTTP2_VERSION="1.35.0" \
+    CURL_VERSION="7.62.0"
 
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
