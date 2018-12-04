@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:3.8
 
 RUN apk add --no-cache \
         apache2-utils \
@@ -6,6 +6,8 @@ RUN apk add --no-cache \
         bind-tools \
         file \
         git \
+        git-email \
+        git-perl \
         go \
         grep \
         less \
@@ -84,19 +86,6 @@ RUN cd /tmp \
  && curl \
         --location \
         --url https://github.com/gliderlabs/sigil/releases/download/v0.4.0/sigil_0.4.0_Linux_x86_64.tgz | tar -zxC /usr/local/bin \
- && rm -rf /tmp/*
-
-RUN git_version=$(git --version | sed -rn "s/.*(\d+\.\d+\.\d+).*/\1/p") \
- && cd /tmp \
- && curl \
-        --location \
-        --url https://github.com/git/git/archive/v${git_version}.zip \
-        --output git.zip \
- && unzip -d git git.zip \
- && mkdir -p /usr/share/perl5/site_perl \
- && mv git/$(ls git)/perl/* /usr/share/perl5/site_perl/ \
- && rm -rf git git.zip /usr/share/perl5/site_perl/Makefile* \
- && cp /usr/share/perl5/site_perl/private-Error.pm /usr/share/perl5/site_perl/Error.pm \
  && rm -rf /tmp/*
 
 # RUN version="$(curl --url https://github.com/git-lfs/git-lfs/releases/latest -I -s | grep -i 'location:' | head -n 1 | sed -En 's|.*tag/v([0-9\.]+).*|\1|p')" \
