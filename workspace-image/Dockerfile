@@ -71,17 +71,31 @@ RUN cd /tmp \
  && make \
  && make install \
  && export GOPATH=/tmp/go-workspace \
- && mkdir -pv $GOPATH \
+ && mkdir -pv ${GOPATH} \
  && go get github.com/fatih/color \
  && go get github.com/google/go-jsonnet \
- && cd $GOPATH/src/github.com/google/go-jsonnet/jsonnet \
+ && cd ${GOPATH}/src/github.com/google/go-jsonnet/jsonnet \
  && go build \
  && mv ./jsonnet /usr/local/bin/jsonnet \
  && jsonnet --version \
+ && go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb \
+ && mv ${GOPATH}/bin/jb /usr/local/bin/ \
+ && jb --help \
+ && go get github.com/brancz/gojsontoyaml \
+ && mv ${GOPATH}/bin/gojsontoyaml /usr/local/bin/ \
+ && echo '{"test": "hello world"}' | gojsontoyaml \
  && go get github.com/kubernetes/kompose \
- && mv $GOPATH/bin/kompose /usr/local/bin/kompose \
+ && mv ${GOPATH}/bin/kompose /usr/local/bin/kompose \
  && kompose version \
- && rm -rf /tmp/go-workspace \
+ && ks_version=0.13.1 \
+ && cd /tmp \
+ && curl \
+        --location \
+        --url https://github.com/ksonnet/ksonnet/releases/download/v${ks_version}/ks_${ks_version}_linux_amd64.tar.gz \
+        --output ks.tar.gz \
+ && tar -zxf ks.tar.gz \
+ && mv ks_${ks_version}_linux_amd64/ks /usr/local/bin/ks \
+ && ks version \
  && apk del build-packages \
  && curl \
         --location \
@@ -129,18 +143,6 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
  && rm -rf /tmp/*
-
-RUN version=0.13.1 \
- && cd /tmp \
- && curl \
-        --location \
-        --url https://github.com/ksonnet/ksonnet/releases/download/v${version}/ks_${version}_linux_amd64.tar.gz \
-        --output ks.tar.gz \
- && tar -zxf ks.tar.gz \
- && mv ks_${version}_linux_amd64/ks /usr/local/bin/ks \
- && rm -rf /tmp/* \
- && ks version \
- && [ $(stat -c %s /usr/local/bin/ks) -gt 500 ] || exit 1
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
