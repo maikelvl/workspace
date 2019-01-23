@@ -131,8 +131,10 @@ COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 18.06.1-ce
 
 COPY compose.patch /tmp/compose.patch
-RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
- && pip install --no-cache-dir --upgrade --ignore-installed --force-reinstall pip \
+RUN cd /tmp \
+ && git clone https://github.com/pypa/pip.git -b 18.1 \
+ && cd pip \
+ && python setup.py install \
  && pip install --no-cache-dir \
         awscli==1.15.49 \
         cookiecutter==1.6.0 \
@@ -142,7 +144,10 @@ RUN curl --location https://bootstrap.pypa.io/get-pip.py | python \
  && cd /usr/lib/python/site-packages/compose \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
- && rm -rf /tmp/*
+ && rm -rf \
+        /tmp/* \
+        /usr/lib/**/*.pyc \
+        /usr/lib/**/__pycache__
 
 RUN rm /etc/motd \
  && passwd root -d "$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)" \
