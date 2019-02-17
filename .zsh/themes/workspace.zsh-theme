@@ -13,6 +13,7 @@ function toggle_git_prompt() {
 }
 
 function my_git_prompt() {
+
   tester=$(git rev-parse --git-dir 2> /dev/null) || return
 
   git_prompt_prefix="$ZSH_THEME_GIT_PROMPT_PREFIX"
@@ -58,15 +59,19 @@ function my_git_prompt() {
 
   local ref
   ref=$(command git symbolic-ref --quiet HEAD 2> /dev/null)
-  local ret=$?
-  sha=$(command git rev-parse --short=8 HEAD 2> /dev/null) || return
-  if [[ $ret != 0 ]]; then
-    [[ $ret == 128 ]] && return  # no git repo.
-    echo "$git_prompt_prefix%{$fg_no_bold[yellow]%}${sha#refs/heads/}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
-    return
+  local sha=$(command git rev-parse --short=8 HEAD 2> /dev/null) || return
+  if [[ ! $ref ]];then
+    ref="$(command git describe --tags --always 2> /dev/null)"
+    if [[ "${ref//-g${_sha:0:7}/}" != "${ref}" ]];then
+      ref=
+    fi
+  fi
+  echo -n "$git_prompt_prefix%{$fg_no_bold[yellow]%}${sha#refs/heads/}"
+  if [[ "$ref" != "" ]]; then
+    echo -n "$git_prompt_prefix${ref#refs/heads/}"
   fi
 
-  echo "$git_prompt_prefix%{$fg_no_bold[yellow]%}${sha#refs/heads/}$git_prompt_prefix${ref#refs/heads/}$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
+  echo "$STATUS$ZSH_THEME_GIT_PROMPT_SUFFIX"
 }
 
 function my_current_branch() {
@@ -131,8 +136,6 @@ if [ "$HOSTNAME" = "workspace" ];then
 fi
 
 PROMPT=$'%{$fg[green]%}$(_kubectl_prompt)%{$fg[$path_color]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
-
-#PROMPT=$'$(ssh_connection)%{$fg[cyan]%}$(_fishy_collapsed_wd)$(my_git_prompt) %(?.%{$fg[yellow]%}.%{$fg[red]%})%B›%b '
 
 ZSH_THEME_PROMPT_RETURNCODE_PREFIX="%{$fg_bold[red]%}"
 ZSH_THEME_GIT_PROMPT_PREFIX=" %{$fg_bold[yellow]%}"

@@ -29,7 +29,7 @@ RUN apk add --no-cache \
  && rm -rf \
         /usr/lib/**/*.pyc \
         /usr/lib/**/__pycache__ \
- && wget -O /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 \
+ && wget -O /usr/local/bin/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64 \
  && chmod +x /usr/local/bin/jq \
  && wget -O j2y.zip https://github.com/y13i/j2y/releases/download/v0.0.7/j2y-linux_amd64.zip \
  && unzip j2y.zip \
