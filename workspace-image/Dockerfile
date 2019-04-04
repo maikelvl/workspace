@@ -12,6 +12,7 @@ RUN apk add --no-cache \
         grep \
         less \
         make \
+        moreutils \
         nodejs \
         openssh \
         openssl \
