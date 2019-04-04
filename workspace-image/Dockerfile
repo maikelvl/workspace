@@ -42,7 +42,7 @@ RUN apk add --no-cache \
 
 ENV PATH="/usr/local/node/bin:$PATH" \
     NGHTTP2_VERSION="1.35.0" \
-    CURL_VERSION="7.62.0"
+    CURL_VERSION="7.64.1"
 
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
