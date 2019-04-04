@@ -41,7 +41,7 @@ RUN apk add --no-cache \
  && chmod +x /usr/bin/yaml2json
 
 ENV PATH="/usr/local/node/bin:$PATH" \
-    NGHTTP2_VERSION="1.35.0" \
+    NGHTTP2_VERSION="1.37.0" \
     CURL_VERSION="7.64.1"
 
 RUN cd /tmp \
