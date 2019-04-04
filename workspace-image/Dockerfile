@@ -1,4 +1,4 @@
-FROM alpine:3.8
+FROM alpine:3.9
 
 RUN apk add --no-cache \
         apache2-utils \
@@ -74,8 +74,8 @@ RUN cd /tmp \
  && mkdir -pv ${GOPATH} \
  && go get github.com/fatih/color \
  && go get github.com/google/go-jsonnet \
- && cd ${GOPATH}/src/github.com/google/go-jsonnet/jsonnet \
- && go build \
+ && cd ${GOPATH}/src/github.com/google/go-jsonnet \
+ && go build ./cmd/jsonnet \
  && mv ./jsonnet /usr/local/bin/jsonnet \
  && jsonnet --version \
  && go get github.com/jsonnet-bundler/jsonnet-bundler/cmd/jb \
