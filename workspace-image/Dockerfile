@@ -35,10 +35,7 @@ RUN apk add --no-cache \
  && wget -O j2y.zip https://github.com/y13i/j2y/releases/download/v0.0.7/j2y-linux_amd64.zip \
  && unzip j2y.zip \
  && rm j2y.zip \
- && mv j2y /usr/local/bin/j2y \
- && version=1.2 \
- && wget -O /usr/bin/yaml2json https://github.com/bronze1man/yaml2json/releases/download/v${version}/yaml2json_linux_amd64 \
- && chmod +x /usr/bin/yaml2json
+ && mv j2y /usr/local/bin/j2y
 
 ENV PATH="/usr/local/node/bin:$PATH" \
     NGHTTP2_VERSION="1.37.0" \
@@ -142,6 +139,12 @@ RUN cd /tmp \
         docker-compose==1.22.0 \
         prompt==0.4.1 \
         ipdb==0.11 \
+        json2yaml==1.1.1 \
+ && mv $(which yaml2json) $(dirname $(which yaml2json))/pyyaml2json \
+ && mv $(which json2yaml) $(dirname $(which json2yaml))/pyjson2yaml \
+ && version=1.2 \
+ && wget -O /usr/bin/yaml2json https://github.com/bronze1man/yaml2json/releases/download/v${version}/yaml2json_linux_amd64 \
+ && chmod +x /usr/bin/yaml2json \
  && cd /usr/lib/python/site-packages/compose \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
