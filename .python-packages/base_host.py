@@ -67,6 +67,8 @@ class BaseHost(object):
             utils.log('Pinging {} ({})'.format(self.name, ip))
             if utils.ping(ip):
                 utils.log('Ping successful')
+                with open('{}/ip-address.txt'.format(self.root), 'w') as f:
+                    f.write(ip)
                 return ip
             utils.log('Ping unsuccessful')
         raise HostDownException
