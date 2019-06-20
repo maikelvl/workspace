@@ -88,6 +88,7 @@ RUN cd /tmp \
  && ks_version=0.13.1 \
  && cd /tmp \
  && curl \
+        --fail \
         --location \
         --url https://github.com/ksonnet/ksonnet/releases/download/v${ks_version}/ks_${ks_version}_linux_amd64.tar.gz \
         --output ks.tar.gz \
@@ -96,6 +97,7 @@ RUN cd /tmp \
  && ks version \
  && apk del build-packages \
  && curl \
+        --fail \
         --location \
         --url https://github.com/gliderlabs/sigil/releases/download/v0.4.0/sigil_0.4.0_Linux_x86_64.tgz | tar -zxC /usr/local/bin \
  && rm -rf /tmp/*
@@ -104,6 +106,7 @@ RUN cd /tmp \
 RUN version=2.4.2 \
  && cd /tmp \
  && curl \
+        --fail \
         --location \
         --url https://github.com/git-lfs/git-lfs/releases/download/v${version}/git-lfs-linux-amd64-${version}.tar.gz \
         --output git-lfs.tar.gz \
@@ -119,6 +122,7 @@ RUN wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O /usr/local/bin/cfssl \
 # RUN version="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
 RUN version=0.15.0 \
  && curl \
+        --fail \
         --location \
         --url https://github.com/docker/machine/releases/download/v${version}/docker-machine-$(uname -s)-$(uname -m) \
         --output /usr/local/bin/docker-machine \
@@ -160,6 +164,7 @@ RUN rm /etc/motd \
  && ssh-keygen -f /etc/ssh/ssh_host_ecdsa_key -N "" -t ecdsa \
  && ssh-keygen -f /etc/ssh/ssh_host_ed25519_key -N "" -t ed25519 \
  && curl \
+        --fail \
         --location \
         --url https://github.com/robbyrussell/oh-my-zsh/archive/master.zip \
         --output /tmp/oh-my-zsh.zip \
