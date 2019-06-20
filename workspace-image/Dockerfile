@@ -140,7 +140,7 @@ RUN apk add --no-cache --virtual build-packages \
  && cd pip \
  && python setup.py install \
  && pip install --no-cache-dir \
-        awscli==1.15.49 \
+        awscli==1.16.180 \
         cookiecutter==1.6.0 \
         docker-compose==1.22.0 \
         prompt==0.4.1 \
