@@ -11,6 +11,7 @@ RUN apk add --no-cache \
         go \
         grep \
         less \
+        libffi \
         make \
         moreutils \
         nodejs \
@@ -134,7 +135,10 @@ RUN install-docker 18.06.1-ce
 
 COPY compose.patch /tmp/compose.patch
 RUN apk add --no-cache --virtual build-packages \
+        libc-dev \
+        libffi-dev \
         linux-headers \
+        openssl-dev \
  && cd /tmp \
  && git clone https://github.com/pypa/pip.git -b 19.1.1 \
  && cd pip \
@@ -142,7 +146,7 @@ RUN apk add --no-cache --virtual build-packages \
  && pip install --no-cache-dir \
         awscli==1.16.180 \
         cookiecutter==1.6.0 \
-        docker-compose==1.22.0 \
+        docker-compose==1.24.0 \
         prompt==0.4.1 \
         ipdb==0.11 \
         json2yaml==1.1.1 \
