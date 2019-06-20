@@ -10,6 +10,7 @@ import click
 import ssh_utils
 from tabulate import tabulate
 import utils
+import urllib2
 
 VERSION = '0.9.0'
 
@@ -66,6 +67,23 @@ class Corectl():
 
         if os.environ.get('DEBUG', None):
             options.append('--debug')
+
+        base_url = 'https://{channel}.release.core-os.net/amd64-usr/{version}'.format(**kwargs)
+        image_dir = '{HOME}/.coreos/images/{channel}/{version}'.format(HOME=os.environ.get('HOME'), **kwargs)
+
+        try:
+            os.makedirs(image_dir)
+        except OSError:
+            pass
+
+        for _file in ('coreos_production_pxe.vmlinuz', 'coreos_production_pxe_image.cpio.gz'):
+            filepath = '/'.join([image_dir, _file])
+            if os.path.isfile(filepath):
+                continue
+            click.echo('Downloading Container Linux {version} {file}...'.format(file=_file, **kwargs))
+            f = urllib2.urlopen('/'.join([base_url, _file]))
+            with open(filepath, 'wb') as dest:
+                dest.write(f.read())
 
         self.execute(['run'] + options + [name])
         self._ps_cache = None
