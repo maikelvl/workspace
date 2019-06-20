@@ -180,7 +180,7 @@ RUN rm /etc/motd \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme \
  && rm -rf /tmp/*
 
-RUN git clone https://github.com/tj/git-extras.git -b 4.5.0 \
+RUN git clone https://github.com/tj/git-extras.git -b 4.7.0 \
  && cd git-extras \
  && make install \
  && cp -f man/git-*.1 /usr/local/share/man/man1 \
