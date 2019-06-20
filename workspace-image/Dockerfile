@@ -133,8 +133,10 @@ COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 18.06.1-ce
 
 COPY compose.patch /tmp/compose.patch
-RUN cd /tmp \
- && git clone https://github.com/pypa/pip.git -b 18.1 \
+RUN apk add --no-cache --virtual build-packages \
+        linux-headers \
+ && cd /tmp \
+ && git clone https://github.com/pypa/pip.git -b 19.1.1 \
  && cd pip \
  && python setup.py install \
  && pip install --no-cache-dir \
@@ -152,6 +154,7 @@ RUN cd /tmp \
  && cd /usr/lib/python/site-packages/compose \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
+ && apk del build-packages \
  && rm -rf \
         /tmp/* \
         /usr/lib/**/*.pyc \
