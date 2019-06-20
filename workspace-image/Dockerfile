@@ -38,8 +38,8 @@ RUN apk add --no-cache \
  && mv j2y /usr/local/bin/j2y
 
 ENV PATH="/usr/local/node/bin:$PATH" \
-    NGHTTP2_VERSION="1.37.0" \
-    CURL_VERSION="7.64.1"
+    NGHTTP2_VERSION="1.39.1" \
+    CURL_VERSION="7.65.1"
 
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
