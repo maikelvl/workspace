@@ -8,6 +8,7 @@ RUN apk add --no-cache \
         git \
         git-email \
         git-perl \
+        gnupg \
         go \
         grep \
         iproute2 \
