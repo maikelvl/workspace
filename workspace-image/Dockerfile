@@ -120,7 +120,7 @@ RUN wget https://pkg.cfssl.org/R1.2/cfssl_linux-amd64 -O /usr/local/bin/cfssl \
  && chmod +x /usr/local/bin/cfssl*
 
 # RUN version="$(curl --url https://github.com/docker/machine/releases/latest | sed -rn 's/.*tag\/([^\"]*).*/\1/p')" \
-RUN version=0.15.0 \
+RUN version=0.16.1 \
  && curl \
         --fail \
         --location \
