@@ -103,15 +103,15 @@ RUN cd /tmp \
  && rm -rf /tmp/*
 
 # RUN version="$(curl --url https://github.com/git-lfs/git-lfs/releases/latest -I -s | grep -i 'location:' | head -n 1 | sed -En 's|.*tag/v([0-9\.]+).*|\1|p')" \
-RUN version=2.4.2 \
+RUN version=2.7.2 \
  && cd /tmp \
  && curl \
         --fail \
         --location \
-        --url https://github.com/git-lfs/git-lfs/releases/download/v${version}/git-lfs-linux-amd64-${version}.tar.gz \
+        --url https://github.com/git-lfs/git-lfs/releases/download/v${version}/git-lfs-linux-amd64-v${version}.tar.gz \
         --output git-lfs.tar.gz \
  && tar -zxf git-lfs.tar.gz \
- && mv /tmp/git-lfs-${version}/git-lfs /usr/local/bin/git-lfs \
+ && mv /tmp/git-lfs /usr/local/bin/git-lfs \
  && rm -rf /tmp/* \
  && [ $(stat -c %s /usr/local/bin/git-lfs) -gt 500 ] || exit 1
 
