@@ -10,6 +10,7 @@ RUN apk add --no-cache \
         git-perl \
         go \
         grep \
+        iproute2 \
         less \
         libffi \
         make \
