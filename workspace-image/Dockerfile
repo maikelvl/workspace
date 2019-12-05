@@ -193,6 +193,13 @@ RUN wget https://dl.minio.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/
  && chmod +x /usr/local/bin/mc \
  && mc version
 
+# https://cloud.google.com/sdk/docs/release-notes
+ENV GCLOUD_VERSION="268.0.0" \
+    PATH="/usr/lib/google-cloud-sdk/bin:${PATH}"
+COPY bin/install-gcloud /usr/local/bin/
+RUN install-gcloud $GCLOUD_VERSION \
+ && gcloud config set component_manager/disable_update_check true
+
 RUN echo 'AcceptEnv TERM_PROGRAM' >> /etc/ssh/sshd_config \
  && echo 'AcceptEnv TERM_PROGRAM_VERSION' >> /etc/ssh/sshd_config \
  && echo 'AcceptEnv TERM_SESSION_ID' >> /etc/ssh/sshd_config
