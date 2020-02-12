@@ -1,8 +1,10 @@
+export PATH="$HOME/bin-`uname -s | tr '[:upper:]' '[:lower:]'`:$HOME/workspace/bin:$PATH"
+export WORKSPACE_HOST_NAME="default"
+
 if [ "$HOSTNAME" != "workspace" ];then
     export WORKSPACE="$HOME/workspace"
     source $WORKSPACE/home/zsh-custom/zshrc-local
     export PATH="$HOME/bin:$HOME/.bin:$PATH"
-    $WORKSPACE/bin/workspace ssh
     alias ws="$WORKSPACE/bin/workspace ssh"
     export ZSH="$WORKSPACE/.oh-my-zsh"
 else
@@ -22,4 +24,5 @@ source $ZSH_CUSTOM/zshrc-keybindings
 
 if [ "$HOSTNAME" != "workspace" ];then
     export PATH="$WORKSPACE/bin:$PATH"
+    workspace ssh
 fi
