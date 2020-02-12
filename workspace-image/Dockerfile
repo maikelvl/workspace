@@ -175,9 +175,9 @@ RUN rm /etc/motd \
  && curl \
         --fail \
         --location \
-        --url https://github.com/robbyrussell/oh-my-zsh/archive/master.zip \
-        --output /tmp/oh-my-zsh.zip \
- && unzip /tmp/oh-my-zsh.zip -d /var/lib \
+        --url https://github.com/ohmyzsh/ohmyzsh/archive/17428f3.zip \
+        --output /tmp/ohmyzsh.zip \
+ && unzip /tmp/ohmyzsh.zip -d /var/lib \
  && mv /var/lib/ohmyzsh* /var/lib/oh-my-zsh \
  && ln -sf ~/theme.zsh-theme /var/lib/oh-my-zsh/home.zsh-theme \
  && rm -rf /tmp/*
