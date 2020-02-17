@@ -1,0 +1,21 @@
+#!/bin/sh
+set -e
+[[ $DEBUG ]] && sleep 1 && set -x
+
+if [[ "${1}" == "" ]];then
+    echo "Please specify a gcloud version."
+    exit 1
+fi
+
+mkdir -p /usr/lib
+cd /usr/lib
+
+curl --fail --location --url https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${1}-linux-x86_64.tar.gz | tar xz \
+ && ./google-cloud-sdk/install.sh \
+    --quiet \
+    --usage-reporting=false \
+    --additional-components=docker-credential-gcr \
+    --additional-components=gcloud
+
+gcloud version
+gcloud components install --quiet beta
