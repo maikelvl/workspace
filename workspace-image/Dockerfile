@@ -16,6 +16,7 @@ RUN apk add --no-cache \
         libffi \
         make \
         moreutils \
+        ncurses \
         nodejs \
         openssh \
         openssl \
@@ -98,6 +99,17 @@ RUN cd /tmp \
  && tar -zxf ks.tar.gz \
  && mv ks_${ks_version}_linux_amd64/ks /usr/local/bin/ks \
  && ks version \
+ && krew_version=0.3.4 \
+ && cd /tmp \
+ && curl \
+        --fail \
+        --location \
+        --url https://github.com/kubernetes-sigs/krew/releases/download/v${krew_version}/krew.tar.gz \
+        --output krew.tar.gz \
+ && tar -zxf krew.tar.gz \
+ && mv krew-$(uname | tr '[:upper:]' '[:lower:]')_amd64 /usr/local/bin/kubectl-krew \
+ && kubectl-krew version \
+ && rm -rf /root/.krew \
  && apk del build-packages \
  && curl \
         --fail \

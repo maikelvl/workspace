@@ -1,0 +1,17 @@
+#!/bin/sh
+set -e
+
+KREW_ROOT=${KREW_ROOT:-$HOME/.krew}
+
+cp -r ${KREW_ROOT}/receipts /tmp/kubectl-krew-receipts-tmp
+
+rm -rf \
+    ${KREW_ROOT}/bin \
+    ${KREW_ROOT}/receipts \
+    ${KREW_ROOT}/store
+
+find /tmp/kubectl-krew-receipts-tmp -name '*.yaml' | while read f;do
+    kubectl-krew install --manifest="${f}"
+done
+
+rm -rf /tmp/kubectl-krew-receipts-tmp

@@ -58,6 +58,8 @@ _prepare_zsh() {
         fi
         echo "export $env_var" >> /etc/zsh/zshenv
     done
+    echo "export KREW_ROOT=\"${WORKSPACE}/home/.krew\"" >> /etc/zsh/zshenv
+    echo 'export PATH="${KREW_ROOT}/bin:${PATH}"' >> /etc/zsh/zshenv
     echo '[ -e $WORKSPACE/.zsh/zshenv ] && source $WORKSPACE/.zsh/zshenv' >> /etc/zsh/zshenv
 }
 

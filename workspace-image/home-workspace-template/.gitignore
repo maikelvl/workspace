@@ -1,5 +1,8 @@
 /.autoenv_authorized*
 /.bin/
+/.krew/bin/
+/.krew/index/
+/.krew/store/
 /.z-data*
 /.zcompdump*
 /zsh-custom/zshrc-local
