@@ -1,4 +1,5 @@
 /.autoenv_authorized*
+/.bin/
 /.z-data*
 /.zcompdump*
 /zsh-custom/zshrc-local
