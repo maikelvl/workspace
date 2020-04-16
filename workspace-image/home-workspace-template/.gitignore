@@ -1,5 +1,5 @@
 /.autoenv_authorized*
-/.z-data
+/.z-data*
 /.zcompdump*
 /zsh-custom/zshrc-local
-/zsh-custom/zshenv-local
+/.oh-my-zsh/
