@@ -133,7 +133,7 @@ RUN version=0.16.1 \
  && [ $(stat -c %s /usr/local/bin/docker-machine) -gt 500 ] || exit 1
 
 COPY bin/install-docker /usr/local/bin/install-docker
-RUN install-docker 18.06.1-ce
+RUN install-docker 18.06.3-ce
 
 COPY compose.patch /tmp/compose.patch
 RUN apk add --no-cache --virtual build-packages \
