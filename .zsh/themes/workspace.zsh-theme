@@ -62,7 +62,7 @@ function my_git_prompt() {
   local sha=$(command git rev-parse --short=8 HEAD 2> /dev/null) || return
   if [[ ! $ref ]];then
     ref="$(command git describe --tags --always 2> /dev/null)"
-    if [[ "${ref//-g${_sha:0:7}/}" != "${ref}" ]];then
+    if [[ "${ref//-g${_sha:0:7}/}" != "${ref}" ]] || [[ "${ref}" == "${sha:0:7}" ]];then
       ref=
     fi
   fi
