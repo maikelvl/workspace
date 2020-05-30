@@ -48,7 +48,7 @@ ENV PATH="/usr/local/node/bin:$PATH" \
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && wget https://dl.uxnr.de/mirror/curl/curl-${CURL_VERSION}.tar.bz2 \
- && apk add --no-cache --virtual build-packages \
+ && apk add --no-cache \
         autoconf \
         automake \
         build-base \
@@ -110,7 +110,6 @@ RUN cd /tmp \
  && mv krew-$(uname | tr '[:upper:]' '[:lower:]')_amd64 /usr/local/bin/kubectl-krew \
  && kubectl-krew version \
  && rm -rf /root/.krew \
- && apk del build-packages \
  && curl \
         --fail \
         --location \
@@ -148,7 +147,7 @@ COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 18.06.3-ce
 
 COPY compose.patch /tmp/compose.patch
-RUN apk add --no-cache --virtual build-packages \
+RUN apk add --no-cache \
         libc-dev \
         libffi-dev \
         linux-headers \
@@ -172,7 +171,6 @@ RUN apk add --no-cache --virtual build-packages \
  && cd /usr/lib/python/site-packages/compose \
  && git apply /tmp/compose.patch \
  && docker-compose --version \
- && apk del build-packages \
  && rm -rf \
         /tmp/* \
         /usr/lib/**/*.pyc \
