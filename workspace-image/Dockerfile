@@ -16,6 +16,7 @@ RUN apk add --no-cache \
         go \
         grep \
         iproute2 \
+        jpeg-dev \
         less \
         libc-dev \
         libffi-dev \
@@ -36,6 +37,7 @@ RUN apk add --no-cache \
         util-linux \
         vim \
         zip \
+        zlib-dev \
         zsh \
  && ln -sf python3 /usr/bin/python \
  && ln -sf $(ls /usr/lib | grep ^python | head -n 1) /usr/lib/python \
@@ -155,9 +157,10 @@ RUN cd /tmp \
         awscli==1.16.180 \
         cookiecutter==1.6.0 \
         docker-compose==1.24.0 \
-        prompt==0.4.1 \
         ipdb==0.11 \
         json2yaml==1.1.1 \
+        pillow==7.1.2 \
+        prompt==0.4.1 \
  && mv $(which yaml2json) $(dirname $(which yaml2json))/pyyaml2json \
  && mv $(which json2yaml) $(dirname $(which json2yaml))/pyjson2yaml \
  && version=1.2 \
