@@ -2,8 +2,12 @@ FROM alpine:3.10
 
 RUN apk add --no-cache \
         apache2-utils \
+        autoconf \
+        automake \
         bash \
         bind-tools \
+        build-base \
+        file \
         file \
         git \
         git-email \
@@ -13,19 +17,23 @@ RUN apk add --no-cache \
         grep \
         iproute2 \
         less \
-        libffi \
+        libc-dev \
+        libffi-dev \
+        libtool \
+        linux-headers \
         make \
         moreutils \
         ncurses \
         nodejs \
         openssh \
-        openssl \
+        openssl-dev \
         perl \
         python3-dev \
         sudo \
         tree \
         tzdata \
         unzip \
+        util-linux \
         vim \
         zip \
         zsh \
@@ -48,14 +56,6 @@ ENV PATH="/usr/local/node/bin:$PATH" \
 RUN cd /tmp \
  && wget https://github.com/nghttp2/nghttp2/releases/download/v${NGHTTP2_VERSION}/nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && wget https://dl.uxnr.de/mirror/curl/curl-${CURL_VERSION}.tar.bz2 \
- && apk add --no-cache \
-        autoconf \
-        automake \
-        build-base \
-        file \
-        libtool \
-        openssl-dev \
-        util-linux \
  && tar -xvjf nghttp2-${NGHTTP2_VERSION}.tar.bz2 \
  && cd /tmp/nghttp2-${NGHTTP2_VERSION} \
  && autoreconf -i \
@@ -147,12 +147,7 @@ COPY bin/install-docker /usr/local/bin/install-docker
 RUN install-docker 18.06.3-ce
 
 COPY compose.patch /tmp/compose.patch
-RUN apk add --no-cache \
-        libc-dev \
-        libffi-dev \
-        linux-headers \
-        openssl-dev \
- && cd /tmp \
+RUN cd /tmp \
  && git clone https://github.com/pypa/pip.git -b 19.1.1 \
  && cd pip \
  && python setup.py install \
