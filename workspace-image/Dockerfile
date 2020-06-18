@@ -197,9 +197,11 @@ RUN git clone https://github.com/tj/git-extras.git -b 4.7.0 \
  && cp -f etc/git-extras-completion.zsh /var/lib/oh-my-zsh/plugins/git-extras/git-extras.plugin.zsh \
  && rm -rf ../git-extras
 
-RUN wget https://dl.minio.io/client/mc/release/linux-amd64/mc -O /usr/local/bin/mc \
+RUN wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2020-06-16T19-24-41Z -O /usr/local/bin/mc \
+ && sha256sum /usr/local/bin/mc \
+ && echo "ff246d5ffc91d7318b2b56e5bc4bbd20c4efc4ed52a3efb974e54bb56f4f1ce5  /usr/local/bin/mc" | sha256sum -c \
  && chmod +x /usr/local/bin/mc \
- && mc version
+ && mc --version
 
 # https://cloud.google.com/sdk/docs/release-notes
 ENV GCLOUD_VERSION="268.0.0" \
