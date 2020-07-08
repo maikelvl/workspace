@@ -204,7 +204,7 @@ RUN wget https://dl.min.io/client/mc/release/linux-amd64/archive/mc.RELEASE.2020
  && mc --version
 
 # https://cloud.google.com/sdk/docs/release-notes
-ENV GCLOUD_VERSION="268.0.0" \
+ENV GCLOUD_VERSION="299.0.0" \
     PATH="/usr/lib/google-cloud-sdk/bin:${PATH}"
 COPY bin/install-gcloud /usr/local/bin/
 RUN install-gcloud $GCLOUD_VERSION \
